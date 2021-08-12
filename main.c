@@ -8,7 +8,7 @@
 @mainpage 	lab_7_integration
 @author 	Thomas Desrosiers
 @section 	MainSection1 Description
-			Laboratoire qui vise à expérimenter la lecture d'un clavier matriciel. La méthode choisie est dans le cas présent la lecture par ADC. Cette méthode est plus complexe au montage mais offre comme avantage de n'utiliser qu'une seule broche.
+Laboratoire qui vise à expérimenter la lecture d'un clavier matriciel. La méthode choisie est dans le cas présent la lecture par ADC. Cette méthode est plus complexe au montage mais offre comme avantage de n'utiliser qu'une seule broche.
 */
 
 #define F_CPU 16000000UL
@@ -24,21 +24,30 @@
 volatile uint16_t msCnt = 0; //Compteur utilisés pour compter 25 fois un délai de 1ms.
 volatile uint8_t msFlag = 0; //Flags qui est mis à 1 à chaques 25ms.
 
+char msg[5];
+
+//Prototypes de fonctions.
+/**
+*@brief  Fonction d'initialisation des différents I/O et fonctions.
+*/
+void miscInit(void);
 
 /**
 *@brief  Fonction d'initialisation du Timer #0.
 */
-void timer0Init();
+void timer0Init(void);
 
 int main(void)
 {
-	usartInit(1000000, F_CPU); //Initialisation du USART à 1Mbps.
-	timer0Init(); //Initialisation de timer 0.
+	miscInit();
+	
 	while (1)
 	{
 		if (msFlag)
 		{
-
+			msFlag = 0;
+			sprintf(msg, "%d\n\r", adcRead8());
+			usartSendString(msg);
 		}
 	}
 }
@@ -54,6 +63,13 @@ ISR(TIMER0_COMPA_vect)
 		msCnt -= TIMER_CNT_CYCLE;
 		msFlag = 1;
 	}
+}
+
+void miscInit(void)
+{
+	usartInit(1000000, F_CPU); //Initialisation du USART à 1Mbps.
+	timer0Init(); //Initialisation de timer 0.
+	adcInit(); //Appel de la fonction d'initialisation du ADC.
 }
 
 void timer0Init()

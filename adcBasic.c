@@ -10,7 +10,7 @@
 #include <avr/interrupt.h>
 #include "adcBasic.h"
 
-void adcInit()
+void adcInit(void)
 {
 	//ADMUX = REFS1 REFS0 ADLAR MUX4 MUX3 MUX2 MUX1 MUX0
 	//ADCSRA = ADEN ADSC ADATE ADIF ADIE ADPS2 ADPS1 ADPS0
@@ -24,9 +24,14 @@ void adcInit()
 	DIDR0 = (1<<ADC0D); //entrée numérique désactivée pour le ADC0.
 }
 
-uint16_t adcRead()
+uint16_t adcRead(void)
 {
 	ADCSRA |= (1<<ADSC);
 	while(ADCSRA & (1<<ADSC)); //On attend que la lecture du ADC soir terminée.
 	return ADC;
+}
+
+uint8_t adcRead8(void)
+{
+	return (adcRead() & 0b11111111);
 }
