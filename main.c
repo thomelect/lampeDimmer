@@ -1,6 +1,6 @@
-/**
+ï»¿/**
 @file 		main.c
-@brief		Laboratoire qui vise à expérimenter la lecture d'un clavier matriciel. La méthode choisie est dans le cas présent la lecture par ADC. Cette méthode est plus complexe au montage mais offre comme avantage de n'utiliser qu'une seule broche.
+@brief		Laboratoire qui vise Ã  expÃ©rimenter la lecture d'un clavier matriciel. La mÃ©thode choisie est dans le cas prÃ©sent la lecture par ADC. Cette mÃ©thode est plus complexe au montage mais offre comme avantage de n'utiliser qu'une seule broche.
 @author 	Thomas Desrosiers
 @version 	1.0
 @date 		2021/05/05
@@ -8,7 +8,7 @@
 @mainpage 	lab_7_integration
 @author 	Thomas Desrosiers
 @section 	MainSection1 Description
-Laboratoire qui vise à expérimenter la lecture d'un clavier matriciel. La méthode choisie est dans le cas présent la lecture par ADC. Cette méthode est plus complexe au montage mais offre comme avantage de n'utiliser qu'une seule broche.
+Laboratoire qui vise Ã  expÃ©rimenter la lecture d'un clavier matriciel. La mÃ©thode choisie est dans le cas prÃ©sent la lecture par ADC. Cette mÃ©thode est plus complexe au montage mais offre comme avantage de n'utiliser qu'une seule broche.
 */
 
 #define F_CPU 16000000UL
@@ -21,15 +21,15 @@ Laboratoire qui vise à expérimenter la lecture d'un clavier matriciel. La méthod
 #define OUTPUT_VALUE(val)	(OCR4A = val) //Valeur PWM output R.
 #define OUTPUT_INIT()		DDRC |= (1<<7) //Init output R.
 
-#define TIMER_CNT_CYCLE 25 //Nombre de cycle comptés en interruption.
+#define TIMER_CNT_CYCLE 25 //Nombre de cycle comptÃ©s en interruption.
 
-enum COMM_STATES {WAIT, RXDATA, VALIDATE}; //Protocole de traitement de réception d'une trame d'octet.
+enum COMM_STATES {WAIT, RXDATA, VALIDATE}; //Protocole de traitement de rÃ©ception d'une trame d'octet.
 enum COMM_STATES commState = WAIT;
 
-volatile uint16_t msCnt = 0; //Compteur utilisés pour compter 25 fois un délai de 1ms.
-volatile uint8_t msFlag = 0; //Flags qui est mis à 1 à chaques 25ms.
-uint8_t rxDataCnt = 0; //Compteur de donnés reçus.
-uint8_t rxData = 0; //Tableau des donnés.
+volatile uint16_t msCnt = 0; //Compteur utilisÃ©s pour compter 25 fois un dÃ©lai de 1ms.
+volatile uint8_t msFlag = 0; //Flags qui est mis Ã  1 Ã  chaques 25ms.
+uint8_t rxDataCnt = 0; //Compteur de donnÃ©s reÃ§us.
+uint8_t rxData = 0; //Tableau des donnÃ©s.
 uint8_t valueAdc = 0;
 uint8_t valueOut = 0;
 char msg[5];
@@ -37,19 +37,19 @@ char msg[5];
 //Prototypes de fonctions.
 
 /**
-*@brief Fonction de traitement des données et commandes reçues.
+*@brief Fonction de traitement des donnÃ©es et commandes reÃ§ues.
 */
 void execRxCommand(void);
 
 /**
-*@brief  Fonction d'initialisation des différents I/O et fonctions.
+*@brief  Fonction d'initialisation des diffÃ©rents I/O et fonctions.
 */
 void miscInit(void);
 
 /**
-*@brief Fonction qui remplis la structure de donnés avec les paramètres correspondants qui lui sont envoyés en paramètre par la fonction usartRemRxData. Le switch case commence à l'état WAIT qui attend la réception de "<". RXDATA place alors les donnés reçus dans l'union de structure jusqu'à ce que la dernière donnée (ici, la longueur de la trame à été spécifié manuellement à 7 puisque nous n'envoyons pas l'octet qui contient la longueur de la trame. Finalement, VALIDATE s'assure que la trame se termine par ">"
-*@param  data est l'octet reçu par la fonction usartRemRxData
-*@return 1 si la trame comportait un chevron '<' au début de celle-ci, des donnés et se terminait par un chevron '>'. Si elle ne se rend pas jusqu'à la validation elle retourne 0.
+*@brief Fonction qui remplis la structure de donnÃ©s avec les paramÃ¨tres correspondants qui lui sont envoyÃ©s en paramÃ¨tre par la fonction usartRemRxData. Le switch case commence Ã  l'Ã©tat WAIT qui attend la rÃ©ception de "<". RXDATA place alors les donnÃ©s reÃ§us dans l'union de structure jusqu'Ã  ce que la derniÃ¨re donnÃ©e (ici, la longueur de la trame Ã  Ã©tÃ© spÃ©cifiÃ© manuellement Ã  7 puisque nous n'envoyons pas l'octet qui contient la longueur de la trame. Finalement, VALIDATE s'assure que la trame se termine par ">"
+*@param  data est l'octet reÃ§u par la fonction usartRemRxData
+*@return 1 si la trame comportait un chevron '<' au dÃ©but de celle-ci, des donnÃ©s et se terminait par un chevron '>'. Si elle ne se rend pas jusqu'Ã  la validation elle retourne 0.
 */
 uint8_t parseRxData(uint8_t data);
 
@@ -59,7 +59,7 @@ uint8_t parseRxData(uint8_t data);
 void timer0Init(void);
 
 /**
-*@brief  Fonction d'initialisation du timer #4 utilisé pour le PWM.
+*@brief  Fonction d'initialisation du timer #4 utilisÃ© pour le PWM.
 */
 void timer4Init(void);
 
@@ -69,8 +69,8 @@ int main(void)
 	
 	while (1)
 	{
-		if (usartRxAvailable()) //Si un caractère est disponible:
-			parseRxData(usartRemRxData()); //appel de la fonction parseRxData() avec en paramètre la valeur retournée par usartRemRxData().
+		if (usartRxAvailable()) //Si un caractÃ¨re est disponible:
+			parseRxData(usartRemRxData()); //appel de la fonction parseRxData() avec en paramÃ¨tre la valeur retournÃ©e par usartRemRxData().
 		if (msFlag)
 		{
 			msFlag = 0;
@@ -87,7 +87,7 @@ int main(void)
 }
 
 /**
-*@brief Interruption de la comparaison sur OCR0A (timer0) qui met msFlag à 1 lorsque msCnt atteint TIMER_CNT_CYCLE qui est définie dans le define. msCnt est incrémenté à chaques 1ms.
+*@brief Interruption de la comparaison sur OCR0A (timer0) qui met msFlag Ã  1 lorsque msCnt atteint TIMER_CNT_CYCLE qui est dÃ©finie dans le define. msCnt est incrÃ©mentÃ© Ã  chaques 1ms.
 */
 ISR(TIMER0_COMPA_vect)
 {
@@ -109,42 +109,42 @@ void miscInit(void)
 	adcInit(); //Appel de la fonction d'initialisation du ADC.
 	timer0Init(); //Initialisation de timer 0.
 	timer4Init(); //Initialisation de timer 4.
-	usartInit(1000000, F_CPU); //Initialisation du USART à 1Mbps.
+	usartInit(1000000, F_CPU); //Initialisation du USART Ã  1Mbps.
 	
 	OUTPUT_INIT();
 }
 
 uint8_t parseRxData(uint8_t data)
 {
-	// Switch case des différents paramètres de la trame de réception
+	// Switch case des diffÃ©rents paramÃ¨tres de la trame de rÃ©ception
 	switch(commState)
 	{
 		default :
-			if(data == '<') //Confirmation que la trame débute par '<'
+			if(data == '<') //Confirmation que la trame dÃ©bute par '<'
 				commState = RXDATA; //Saut vers RXDATA.
-			rxDataCnt = 0; //Remet rxDataSizeCnt à 0 pour être prêt à recevoir la donnée 0.
+			rxDataCnt = 0; //Remet rxDataSizeCnt Ã  0 pour Ãªtre prÃªt Ã  recevoir la donnÃ©e 0.
 			break;
 		case RXDATA:
-			rxData = data; //Place les données dans l'union de structure. Puisque les paramètres sont placés dans la même ordre dans la structure que dans celui qu'elle sont reçu, il est possible d'utiliser bytes[x] au lieu de devoir spécifier le nom complet. Ce qui permet aussi d'assembler les valeurs 16 bits qui avaient été séparés en 2 x 8bits.
+			rxData = data; //Place les donnÃ©es dans l'union de structure. Puisque les paramÃ¨tres sont placÃ©s dans la mÃªme ordre dans la structure que dans celui qu'elle sont reÃ§u, il est possible d'utiliser bytes[x] au lieu de devoir spÃ©cifier le nom complet. Ce qui permet aussi d'assembler les valeurs 16 bits qui avaient Ã©tÃ© sÃ©parÃ©s en 2 x 8bits.
 			rxDataCnt++;
-			if(rxDataCnt >= 1) //Le nombre de données attendu est de 6.
-				commState = VALIDATE; //Lorsque le nombre de données anticipés est reçu on sute à validate.
+			if(rxDataCnt >= 1) //Le nombre de donnÃ©es attendu est de 6.
+				commState = VALIDATE; //Lorsque le nombre de donnÃ©es anticipÃ©s est reÃ§u on sute Ã  validate.
 			break;
 		case VALIDATE :
-			if(data == '>') //On vérifie que la trame se termine bien par un chevron de fermeture.
-				execRxCommand(); //Appel de execRxCommand() pour executer divers oppération sur les données reçues.
+			if(data == '>') //On vÃ©rifie que la trame se termine bien par un chevron de fermeture.
+				execRxCommand(); //Appel de execRxCommand() pour executer divers oppÃ©ration sur les donnÃ©es reÃ§ues.
 			commState = WAIT;
 			return 1; //Retourne 1 si il y a eu validation.
 			break;
 	}
-	return 0;// Retourne si l'a validation n'a pas été faite.
+	return 0;// Retourne si l'a validation n'a pas Ã©tÃ© faite.
 }
 
 void timer0Init(void)
 {
-	//TCCR0A : COM0A1 COM0A0 COM0B1 COM0B0 – – WGM01 WGM00
-	//TCCR0B : FOC0A FOC0B – – WGM02 CS02 CS01 CS00
-	//TIMSK0 : – – – – – OCIE0B OCIE0A TOIE0
+	//TCCR0A : COM0A1 COM0A0 COM0B1 COM0B0 â€“ â€“ WGM01 WGM00
+	//TCCR0B : FOC0A FOC0B â€“ â€“ WGM02 CS02 CS01 CS00
+	//TIMSK0 : â€“ â€“ â€“ â€“ â€“ OCIE0B OCIE0A TOIE0
 	uint8_t top = 250; //Valeur de OCR0A.
 	TCCR0A = 0b00000010; //Mode CTC.
 	TCCR0B = 0b00000011; //Prescaler de 64.
