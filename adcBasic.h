@@ -20,6 +20,11 @@ void adcInit(void);
 */
 uint16_t adcRead(void);
 
+
+/**
+*@brief  Retourne une lecture de l'ADC en 8bits.
+*@return Valeur de l'ADC convertie en 8bits.
+*/
 uint8_t adcRead8(void);
 
 #endif /* ADCBASIC_H_ */
