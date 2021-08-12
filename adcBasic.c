@@ -33,5 +33,5 @@ uint16_t adcRead(void)
 
 uint8_t adcRead8(void)
 {
-	return (adcRead() & 0b11111111);
+	return (adcRead() >> 2);
 }
