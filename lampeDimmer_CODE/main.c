@@ -20,6 +20,8 @@ Laboratoire qui vise à expérimenter la lecture d'un clavier matriciel. La mét
 
 #define OUTPUT_VALUE(val)	(OCR4A = val) //Valeur PWM output R.
 #define OUTPUT_INIT()		DDRC |= (1<<7) //Init output R.
+#define SWITCH_INIT()		PORTB |= (1<<3) //Bouton sur PD1.
+#define SWITCH()			((PINB & (1<<3))==0)
 
 #define TIMER_CNT_CYCLE 25 //Nombre de cycle comptés en interruption.
 
@@ -69,20 +71,26 @@ int main(void)
 	
 	while (1)
 	{
-		if (usartRxAvailable()) //Si un caractère est disponible:
-			parseRxData(usartRemRxData()); //appel de la fonction parseRxData() avec en paramètre la valeur retournée par usartRemRxData().
-		if (msFlag)
+		if (SWITCH())
 		{
-			msFlag = 0;
-			if (valueAdc != adcRead8())
+			//valueOut = 0;
+			if (usartRxAvailable()) //Si un caractère est disponible:
+				parseRxData(usartRemRxData()); //appel de la fonction parseRxData() avec en paramètre la valeur retournée par usartRemRxData().
+			if (msFlag)
 			{
-				valueAdc = adcRead8();
-				valueOut = adcRead8();
-			}			
-			OUTPUT_VALUE(valueOut);
-			sprintf(msg, "%d\n\r", valueOut);
-			usartSendString(msg);			
+				msFlag = 0;
+				if (valueAdc != adcRead8())
+				{
+					valueAdc = adcRead8();
+					valueOut = adcRead8();
+				}
+				sprintf(msg, "%d\n\r", valueOut);
+				usartSendString(msg);
+			}
 		}
+		else
+			valueOut = 0;
+		OUTPUT_VALUE(valueOut);
 	}
 }
 
@@ -112,6 +120,7 @@ void miscInit(void)
 	usartInit(1000000, F_CPU); //Initialisation du USART à 1Mbps.
 	
 	OUTPUT_INIT();
+	SWITCH_INIT();
 }
 
 uint8_t parseRxData(uint8_t data)
