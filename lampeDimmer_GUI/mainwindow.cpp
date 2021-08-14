@@ -237,14 +237,13 @@ void MainWindow::on_pushBottonOnOff_clicked()
     sendSerialData();
 }
 
-void MainWindow::on_comboBoxSleep_activated(void)
+void MainWindow::on_comboBoxSleep_activated(int index)
 {
-    int stateName = ui->comboBoxSleep->currentIndex();
     char txData[5];
     txData[0] = '<';
     txData[1] = 1;
     txData[2] = SEND_SLEEP_MODE;
-    txData[3] = stateName;
+    txData[3] = index;
     txData[4] = '>';
     serial->write(txData, 5);
 }

@@ -39,7 +39,7 @@ private slots:
 
     void boutonManage(int value);
 
-    void on_comboBoxSleep_activated(void);
+    void on_comboBoxSleep_activated(int index);
 
 private:
 

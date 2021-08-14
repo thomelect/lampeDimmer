@@ -167,7 +167,7 @@ void execRxCommand()
 			txCommande = 0;
 			break;
 		case SET_VAL: //Réception depuis l'interface de la valeur de la sortie.
-			//if (SWITCH()) //Si l'interrupteur du potentiomètre est à la position "ON"...
+			if (SWITCH()) //Si l'interrupteur du potentiomètre est à la position "ON"...
 				valueOut = rxData[0];
 			break;
 		case SET_SLEEP_MODE:

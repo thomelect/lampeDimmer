@@ -21,8 +21,8 @@ QT_BEGIN_MOC_NAMESPACE
 QT_WARNING_PUSH
 QT_WARNING_DISABLE_DEPRECATED
 struct qt_meta_stringdata_MainWindow_t {
-    QByteArrayData data[13];
-    char stringdata0[211];
+    QByteArrayData data[14];
+    char stringdata0[217];
 };
 #define QT_MOC_LITERAL(idx, ofs, len) \
     Q_STATIC_BYTE_ARRAY_DATA_HEADER_INITIALIZER_WITH_OFFSET(len, \
@@ -43,7 +43,8 @@ QT_MOC_LITERAL(8, 152, 7), // "uint8_t"
 QT_MOC_LITERAL(9, 160, 4), // "data"
 QT_MOC_LITERAL(10, 165, 12), // "boutonManage"
 QT_MOC_LITERAL(11, 178, 5), // "value"
-QT_MOC_LITERAL(12, 184, 26) // "on_comboBoxSleep_activated"
+QT_MOC_LITERAL(12, 184, 26), // "on_comboBoxSleep_activated"
+QT_MOC_LITERAL(13, 211, 5) // "index"
 
     },
     "MainWindow\0readSerialData\0\0"
@@ -51,7 +52,7 @@ QT_MOC_LITERAL(12, 184, 26) // "on_comboBoxSleep_activated"
     "on_dialIntensite_valueChanged\0"
     "on_pushBottonOnOff_clicked\0execRxCommand\0"
     "parseRXData\0uint8_t\0data\0boutonManage\0"
-    "value\0on_comboBoxSleep_activated"
+    "value\0on_comboBoxSleep_activated\0index"
 };
 #undef QT_MOC_LITERAL
 
@@ -76,7 +77,7 @@ static const uint qt_meta_data_MainWindow[] = {
        6,    0,   58,    2, 0x08 /* Private */,
        7,    1,   59,    2, 0x08 /* Private */,
       10,    1,   62,    2, 0x08 /* Private */,
-      12,    0,   65,    2, 0x08 /* Private */,
+      12,    1,   65,    2, 0x08 /* Private */,
 
  // slots: parameters
     QMetaType::Void,
@@ -86,7 +87,7 @@ static const uint qt_meta_data_MainWindow[] = {
     QMetaType::Void,
     QMetaType::Void, 0x80000000 | 8,    9,
     QMetaType::Void, QMetaType::Int,   11,
-    QMetaType::Void,
+    QMetaType::Void, QMetaType::Int,   13,
 
        0        // eod
 };
@@ -104,7 +105,7 @@ void MainWindow::qt_static_metacall(QObject *_o, QMetaObject::Call _c, int _id, 
         case 4: _t->execRxCommand(); break;
         case 5: _t->parseRXData((*reinterpret_cast< uint8_t(*)>(_a[1]))); break;
         case 6: _t->boutonManage((*reinterpret_cast< int(*)>(_a[1]))); break;
-        case 7: _t->on_comboBoxSleep_activated(); break;
+        case 7: _t->on_comboBoxSleep_activated((*reinterpret_cast< int(*)>(_a[1]))); break;
         default: ;
         }
     }
