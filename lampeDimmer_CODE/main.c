@@ -24,17 +24,47 @@ Laboratoire qui vise à expérimenter la lecture d'un clavier matriciel. La mét
 #define SWITCH()			((PINB & (1<<3))==0)
 
 #define TIMER_CNT_CYCLE 25 //Nombre de cycle comptés en interruption.
+#define _MAX_RXDATASIZE_    16
 
-enum COMM_STATES {WAIT, RXDATA, VALIDATE}; //Protocole de traitement de réception d'une trame d'octet.
-enum COMM_STATES commState = WAIT;
+//enum des différents paramètres d'une réception
+enum RX_STATES {
+	WAIT,
+	RXSIZE,
+	RXCOMMANDE,
+	RXDATA,
+	VALIDATE
+};
+
+//enum des différents paramètres d'une transmission
+enum TX_COMMANDES {
+	VAL_POT
+};
+
+//enum des différents commandes de transmission d'une réception
+enum RX_COMMANDES {
+	GET_ETAT,
+	SET_VAL
+};
+
+//déclaration des enums
+enum RX_STATES rxState;
+enum TX_COMMANDES txCommande;
+enum RX_COMMANDES rxCommande;
 
 volatile uint16_t msCnt = 0; //Compteur utilisés pour compter 25 fois un délai de 1ms.
 volatile uint8_t msFlag = 0; //Flags qui est mis à 1 à chaques 25ms.
-uint8_t rxDataCnt = 0; //Compteur de donnés reçus.
-uint8_t rxData = 0; //Tableau des donnés.
 uint8_t valueAdc = 0;
 uint8_t valueOut = 0;
+uint8_t valueSend = 0;
 char msg[5];
+
+//variables nécessaires à la communication avec l'interface
+uint8_t rxDataSize;
+uint8_t rxDataCnt = 0; //Compteur de donnés reçus.
+uint8_t rxData[_MAX_RXDATASIZE_];
+uint16_t rxErrorCommCnt = 0;
+uint8_t moteurStopFlag = 0;
+uint8_t seqAuto = 0;
 
 //Prototypes de fonctions.
 
@@ -53,7 +83,7 @@ void miscInit(void);
 *@param  data est l'octet reçu par la fonction usartRemRxData
 *@return 1 si la trame comportait un chevron '<' au début de celle-ci, des donnés et se terminait par un chevron '>'. Si elle ne se rend pas jusqu'à la validation elle retourne 0.
 */
-uint8_t parseRxData(uint8_t data);
+void parseRxData(uint8_t data);
 
 /**
 *@brief  Fonction d'initialisation du Timer #0.
@@ -84,8 +114,10 @@ int main(void)
 					valueAdc = adcRead8();
 					valueOut = adcRead8();
 				}
+				else
+					valueSend = adcRead8();
 				sprintf(msg, "%d\n\r", valueOut);
-				usartSendString(msg);
+				//usartSendString(msg);
 			}
 		}
 		else
@@ -109,7 +141,36 @@ ISR(TIMER0_COMPA_vect)
 
 void execRxCommand()
 {
-	valueOut = rxData;
+	switch (rxCommande)
+	{
+		case GET_ETAT:
+			txCommande = 0;
+			break;
+		case SET_VAL:
+			
+			if (valueSend != rxData[0])
+			{
+				valueOut = rxData[0];
+			}
+			else
+				valueOut = adcRead8();
+			break;
+	}
+	switch (txCommande)
+	{
+		char txData[5];
+		case VAL_POT:
+			txData[0] = '<';
+			txData[1] = 1;
+			txData[2] = VAL_POT;
+			txData[3] = valueSend;
+			txData[4] = '>';
+			for (int x = 0; x <= 4; x++)
+			{
+				usartSendByte(txData[x]);
+			}
+			break;
+	}
 }
 
 void miscInit(void)
@@ -123,30 +184,55 @@ void miscInit(void)
 	SWITCH_INIT();
 }
 
-uint8_t parseRxData(uint8_t data)
+/**
+* @brief Sépare les données reçues sur le port série.
+* @param data la donnée à traiter
+*/
+void parseRxData(uint8_t data)
 {
-	// Switch case des différents paramètres de la trame de réception
-	switch(commState)
+	//switch case des différents paramètres de la trame de réception
+	switch(rxState)
 	{
+		//confirmation que la trame débute par '<'
 		default :
-			if(data == '<') //Confirmation que la trame débute par '<'
-				commState = RXDATA; //Saut vers RXDATA.
-			rxDataCnt = 0; //Remet rxDataSizeCnt à 0 pour être prêt à recevoir la donnée 0.
+			if(data == '<')
+			{
+				rxState = RXSIZE;
+				rxDataCnt = 0;
+			}
 			break;
+		//////////////////////////////////////////////////////////////////////////
+		case RXSIZE:
+			rxDataSize = data;
+			if(rxDataSize >= _MAX_RXDATASIZE_)
+				rxState = WAIT;
+			else
+				rxState = RXCOMMANDE;
+			break;
+		//////////////////////////////////////////////////////////////////////////
+		case RXCOMMANDE:
+			rxCommande = data;
+			if(rxDataSize)
+				rxState = RXDATA;
+			else
+				rxState = VALIDATE;
+			break;
+		//////////////////////////////////////////////////////////////////////////
 		case RXDATA:
-			rxData = data; //Place les données dans l'union de structure. Puisque les paramètres sont placés dans la même ordre dans la structure que dans celui qu'elle sont reçu, il est possible d'utiliser bytes[x] au lieu de devoir spécifier le nom complet. Ce qui permet aussi d'assembler les valeurs 16 bits qui avaient été séparés en 2 x 8bits.
-			rxDataCnt++;
-			if(rxDataCnt >= 1) //Le nombre de données attendu est de 6.
-				commState = VALIDATE; //Lorsque le nombre de données anticipés est reçu on sute à validate.
+			rxData[rxDataCnt++] = data;
+			if(rxDataCnt == rxDataSize)
+				rxState = VALIDATE;
 			break;
+		//////////////////////////////////////////////////////////////////////////
+		//confirmation que la trame se termine par '>'
 		case VALIDATE :
-			if(data == '>') //On vérifie que la trame se termine bien par un chevron de fermeture.
-				execRxCommand(); //Appel de execRxCommand() pour executer divers oppération sur les données reçues.
-			commState = WAIT;
-			return 1; //Retourne 1 si il y a eu validation.
+			rxState = WAIT;
+			if(data == '>')
+				execRxCommand();//si oui la fonction execRxCommand() est appelée
+			else
+				rxErrorCommCnt++;// sinon le nombre d'erreur augmente
 			break;
 	}
-	return 0;// Retourne si l'a validation n'a pas été faite.
 }
 
 void timer0Init(void)

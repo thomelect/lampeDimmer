@@ -21,8 +21,8 @@ QT_BEGIN_MOC_NAMESPACE
 QT_WARNING_PUSH
 QT_WARNING_DISABLE_DEPRECATED
 struct qt_meta_stringdata_MainWindow_t {
-    QByteArrayData data[8];
-    char stringdata0[145];
+    QByteArrayData data[13];
+    char stringdata0[197];
 };
 #define QT_MOC_LITERAL(idx, ofs, len) \
     Q_STATIC_BYTE_ARRAY_DATA_HEADER_INITIALIZER_WITH_OFFSET(len, \
@@ -37,15 +37,21 @@ QT_MOC_LITERAL(2, 26, 0), // ""
 QT_MOC_LITERAL(3, 27, 41), // "on_horizontalSliderIntensite_..."
 QT_MOC_LITERAL(4, 69, 29), // "on_dialIntensite_valueChanged"
 QT_MOC_LITERAL(5, 99, 26), // "on_pushBottonOnOff_clicked"
-QT_MOC_LITERAL(6, 126, 12), // "boutonManage"
-QT_MOC_LITERAL(7, 139, 5) // "value"
+QT_MOC_LITERAL(6, 126, 12), // "sendGetState"
+QT_MOC_LITERAL(7, 139, 13), // "execRxCommand"
+QT_MOC_LITERAL(8, 153, 11), // "parseRXData"
+QT_MOC_LITERAL(9, 165, 7), // "uint8_t"
+QT_MOC_LITERAL(10, 173, 4), // "data"
+QT_MOC_LITERAL(11, 178, 12), // "boutonManage"
+QT_MOC_LITERAL(12, 191, 5) // "value"
 
     },
     "MainWindow\0readSerialData\0\0"
     "on_horizontalSliderIntensite_valueChanged\0"
     "on_dialIntensite_valueChanged\0"
-    "on_pushBottonOnOff_clicked\0boutonManage\0"
-    "value"
+    "on_pushBottonOnOff_clicked\0sendGetState\0"
+    "execRxCommand\0parseRXData\0uint8_t\0"
+    "data\0boutonManage\0value"
 };
 #undef QT_MOC_LITERAL
 
@@ -55,7 +61,7 @@ static const uint qt_meta_data_MainWindow[] = {
        7,       // revision
        0,       // classname
        0,    0, // classinfo
-       5,   14, // methods
+       8,   14, // methods
        0,    0, // properties
        0,    0, // enums/sets
        0,    0, // constructors
@@ -63,18 +69,24 @@ static const uint qt_meta_data_MainWindow[] = {
        0,       // signalCount
 
  // slots: name, argc, parameters, tag, flags
-       1,    0,   39,    2, 0x08 /* Private */,
-       3,    0,   40,    2, 0x08 /* Private */,
-       4,    0,   41,    2, 0x08 /* Private */,
-       5,    0,   42,    2, 0x08 /* Private */,
-       6,    1,   43,    2, 0x08 /* Private */,
+       1,    0,   54,    2, 0x08 /* Private */,
+       3,    0,   55,    2, 0x08 /* Private */,
+       4,    0,   56,    2, 0x08 /* Private */,
+       5,    0,   57,    2, 0x08 /* Private */,
+       6,    0,   58,    2, 0x08 /* Private */,
+       7,    0,   59,    2, 0x08 /* Private */,
+       8,    1,   60,    2, 0x08 /* Private */,
+      11,    1,   63,    2, 0x08 /* Private */,
 
  // slots: parameters
     QMetaType::Void,
     QMetaType::Void,
     QMetaType::Void,
     QMetaType::Void,
-    QMetaType::Void, QMetaType::Int,    7,
+    QMetaType::Void,
+    QMetaType::Void,
+    QMetaType::Void, 0x80000000 | 9,   10,
+    QMetaType::Void, QMetaType::Int,   12,
 
        0        // eod
 };
@@ -89,7 +101,10 @@ void MainWindow::qt_static_metacall(QObject *_o, QMetaObject::Call _c, int _id, 
         case 1: _t->on_horizontalSliderIntensite_valueChanged(); break;
         case 2: _t->on_dialIntensite_valueChanged(); break;
         case 3: _t->on_pushBottonOnOff_clicked(); break;
-        case 4: _t->boutonManage((*reinterpret_cast< int(*)>(_a[1]))); break;
+        case 4: _t->sendGetState(); break;
+        case 5: _t->execRxCommand(); break;
+        case 6: _t->parseRXData((*reinterpret_cast< uint8_t(*)>(_a[1]))); break;
+        case 7: _t->boutonManage((*reinterpret_cast< int(*)>(_a[1]))); break;
         default: ;
         }
     }
@@ -120,13 +135,13 @@ int MainWindow::qt_metacall(QMetaObject::Call _c, int _id, void **_a)
     if (_id < 0)
         return _id;
     if (_c == QMetaObject::InvokeMetaMethod) {
-        if (_id < 5)
+        if (_id < 8)
             qt_static_metacall(this, _c, _id, _a);
-        _id -= 5;
+        _id -= 8;
     } else if (_c == QMetaObject::RegisterMethodArgumentMetaType) {
-        if (_id < 5)
+        if (_id < 8)
             *reinterpret_cast<int*>(_a[0]) = -1;
-        _id -= 5;
+        _id -= 8;
     }
     return _id;
 }

@@ -31,18 +31,41 @@ private slots:
 
     void on_pushBottonOnOff_clicked();
 
+    void sendGetState();
+
+    void execRxCommand();
+
+    void parseRXData(uint8_t data);
+
     void boutonManage(int value);
 
 private:
+
+#define _MAX_RXDATASIZE_    16
+#define _SEQ_SIZE_          10
+
     void createMenus();
     QMenu *toolsMenu;
     QAction *setupSerialAct;
 
     void setupSerial();
     QSerialPort *serial;
+    QTimer *timer;
     Ui::MainWindow *ui;
 
     void sendSerialData();
+
+    enum RX_STATES {WAIT,RXSIZE,RXCOMMANDE,RXDATA,VALIDATE};
+    enum RX_COMMANDES {VAL_POT};
+    enum TX_COMMANDES {GET_ETAT,SEND_VAL};
+    RX_STATES rxState;
+    RX_COMMANDES rxCommande;
+    QByteArray tmpRxData;
+    uint8_t rxDataSize;
+    uint8_t rxDataCnt;
+    uint8_t rxData[_MAX_RXDATASIZE_];
+    uint16_t rxErrorCommCnt;
+    uint8_t seqCnt;
 
 };
 #endif // MAINWINDOW_H
