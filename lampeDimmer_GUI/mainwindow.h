@@ -39,6 +39,8 @@ private slots:
 
     void boutonManage(int value);
 
+    void on_comboBoxSleep_currentIndexChanged(int index);
+
 private:
 
 #define _MAX_RXDATASIZE_    16
@@ -55,9 +57,9 @@ private:
 
     void sendSerialData();
 
-    enum RX_STATES {WAIT,RXSIZE,RXCOMMANDE,RXDATA,VALIDATE};
+    enum RX_STATES {WAIT, RXSIZE, RXCOMMANDE, RXDATA, VALIDATE};
     enum RX_COMMANDES {VAL_POT};
-    enum TX_COMMANDES {GET_ETAT,SEND_VAL};
+    enum TX_COMMANDES {GET_ETAT, SEND_VAL, SEND_SLEEP_MODE};
     RX_STATES rxState;
     RX_COMMANDES rxCommande;
     QByteArray tmpRxData;

@@ -13,6 +13,7 @@
 #include <QtWidgets/QAction>
 #include <QtWidgets/QApplication>
 #include <QtWidgets/QButtonGroup>
+#include <QtWidgets/QComboBox>
 #include <QtWidgets/QDial>
 #include <QtWidgets/QHeaderView>
 #include <QtWidgets/QLabel>
@@ -35,6 +36,7 @@ public:
     QLabel *lb_255_slider;
     QLabel *lb_255_dial;
     QLabel *lb_0_dial;
+    QComboBox *comboBoxSleep;
 
     void setupUi(QMainWindow *MainWindow)
     {
@@ -96,6 +98,9 @@ public:
         lb_0_dial->setEnabled(true);
         lb_0_dial->setGeometry(QRect(220, 60, 21, 20));
         lb_0_dial->setAlignment(Qt::AlignCenter);
+        comboBoxSleep = new QComboBox(centralwidget);
+        comboBoxSleep->setObjectName(QStringLiteral("comboBoxSleep"));
+        comboBoxSleep->setGeometry(QRect(20, 50, 91, 22));
         MainWindow->setCentralWidget(centralwidget);
 
         retranslateUi(MainWindow);
@@ -112,6 +117,12 @@ public:
         lb_255_slider->setText(QApplication::translate("MainWindow", "255", Q_NULLPTR));
         lb_255_dial->setText(QApplication::translate("MainWindow", "255", Q_NULLPTR));
         lb_0_dial->setText(QApplication::translate("MainWindow", "0", Q_NULLPTR));
+        comboBoxSleep->clear();
+        comboBoxSleep->insertItems(0, QStringList()
+         << QApplication::translate("MainWindow", "OFF", Q_NULLPTR)
+         << QApplication::translate("MainWindow", "ON", Q_NULLPTR)
+         << QApplication::translate("MainWindow", "BREATHING", Q_NULLPTR)
+        );
     } // retranslateUi
 
 };

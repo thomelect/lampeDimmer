@@ -11,6 +11,7 @@
 #include <QTimer>
 #include <QDebug>
 #include <QMenuBar>
+#include <QString>
 
 using namespace std;
 
@@ -234,4 +235,30 @@ void MainWindow::on_pushBottonOnOff_clicked()
     ui->horizontalSliderIntensite->setSliderPosition(intensite); //Modifie la position du slider.
     ui->dialIntensite->setSliderPosition(intensite); //Modifie la position du dial.
     sendSerialData();
+}
+
+void MainWindow::on_comboBoxSleep_currentIndexChanged(int index)
+{
+    int stateName = ui->comboBoxSleep->currentIndex();
+    char txData[5];
+    txData[0] = '<';
+    txData[1] = 1;
+    txData[2] = SEND_SLEEP_MODE;
+    txData[3] = stateName;
+    txData[4] = '>';
+    serial->write(txData, 5);
+    /*
+    switch (stateName)
+    {
+        case 0:
+
+            break;
+        case 1:
+
+            break;
+        case 2:
+
+            break;
+    }
+    */
 }

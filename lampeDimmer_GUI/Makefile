@@ -210,6 +210,7 @@ Makefile: lampeDimmer_GUI.pro C:/Qt/Qt5.9.9/5.9.9/mingw53_32/mkspecs/win32-g++/q
 		C:/Qt/Qt5.9.9/5.9.9/mingw53_32/mkspecs/features/qt_config.prf \
 		C:/Qt/Qt5.9.9/5.9.9/mingw53_32/mkspecs/win32-g++/qmake.conf \
 		C:/Qt/Qt5.9.9/5.9.9/mingw53_32/mkspecs/features/spec_post.prf \
+		.qmake.stash \
 		C:/Qt/Qt5.9.9/5.9.9/mingw53_32/mkspecs/features/exclusive_builds.prf \
 		C:/Qt/Qt5.9.9/5.9.9/mingw53_32/mkspecs/features/toolchain.prf \
 		C:/Qt/Qt5.9.9/5.9.9/mingw53_32/mkspecs/features/default_pre.prf \
@@ -388,6 +389,7 @@ C:/Qt/Qt5.9.9/5.9.9/mingw53_32/mkspecs/features/qt_functions.prf:
 C:/Qt/Qt5.9.9/5.9.9/mingw53_32/mkspecs/features/qt_config.prf:
 C:/Qt/Qt5.9.9/5.9.9/mingw53_32/mkspecs/win32-g++/qmake.conf:
 C:/Qt/Qt5.9.9/5.9.9/mingw53_32/mkspecs/features/spec_post.prf:
+.qmake.stash:
 C:/Qt/Qt5.9.9/5.9.9/mingw53_32/mkspecs/features/exclusive_builds.prf:
 C:/Qt/Qt5.9.9/5.9.9/mingw53_32/mkspecs/features/toolchain.prf:
 C:/Qt/Qt5.9.9/5.9.9/mingw53_32/mkspecs/features/default_pre.prf:

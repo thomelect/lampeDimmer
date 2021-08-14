@@ -192,6 +192,31 @@
      <set>Qt::AlignCenter</set>
     </property>
    </widget>
+   <widget class="QComboBox" name="comboBoxSleep">
+    <property name="geometry">
+     <rect>
+      <x>20</x>
+      <y>50</y>
+      <width>91</width>
+      <height>22</height>
+     </rect>
+    </property>
+    <item>
+     <property name="text">
+      <string>OFF</string>
+     </property>
+    </item>
+    <item>
+     <property name="text">
+      <string>ON</string>
+     </property>
+    </item>
+    <item>
+     <property name="text">
+      <string>BREATHING</string>
+     </property>
+    </item>
+   </widget>
   </widget>
  </widget>
  <resources/>

@@ -23,7 +23,9 @@ Laboratoire qui vise à expérimenter la lecture d'un clavier matriciel. La mét
 #define SWITCH_INIT()		PORTB |= (1<<3) //Bouton sur PD1.
 #define SWITCH()			((PINB & (1<<3))==0)
 
-#define TIMER_CNT_CYCLE 25 //Nombre de cycle comptés en interruption.
+#define TIMER_CNT_CYCLE_ADC		25 //Nombre de cycle comptés en interruption.
+#define TIMER_CNT_CYCLE_FADE	50 //Nombre de cycle comptés en interruption.
+#define INCREMENT_STEP			2 //Incrément pour le fadding.
 #define _MAX_RXDATASIZE_    16
 
 //enum des différents paramètres d'une réception
@@ -43,7 +45,8 @@ enum TX_COMMANDES {
 //enum des différents commandes de transmission d'une réception
 enum RX_COMMANDES {
 	GET_ETAT,
-	SET_VAL
+	SET_VAL,
+	SET_SLEEP_MODE
 };
 
 //déclaration des enums
@@ -51,10 +54,14 @@ enum RX_STATES rxState;
 enum TX_COMMANDES txCommande;
 enum RX_COMMANDES rxCommande;
 
-volatile uint16_t msCnt = 0; //Compteur utilisés pour compter 25 fois un délai de 1ms.
-volatile uint8_t msFlag = 0; //Flags qui est mis à 1 à chaques 25ms.
-uint8_t valueAdc = 0;
-uint8_t valueOut = 0;
+volatile uint16_t msCntAdc = 0; //Compteur utilisés pour compter 25 fois un délai de 1ms pour la mesure de l'ADC.
+volatile uint8_t msFlagAdc = 0; //Flags qui est mis à 1 à chaques 25ms pour la mesure de l'ADC.
+volatile uint16_t msCntFade = 0; //Compteur utilisés pour compter 50 fois un délai de 1ms pour le fade de la sortie.
+volatile uint8_t msFlagFade = 0; //Flags qui est mis à 1 à chaques 50ms pour le fade de la sortie.
+uint16_t valueAdc = 0;
+uint16_t valueOut = 0;
+uint8_t veilleMode = 0;
+int increment = 5;
 char msg[5];
 
 //variables nécessaires à la communication avec l'interface
@@ -76,6 +83,8 @@ void execRxCommand(void);
 *@brief  Fonction d'initialisation des différents I/O et fonctions.
 */
 void miscInit(void);
+
+void outputVeille(uint8_t value);
 
 /**
 *@brief Fonction qui remplis la structure de donnés avec les paramètres correspondants qui lui sont envoyés en paramètre par la fonction usartRemRxData. Le switch case commence à l'état WAIT qui attend la réception de "<". RXDATA place alors les donnés reçus dans l'union de structure jusqu'à ce que la dernière donnée (ici, la longueur de la trame à été spécifié manuellement à 7 puisque nous n'envoyons pas l'octet qui contient la longueur de la trame. Finalement, VALIDATE s'assure que la trame se termine par ">"
@@ -100,25 +109,32 @@ int main(void)
 	
 	while (1)
 	{
-		if (SWITCH())
-		{
-			//valueOut = 0;
-			if (usartRxAvailable()) //Si un caractère est disponible:
+				if (usartRxAvailable()) //Si un caractère est disponible...
 				parseRxData(usartRemRxData()); //appel de la fonction parseRxData() avec en paramètre la valeur retournée par usartRemRxData().
-			if (msFlag)
+		if (SWITCH()) //Si l'interrupteur du potentiomètre est à la position "ON"...
+		{
+// 			if (usartRxAvailable()) //Si un caractère est disponible...
+// 				parseRxData(usartRemRxData()); //appel de la fonction parseRxData() avec en paramètre la valeur retournée par usartRemRxData().
+			if (msFlagAdc)
 			{
-				msFlag = 0;
+				msFlagAdc = 0;
 				if (valueAdc != adcRead8())
 				{
-					valueAdc = adcRead8();
-					valueOut = adcRead8();
+					
+					for (uint8_t i = 0; i < 100; i++) //Une valeur moyenne sur un echantillon de 100 mesures est calculé afin d'éviter d'être entre deux valeurs.
+					{
+						valueAdc += adcRead8();
+						valueOut += adcRead8();
+					}
+					valueAdc /= 100;
+					valueOut /= 100;
 				}
 				sprintf(msg, "%d\n\r", valueOut);
-				//usartSendString(msg);
+				usartSendString(msg);
 			}
 		}
-		else
-			valueOut = 0;
+		else  //Si l'interrupteur du potentiomètre est à la position "OFF"...
+			outputVeille(veilleMode);
 		OUTPUT_VALUE(valueOut);
 	}
 }
@@ -128,11 +144,17 @@ int main(void)
 */
 ISR(TIMER0_COMPA_vect)
 {
-	msCnt++;
-	if (msCnt >= TIMER_CNT_CYCLE)
+	msCntAdc++;
+	msCntFade++;
+	if (msCntAdc >= TIMER_CNT_CYCLE_ADC)
 	{
-		msCnt -= TIMER_CNT_CYCLE;
-		msFlag = 1;
+		msCntAdc -= TIMER_CNT_CYCLE_ADC;
+		msFlagAdc = 1;
+	}
+	if (msCntFade >= TIMER_CNT_CYCLE_FADE)
+	{
+		msCntFade -= TIMER_CNT_CYCLE_FADE;
+		msFlagFade = 1;
 	}
 }
 
@@ -140,11 +162,15 @@ void execRxCommand()
 {
 	switch (rxCommande)
 	{
-		case GET_ETAT:
+		case GET_ETAT: //État non utilisé
 			txCommande = 0;
 			break;
-		case SET_VAL:
-			valueOut = rxData[0];
+		case SET_VAL: //Réception depuis l'interface de la valeur de la sortie.
+			//if (SWITCH()) //Si l'interrupteur du potentiomètre est à la position "ON"...
+				valueOut = rxData[0];
+			break;
+		case SET_SLEEP_MODE:
+				veilleMode = rxData[0];
 			break;
 	}
 	/*
@@ -177,6 +203,34 @@ void miscInit(void)
 	SWITCH_INIT();
 }
 
+void outputVeille(uint8_t value)
+{
+	switch (value)
+	{
+		case 0:
+			valueOut = 0;
+			break;
+		case 1:
+			valueOut = 255;
+			break;
+		case 2:
+			if (valueOut <= 0) //Lorsque oc4aValue à atteint son minimum.
+			{
+				increment = INCREMENT_STEP;
+			}
+			if (valueOut >= 255) //Lorsque oc4aValue à atteint son maximum.
+			{
+				increment = -INCREMENT_STEP;
+			}
+			if (msFlagFade)
+			{
+				msFlagFade = 0;
+				valueOut += increment;
+			}
+			break;
+	}
+}
+
 /**
 * @brief Sépare les données reçues sur le port série.
 * @param data la donnée à traiter
@@ -184,7 +238,7 @@ void miscInit(void)
 void parseRxData(uint8_t data)
 {
 	//switch case des différents paramètres de la trame de réception
-	switch(rxState)
+	switch (rxState)
 	{
 		//confirmation que la trame débute par '<'
 		default :
@@ -203,6 +257,7 @@ void parseRxData(uint8_t data)
 				rxState = RXCOMMANDE;
 			break;
 		//////////////////////////////////////////////////////////////////////////
+		//Traitement de la commande.
 		case RXCOMMANDE:
 			rxCommande = data;
 			if(rxDataSize)
@@ -211,6 +266,7 @@ void parseRxData(uint8_t data)
 				rxState = VALIDATE;
 			break;
 		//////////////////////////////////////////////////////////////////////////
+		//Traitement de la donnée.
 		case RXDATA:
 			rxData[rxDataCnt++] = data;
 			if(rxDataCnt == rxDataSize)
