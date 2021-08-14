@@ -21,9 +21,11 @@ MainWindow::MainWindow(QWidget *parent):
     QMainWindow(parent),
     ui(new Ui::MainWindow)
 {
+    /*
     timer = new QTimer(this);
     connect(timer, SIGNAL(timeout()), this, SLOT(sendGetState()));
     timer->start(100); // vous pouvez réduire l'interval durant les tests.
+    */
 
     serial = new QSerialPort(this);
     connect(serial, SIGNAL(readyRead()), this, SLOT(readSerialData()));
@@ -66,6 +68,7 @@ void MainWindow::createMenus()
  */
 void MainWindow::execRxCommand()
 {
+    /*
     if (rxCommande == VAL_POT)
     {
         //intensite = rxData[0];
@@ -73,6 +76,7 @@ void MainWindow::execRxCommand()
         ui->dialIntensite->setSliderPosition(rxData[0]); //Modifie la position du slider en fonction de la valeur obtenue par le slider.
         ui->lbIntensiteValue->setText(QString::number(rxData[0]));
     }
+    */
 }
 
 /**
@@ -100,7 +104,6 @@ void MainWindow::parseRXData(uint8_t data)
         }
         else
         {
-            qDebug() << "COOL";
             rxState = RXCOMMANDE;
         }
         break;
@@ -154,6 +157,7 @@ void MainWindow::readSerialData() {
 /**
  * @brief Envoi la commande GET_STATE. Déclenchée par le timer.
  */
+/*
 void MainWindow::sendGetState()
 {
     if(serial->isOpen())
@@ -165,7 +169,7 @@ void MainWindow::sendGetState()
         txData[3] = '>';
         serial->write(txData,4);
     }
-}
+*/
 
 /**
 * @brief Fonction de lecture du'envoie sur le port série..

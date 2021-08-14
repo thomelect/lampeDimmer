@@ -55,7 +55,6 @@ volatile uint16_t msCnt = 0; //Compteur utilisés pour compter 25 fois un délai
 volatile uint8_t msFlag = 0; //Flags qui est mis à 1 à chaques 25ms.
 uint8_t valueAdc = 0;
 uint8_t valueOut = 0;
-uint8_t valueSend = 0;
 char msg[5];
 
 //variables nécessaires à la communication avec l'interface
@@ -114,8 +113,6 @@ int main(void)
 					valueAdc = adcRead8();
 					valueOut = adcRead8();
 				}
-				else
-					valueSend = adcRead8();
 				sprintf(msg, "%d\n\r", valueOut);
 				//usartSendString(msg);
 			}
@@ -147,15 +144,10 @@ void execRxCommand()
 			txCommande = 0;
 			break;
 		case SET_VAL:
-			
-			if (valueSend != rxData[0])
-			{
-				valueOut = rxData[0];
-			}
-			else
-				valueOut = adcRead8();
+			valueOut = rxData[0];
 			break;
 	}
+	/*
 	switch (txCommande)
 	{
 		char txData[5];
@@ -171,6 +163,7 @@ void execRxCommand()
 			}
 			break;
 	}
+	*/
 }
 
 void miscInit(void)

@@ -31,7 +31,7 @@ private slots:
 
     void on_pushBottonOnOff_clicked();
 
-    void sendGetState();
+//    void sendGetState();
 
     void execRxCommand();
 
