@@ -25,7 +25,7 @@ Laboratoire qui vise à expérimenter la lecture d'un clavier matriciel. La mét
 
 #define TIMER_CNT_CYCLE_ADC		25 //Nombre de cycle comptés en interruption.
 #define TIMER_CNT_CYCLE_FADE	50 //Nombre de cycle comptés en interruption.
-#define INCREMENT_STEP			2 //Incrément pour le fadding.
+#define INCREMENT_STEP			1 //Incrément pour le fadding.
 #define _MAX_RXDATASIZE_    16
 
 //enum des différents paramètres d'une réception
@@ -120,14 +120,15 @@ int main(void)
 				msFlagAdc = 0;
 				if (valueAdc != adcRead8())
 				{
-					
+					valueAdc = adcRead8();
 					for (uint8_t i = 0; i < 100; i++) //Une valeur moyenne sur un echantillon de 100 mesures est calculé afin d'éviter d'être entre deux valeurs.
 					{
-						valueAdc += adcRead8();
+						
 						valueOut += adcRead8();
 					}
-					valueAdc /= 100;
 					valueOut /= 100;
+					if (valueOut >= 255) //Si valueOut dépasse 255..
+						valueOut = 255; //valueOut est limité à 255.
 				}
 				sprintf(msg, "%d\n\r", valueOut);
 				usartSendString(msg);
@@ -214,7 +215,7 @@ void outputVeille(uint8_t value)
 			valueOut = 255;
 			break;
 		case 2:
-			if (valueOut <= 0) //Lorsque oc4aValue à atteint son minimum.
+			if (valueOut <= 1) //Lorsque oc4aValue à atteint son minimum.
 			{
 				increment = INCREMENT_STEP;
 			}
