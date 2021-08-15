@@ -15,9 +15,6 @@
 
 using namespace std;
 
-uint8_t intensite = 0;
-bool boutonState = 1;
-
 MainWindow::MainWindow(QWidget *parent):
     QMainWindow(parent),
     ui(new Ui::MainWindow)
@@ -28,10 +25,18 @@ MainWindow::MainWindow(QWidget *parent):
     timer->start(100); // vous pouvez réduire l'interval durant les tests.
     */
 
+    ui->setupUi(this);
     serial = new QSerialPort(this);
     connect(serial, SIGNAL(readyRead()), this, SLOT(readSerialData()));
     createMenus();
-    ui->setupUi(this);
+    ui->pushBottonOnOff->setIcon(QIcon(":/images/off.png"));
+    ui->pushBottonOnOff->setIconSize(QSize(65, 65));
+    //Feuille de style des boutons de la de l'interface MainWindow.
+    this->setStyleSheet("#pushBottonOnOff {"
+                        "background-color: none;"
+                        "border: 0px"
+                        "}"
+                        );
 }
 
 MainWindow::~MainWindow()
@@ -44,14 +49,20 @@ MainWindow::~MainWindow()
 
 void MainWindow::boutonManage(int value)
 {
+    QPixmap pixmapOff("/images/off.png");
+    QIcon ButtonIcon(pixmapOff);
     if (value)
     {
-        ui->pushBottonOnOff->setText("OFF");
+        //ui->pushBottonOnOff->setText("OFF");
+        ui->pushBottonOnOff->setIcon(QIcon(":/images/on.png"));
+        ui->pushBottonOnOff->setIconSize(QSize(65, 65));
         boutonState = 0;
     }
     else
     {
-        ui->pushBottonOnOff->setText("ON");
+        //ui->pushBottonOnOff->setText("ON ");
+        ui->pushBottonOnOff->setIcon(QIcon(":/images/off.png"));
+        ui->pushBottonOnOff->setIconSize(QSize(65, 65));
         boutonState = 1;
     }
 }
@@ -195,6 +206,17 @@ void MainWindow::setupSerial()
     setupDia.exec();
 }
 
+void MainWindow::on_comboBoxSleep_activated(int index)
+{
+    char txData[5];
+    txData[0] = '<';
+    txData[1] = 1;
+    txData[2] = SEND_SLEEP_MODE;
+    txData[3] = index;
+    txData[4] = '>';
+    serial->write(txData, 5);
+}
+
 void MainWindow::on_dialIntensite_valueChanged(void)
 {
     intensite = ui->dialIntensite->value();
@@ -221,29 +243,16 @@ void MainWindow::on_pushBottonOnOff_clicked()
     if (boutonState) //Met la lumière à "ON" et le bouton affiche maintenant "OFF".
     {
         boutonState = !boutonState;
-        ui->pushBottonOnOff->setText("OFF");
         intensite = 255;
         ui->lbIntensiteValue->setText(QString::number(intensite));
     }
     else //Met la lumière à "OFF" et le bouton affiche maintenant "ON".
     {
         boutonState = !boutonState;
-        ui->pushBottonOnOff->setText("ON");
         intensite = 0;
         ui->lbIntensiteValue->setText(QString::number(intensite));
     }
     ui->horizontalSliderIntensite->setSliderPosition(intensite); //Modifie la position du slider.
     ui->dialIntensite->setSliderPosition(intensite); //Modifie la position du dial.
     sendSerialData();
-}
-
-void MainWindow::on_comboBoxSleep_activated(int index)
-{
-    char txData[5];
-    txData[0] = '<';
-    txData[1] = 1;
-    txData[2] = SEND_SLEEP_MODE;
-    txData[3] = index;
-    txData[4] = '>';
-    serial->write(txData, 5);
 }

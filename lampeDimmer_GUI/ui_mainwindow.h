@@ -77,7 +77,7 @@ public:
         horizontalSliderIntensite->setTickInterval(64);
         pushBottonOnOff = new QPushButton(centralwidget);
         pushBottonOnOff->setObjectName(QStringLiteral("pushBottonOnOff"));
-        pushBottonOnOff->setGeometry(QRect(80, 20, 75, 23));
+        pushBottonOnOff->setGeometry(QRect(130, 20, 65, 65));
         lb_0_slider = new QLabel(centralwidget);
         lb_0_slider->setObjectName(QStringLiteral("lb_0_slider"));
         lb_0_slider->setEnabled(true);
@@ -100,7 +100,11 @@ public:
         lb_0_dial->setAlignment(Qt::AlignCenter);
         comboBoxSleep = new QComboBox(centralwidget);
         comboBoxSleep->setObjectName(QStringLiteral("comboBoxSleep"));
-        comboBoxSleep->setGeometry(QRect(20, 50, 91, 22));
+        comboBoxSleep->setGeometry(QRect(20, 50, 98, 18));
+        comboBoxSleep->setStyleSheet(QStringLiteral(""));
+        comboBoxSleep->setSizeAdjustPolicy(QComboBox::AdjustToContentsOnFirstShow);
+        comboBoxSleep->setDuplicatesEnabled(false);
+        comboBoxSleep->setFrame(true);
         MainWindow->setCentralWidget(centralwidget);
 
         retranslateUi(MainWindow);
@@ -112,7 +116,7 @@ public:
     {
         MainWindow->setWindowTitle(QApplication::translate("MainWindow", "Lampe contr\303\264leur", Q_NULLPTR));
         lbIntensiteValue->setText(QApplication::translate("MainWindow", "0", Q_NULLPTR));
-        pushBottonOnOff->setText(QApplication::translate("MainWindow", "ON", Q_NULLPTR));
+        pushBottonOnOff->setText(QString());
         lb_0_slider->setText(QApplication::translate("MainWindow", "0", Q_NULLPTR));
         lb_255_slider->setText(QApplication::translate("MainWindow", "255", Q_NULLPTR));
         lb_255_dial->setText(QApplication::translate("MainWindow", "255", Q_NULLPTR));

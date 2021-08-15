@@ -89,7 +89,6 @@ void outputVeille(uint8_t value);
 /**
 *@brief Fonction qui remplis la structure de donnés avec les paramètres correspondants qui lui sont envoyés en paramètre par la fonction usartRemRxData. Le switch case commence à l'état WAIT qui attend la réception de "<". RXDATA place alors les donnés reçus dans l'union de structure jusqu'à ce que la dernière donnée (ici, la longueur de la trame à été spécifié manuellement à 7 puisque nous n'envoyons pas l'octet qui contient la longueur de la trame. Finalement, VALIDATE s'assure que la trame se termine par ">"
 *@param  data est l'octet reçu par la fonction usartRemRxData
-*@return 1 si la trame comportait un chevron '<' au début de celle-ci, des donnés et se terminait par un chevron '>'. Si elle ne se rend pas jusqu'à la validation elle retourne 0.
 */
 void parseRxData(uint8_t data);
 
