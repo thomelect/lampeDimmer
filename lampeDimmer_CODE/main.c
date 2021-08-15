@@ -119,12 +119,13 @@ int main(void)
 				msFlagAdc = 0;
 				if (valueAdc != adcRead8())
 				{
-					valueAdc = adcRead8();
+					/*valueAdc = adcRead8();*/
 					for (uint8_t i = 0; i < 100; i++) //Une valeur moyenne sur un echantillon de 100 mesures est calculé afin d'éviter d'être entre deux valeurs.
 					{
-						
+						valueAdc += adcRead8();
 						valueOut += adcRead8();
 					}
+					valueAdc /= 100;
 					valueOut /= 100;
 					if (valueOut >= 255) //Si valueOut dépasse 255..
 						valueOut = 255; //valueOut est limité à 255.
