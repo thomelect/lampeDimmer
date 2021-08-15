@@ -126,6 +126,7 @@ public:
          << QApplication::translate("MainWindow", "OFF", Q_NULLPTR)
          << QApplication::translate("MainWindow", "ON", Q_NULLPTR)
          << QApplication::translate("MainWindow", "BREATHING", Q_NULLPTR)
+         << QApplication::translate("MainWindow", "VEILLEUSE", Q_NULLPTR)
         );
     } // retranslateUi
 

@@ -112,14 +112,11 @@ int main(void)
 				parseRxData(usartRemRxData()); //appel de la fonction parseRxData() avec en paramètre la valeur retournée par usartRemRxData().
 		if (SWITCH()) //Si l'interrupteur du potentiomètre est à la position "ON"...
 		{
-// 			if (usartRxAvailable()) //Si un caractère est disponible...
-// 				parseRxData(usartRemRxData()); //appel de la fonction parseRxData() avec en paramètre la valeur retournée par usartRemRxData().
 			if (msFlagAdc)
 			{
 				msFlagAdc = 0;
 				if (valueAdc != adcRead8())
 				{
-					/*valueAdc = adcRead8();*/
 					for (uint8_t i = 0; i < 100; i++) //Une valeur moyenne sur un echantillon de 100 mesures est calculé afin d'éviter d'être entre deux valeurs.
 					{
 						valueAdc += adcRead8();
@@ -228,6 +225,9 @@ void outputVeille(uint8_t value)
 				msFlagFade = 0;
 				valueOut += increment;
 			}
+			break;
+		case 3:
+			valueOut = 1;
 			break;
 	}
 }

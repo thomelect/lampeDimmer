@@ -228,6 +228,11 @@
       <string>BREATHING</string>
      </property>
     </item>
+    <item>
+     <property name="text">
+      <string>VEILLEUSE</string>
+     </property>
+    </item>
    </widget>
   </widget>
  </widget>
