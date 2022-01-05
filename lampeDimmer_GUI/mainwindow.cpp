@@ -31,6 +31,8 @@ MainWindow::MainWindow(QWidget *parent):
     createMenus();
     ui->pushBottonOnOff->setIcon(QIcon(":/images/off.png"));
     ui->pushBottonOnOff->setIconSize(QSize(65, 65));
+
+    ui->statusBar->showMessage(QString::number(000)+'%');
     //Feuille de style des boutons de la de l'interface MainWindow.
     this->setStyleSheet("#pushBottonOnOff {"
                         "background-color: none;"
@@ -80,7 +82,7 @@ void MainWindow::createMenus()
  */
 void MainWindow::execRxCommand()
 {
-    /*
+
     if (rxCommande == VAL_POT)
     {
         //intensite = rxData[0];
@@ -88,7 +90,8 @@ void MainWindow::execRxCommand()
         ui->dialIntensite->setSliderPosition(rxData[0]); //Modifie la position du slider en fonction de la valeur obtenue par le slider.
         ui->lbIntensiteValue->setText(QString::number(rxData[0]));
     }
-    */
+
+    ui->statusBar->showMessage(QString::number(123));
 }
 
 /**
@@ -97,7 +100,6 @@ void MainWindow::execRxCommand()
  */
 void MainWindow::parseRXData(uint8_t data)
 {
-
     switch(rxState)
     {
     default :
@@ -131,6 +133,7 @@ void MainWindow::parseRXData(uint8_t data)
         break;
     case RXDATA:
         rxData[rxDataCnt++] = data;
+        qDebug() << data;
         if(rxDataCnt == rxDataSize)
             rxState = VALIDATE;
         break;
@@ -159,6 +162,7 @@ void MainWindow::readSerialData() {
 
     if(serial->bytesAvailable())
     {
+        //qDebug() << "available";
         tmpRx.resize(serial->bytesAvailable());
         serial->read(tmpRx.data(), tmpRx.size());
         for(uint16_t i = 0 ; i < tmpRx.size() ; i++ )
