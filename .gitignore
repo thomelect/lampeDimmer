@@ -2,6 +2,8 @@
 
 *.one
 /.vs
+/lampeDimmer_CODE/.vs/
+/lampeDimmer_CODE-USB/.vs/
 
 # GUI
 
