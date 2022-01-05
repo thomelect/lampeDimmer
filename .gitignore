@@ -1,6 +1,7 @@
 # Arborescence générale
 
 *.one
+/.vs
 
 # GUI
 
