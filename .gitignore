@@ -1,0 +1,34 @@
+# Arborescence générale
+
+*.one
+
+# GUI
+
+lampeDimmer_GUI/debug/
+lampeDimmer_GUI/release/
+*.stash
+*.rc
+lampeDimmer_GUI/*.pro.user
+lampeDimmer_GUI/Makefile
+lampeDimmer_GUI/Makefile.Debug
+lampeDimmer_GUI/Makefile.Release
+
+# RÉPERTOIRE !USB & USB
+
+*.atsln
+*.bin
+*.componentinfo.xml
+*.eep
+*.elf
+*.hex
+*.lss
+*.map
+*.sym
+
+# CODE - !USB
+
+lampeDimmer_CODE-USB/Debug/
+
+# CODE - USB
+
+lampeDimmer_CODE/Debug/
