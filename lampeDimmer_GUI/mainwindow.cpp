@@ -60,6 +60,7 @@ void MainWindow::boutonManage(int value)
 {
     ui->lbIntensiteValue->setText(QString::number(intensite)); //La valeur du slider est affichée dans le label sous le slider.
     ui->dialIntensite->setSliderPosition(intensite); //Modifie la position du slider en fonction de la valeur obtenue par le slider.
+    ui->horizontalSliderIntensite->setSliderPosition(intensite);
     ui->statusBar->showMessage(QString::number((intensite / 2.55), 'f', 0) + '%');
 
     QPixmap pixmapOff("/images/off.png");
@@ -97,6 +98,7 @@ void MainWindow::execRxCommand(void)
     if (rxCommande == VAL_POT)
     {
         //intensite = rxData[0];
+        valuePot = rxData[0];
         ui->horizontalSliderIntensite->setSliderPosition(rxData[0]); //Modifie la position du slider en fonction de la valeur obtenue par le dial.
         ui->dialIntensite->setSliderPosition(rxData[0]); //Modifie la position du slider en fonction de la valeur obtenue par le slider.
         ui->lbIntensiteValue->setText(QString::number(rxData[0]));
@@ -248,7 +250,10 @@ void MainWindow::on_pushBottonOnOff_clicked(void)
     if (boutonState) //Met la lumière à "ON" et le bouton affiche maintenant "OFF".
     {
         boutonState = !boutonState;
-        intensite = 255;
+//        intensite = 255;
+//        ui->lbIntensiteValue->setText(QString::number(intensite));
+        sendSerialData(GET_ETAT);
+        intensite = valuePot;
         ui->lbIntensiteValue->setText(QString::number(intensite));
     }
     else //Met la lumière à "OFF" et le bouton affiche maintenant "ON".

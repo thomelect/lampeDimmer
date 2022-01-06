@@ -85,6 +85,7 @@ private:
     uint8_t rxData[_MAX_RXDATASIZE_];
     uint16_t rxErrorCommCnt;
     uint8_t seqCnt;
+    uint8_t valuePot;
     bool serialRxIn;
 
     /*/////////////////////-Autres fonctions-/////////////////////*/
