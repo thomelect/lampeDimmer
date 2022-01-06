@@ -58,7 +58,7 @@ volatile uint16_t msCntAdc = 0; //Compteur utilisés pour compter 25 fois un dé
 volatile uint8_t msFlagAdc = 0; //Flags qui est mis à 1 à chaques 25ms pour la mesure de l'ADC.
 volatile uint16_t msCntFade = 0; //Compteur utilisés pour compter 50 fois un délai de 1ms pour le fade de la sortie.
 volatile uint8_t msFlagFade = 0; //Flags qui est mis à 1 à chaques 50ms pour le fade de la sortie.
-uint16_t valueAdc = 0;
+uint16_t valueAdc[2] = {0, 0};
 uint16_t valueOut = 0;
 uint8_t veilleMode = 0;
 int increment = 5;
@@ -121,17 +121,23 @@ int main(void)
 				{
 					for (uint8_t i = 0; i < 100; i++) //Une valeur moyenne sur un echantillon de 100 mesures est calculé afin d'éviter d'être entre deux valeurs.
 					{
-						valueAdc += adcRead8();
-						valueOut += adcRead8();
+						valueAdc[1] += adcRead8();
+						//valueOut += adcRead8();
 					}
-					valueAdc /= 100;
-					valueOut /= 100;
-					if (valueOut >= 255) //Si valueOut dépasse 255..
-						valueOut = 255; //valueOut est limité à 255.
+					valueAdc[1] /= 100;
+					//valueOut /= 100;
+					if (valueAdc[1] >= 255) //Si valueOut dépasse 255..
+						valueAdc[1] = 255; //valueOut est limité à 255.
+					if (valueAdc[1] != valueAdc[0])
+					{
+						valueAdc[0] = valueAdc[1]; //La nouvelle valeur remplace l'ancienne.
+						valueOut = valueAdc[1];
+						sendPotValue(valueOut);
+					}
 				}
 // 				sprintf(msg, "%d\n\r", valueOut);
 // 				usartSendString(msg);
-				sendPotValue(valueOut);
+				//sendPotValue(valueOut);
 			}
 		}
 		else  //Si l'interrupteur du potentiomètre est à la position "OFF"...
