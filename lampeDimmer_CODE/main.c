@@ -18,18 +18,19 @@ Laboratoire qui vise à expérimenter la lecture d'un clavier matriciel. La mét
 #include <avr/interrupt.h>
 #include <stdio.h>
 
-#define OUTPUT_VALUE(val)	(OCR4A = val) //Valeur PWM output R.
-#define OUTPUT_INIT()		DDRC |= (1<<7) //Init output R.
-#define SWITCH_INIT()		PORTB |= (1<<1) //Bouton sur PD1.
-#define SWITCH()			((PINB & (1<<1))==0)
+#define OUTPUT_VALUE(val) (OCR4A = val) //Valeur PWM output R.
+#define OUTPUT_INIT() DDRC |= (1 << 7)	//Init output R.
+#define SWITCH_INIT() PORTB |= (1 << 1) //Bouton sur PD1.
+#define SWITCH() ((PINB & (1 << 1)) == 0)
 
-#define TIMER_CNT_CYCLE_ADC		25 //Nombre de cycle comptés en interruption.
-#define TIMER_CNT_CYCLE_FADE	50 //Nombre de cycle comptés en interruption.
-#define INCREMENT_STEP			1 //Incrément pour le fadding.
-#define _MAX_RXDATASIZE_    16
+#define TIMER_CNT_CYCLE_ADC 25	//Nombre de cycle comptés en interruption.
+#define TIMER_CNT_CYCLE_FADE 50 //Nombre de cycle comptés en interruption.
+#define INCREMENT_STEP 1		//Incrément pour le fadding.
+#define _MAX_RXDATASIZE_ 16
 
 //enum des différents paramètres d'une réception
-enum RX_STATES {
+enum RX_STATES
+{
 	WAIT,
 	RXSIZE,
 	RXCOMMANDE,
@@ -38,12 +39,14 @@ enum RX_STATES {
 };
 
 //enum des différents paramètres d'une transmission
-enum TX_COMMANDES {
+enum TX_COMMANDES
+{
 	VAL_POT
 };
 
 //enum des différents commandes de transmission d'une réception
-enum RX_COMMANDES {
+enum RX_COMMANDES
+{
 	GET_ETAT,
 	SET_VAL,
 	SET_SLEEP_MODE
@@ -54,8 +57,8 @@ enum RX_STATES rxState;
 enum TX_COMMANDES txCommande;
 enum RX_COMMANDES rxCommande;
 
-volatile uint16_t msCntAdc = 0; //Compteur utilisés pour compter 25 fois un délai de 1ms pour la mesure de l'ADC.
-volatile uint8_t msFlagAdc = 0; //Flags qui est mis à 1 à chaques 25ms pour la mesure de l'ADC.
+volatile uint16_t msCntAdc = 0;	 //Compteur utilisés pour compter 25 fois un délai de 1ms pour la mesure de l'ADC.
+volatile uint8_t msFlagAdc = 0;	 //Flags qui est mis à 1 à chaques 25ms pour la mesure de l'ADC.
 volatile uint16_t msCntFade = 0; //Compteur utilisés pour compter 50 fois un délai de 1ms pour le fade de la sortie.
 volatile uint8_t msFlagFade = 0; //Flags qui est mis à 1 à chaques 50ms pour le fade de la sortie.
 uint16_t valueAdcTbl[2] = {0, 0};
@@ -79,6 +82,8 @@ uint8_t seqAuto = 0;
 *@brief Fonction de traitement des données et commandes reçues.
 */
 void execRxCommand(void);
+
+void execTxCommand(void);
 
 /**
 *@brief  Fonction d'initialisation des différents I/O et fonctions.
@@ -108,12 +113,12 @@ void timer4Init(void);
 int main(void)
 {
 	miscInit();
-	
+
 	while (1)
 	{
-				if (usartRxAvailable()) //Si un caractère est disponible...
-				parseRxData(usartRemRxData()); //appel de la fonction parseRxData() avec en paramètre la valeur retournée par usartRemRxData().
-		if (SWITCH()) //Si l'interrupteur du potentiomètre est à la position "ON"...
+		if (usartRxAvailable())			   //Si un caractère est disponible...
+			parseRxData(usartRemRxData()); //appel de la fonction parseRxData() avec en paramètre la valeur retournée par usartRemRxData().
+		if (SWITCH())					   //Si l'interrupteur du potentiomètre est à la position "ON"...
 		{
 			if (msFlagAdc)
 			{
@@ -128,7 +133,7 @@ int main(void)
 					valueAdcTbl[1] /= 100;
 					//valueOut /= 100;
 					if (valueAdcTbl[1] >= 255) //Si valueOut dépasse 255..
-						valueAdcTbl[1] = 255; //valueOut est limité à 255.
+						valueAdcTbl[1] = 255;  //valueOut est limité à 255.
 					if (valueAdcTbl[1] != valueAdcTbl[0])
 					{
 						valueAdcTbl[0] = valueAdcTbl[1]; //La nouvelle valeur remplace l'ancienne.
@@ -137,12 +142,12 @@ int main(void)
 						sendPotValue(valueOut);
 					}
 				}
-// 				sprintf(msg, "%d\n\r", valueOut);
-// 				usartSendString(msg);
+				// 				sprintf(msg, "%d\n\r", valueOut);
+				// 				usartSendString(msg);
 				//sendPotValue(valueOut);
 			}
 		}
-		else  //Si l'interrupteur du potentiomètre est à la position "OFF"...
+		else //Si l'interrupteur du potentiomètre est à la position "OFF"...
 			outputVeille(veilleMode);
 		OUTPUT_VALUE(valueOut);
 	}
@@ -167,37 +172,41 @@ ISR(TIMER0_COMPA_vect)
 	}
 }
 
-void execRxCommand()
+void execRxCommand(void)
 {
 	switch (rxCommande)
 	{
-		case GET_ETAT: //État non utilisé
-			txCommande = 0;
-			break;
-		case SET_VAL: //Réception depuis l'interface de la valeur de la sortie.
-			if (SWITCH()) //Si l'interrupteur du potentiomètre est à la position "ON"...
-				valueOut = rxData[0];
-				sendPotValue(rxData[0]);
-			break;
-		case SET_SLEEP_MODE:
-				veilleMode = rxData[0];
-			break;
+	case GET_ETAT: //État non utilisé
+		txCommande = 0;
+		execTxCommand();
+		break;
+	case SET_VAL:	  //Réception depuis l'interface de la valeur de la sortie.
+		if (SWITCH()) //Si l'interrupteur du potentiomètre est à la position "ON"...
+			valueOut = rxData[0];
+		break;
+	case SET_SLEEP_MODE:
+		veilleMode = rxData[0];
+		break;
 	}
+}
+
+void execTxCommand(void)
+{
 	switch (txCommande)
 	{
-		case VAL_POT:
-			sendPotValue(valueAdc);
-			break;
+	case VAL_POT:
+		sendPotValue(valueAdc);
+		break;
 	}
 }
 
 void miscInit(void)
 {
-	adcInit(); //Appel de la fonction d'initialisation du ADC.
-	timer0Init(); //Initialisation de timer 0.
-	timer4Init(); //Initialisation de timer 4.
+	adcInit();				   //Appel de la fonction d'initialisation du ADC.
+	timer0Init();			   //Initialisation de timer 0.
+	timer4Init();			   //Initialisation de timer 4.
 	usartInit(1000000, F_CPU); //Initialisation du USART à 1Mbps.
-	
+
 	OUTPUT_INIT();
 	SWITCH_INIT();
 }
@@ -206,30 +215,30 @@ void outputVeille(uint8_t value)
 {
 	switch (value)
 	{
-		case 0:
-			valueOut = 0;
-			break;
-		case 1:
-			valueOut = 255;
-			break;
-		case 2:
-			if (valueOut <= 1) //Lorsque oc4aValue à atteint son minimum.
-			{
-				increment = INCREMENT_STEP;
-			}
-			if (valueOut >= 255) //Lorsque oc4aValue à atteint son maximum.
-			{
-				increment = -INCREMENT_STEP;
-			}
-			if (msFlagFade)
-			{
-				msFlagFade = 0;
-				valueOut += increment;
-			}
-			break;
-		case 3:
-			valueOut = 1;
-			break;
+	case 0:
+		valueOut = 0;
+		break;
+	case 1:
+		valueOut = 255;
+		break;
+	case 2:
+		if (valueOut <= 1) //Lorsque oc4aValue à atteint son minimum.
+		{
+			increment = INCREMENT_STEP;
+		}
+		if (valueOut >= 255) //Lorsque oc4aValue à atteint son maximum.
+		{
+			increment = -INCREMENT_STEP;
+		}
+		if (msFlagFade)
+		{
+			msFlagFade = 0;
+			valueOut += increment;
+		}
+		break;
+	case 3:
+		valueOut = 1;
+		break;
 	}
 }
 
@@ -240,47 +249,47 @@ void outputVeille(uint8_t value)
 void parseRxData(uint8_t data)
 {
 	//switch case des différents paramètres de la trame de réception
-	switch(rxState)
+	switch (rxState)
 	{
-		//confirmation que la trame débute par '<'
-		default :
-			if(data == '<')
-			{
-				rxState = RXSIZE;
-				rxDataCnt = 0;
-			}
-			break;
-		//////////////////////////////////////////////////////////////////////////
-		case RXSIZE:
-			rxDataSize = data;
-			if(rxDataSize >= _MAX_RXDATASIZE_)
+	//confirmation que la trame débute par '<'
+	default:
+		if (data == '<')
+		{
+			rxState = RXSIZE;
+			rxDataCnt = 0;
+		}
+		break;
+	//////////////////////////////////////////////////////////////////////////
+	case RXSIZE:
+		rxDataSize = data;
+		if (rxDataSize >= _MAX_RXDATASIZE_)
 			rxState = WAIT;
-			else
+		else
 			rxState = RXCOMMANDE;
-			break;
-		//////////////////////////////////////////////////////////////////////////
-		case RXCOMMANDE:
-			rxCommande = data;
-			if(rxDataSize)
+		break;
+	//////////////////////////////////////////////////////////////////////////
+	case RXCOMMANDE:
+		rxCommande = data;
+		if (rxDataSize)
 			rxState = RXDATA;
-			else
+		else
 			rxState = VALIDATE;
-			break;
-		//////////////////////////////////////////////////////////////////////////
-		case RXDATA:
-			rxData[rxDataCnt++] = data;
-			if(rxDataCnt == rxDataSize)
+		break;
+	//////////////////////////////////////////////////////////////////////////
+	case RXDATA:
+		rxData[rxDataCnt++] = data;
+		if (rxDataCnt == rxDataSize)
 			rxState = VALIDATE;
-			break;
-		//////////////////////////////////////////////////////////////////////////
-		//confirmation que la trame se termine par '>'
-		case VALIDATE :
-			rxState = WAIT;
-			if(data == '>')
-			execRxCommand();//si oui la fonction execRxCommand() est appelée
-			else
-			rxErrorCommCnt++;// sinon le nombre d'erreur augmente
-			break;
+		break;
+	//////////////////////////////////////////////////////////////////////////
+	//confirmation que la trame se termine par '>'
+	case VALIDATE:
+		rxState = WAIT;
+		if (data == '>')
+			execRxCommand(); //si oui la fonction execRxCommand() est appelée
+		else
+			rxErrorCommCnt++; // sinon le nombre d'erreur augmente
+		break;
 	}
 }
 
@@ -303,11 +312,11 @@ void timer0Init(void)
 	//TCCR0A : COM0A1 COM0A0 COM0B1 COM0B0 – – WGM01 WGM00
 	//TCCR0B : FOC0A FOC0B – – WGM02 CS02 CS01 CS00
 	//TIMSK0 : – – – – – OCIE0B OCIE0A TOIE0
-	uint8_t top = 250; //Valeur de OCR0A.
+	uint8_t top = 250;	 //Valeur de OCR0A.
 	TCCR0A = 0b00000010; //Mode CTC.
 	TCCR0B = 0b00000011; //Prescaler de 64.
 	TIMSK0 = 0b00000010; //Output compare match A interrupt enable.
-	OCR0A = top-1; //62.5ns * 64 * 250 = 1ms.
+	OCR0A = top - 1;	 //62.5ns * 64 * 250 = 1ms.
 	sei();
 }
 
@@ -320,8 +329,8 @@ void timer4Init(void)
 	//TCCR4E: TLOCK4 ENHC4 OC4OE5 OC4OE4 OC4OE3 OC4OE2 OC4OE1 OC4OE0
 	TCCR4A = 0b10000010; //PWM output OC4A.
 	TCCR4B = 0b00000100; //Prescaler de 4.
-	OCR4C = 255-1; //62.5ns * 4 * 255 = 127.5us.
-	OUTPUT_VALUE(0); //Valeur de la sortie.
+	OCR4C = 255 - 1;	 //62.5ns * 4 * 255 = 127.5us.
+	OUTPUT_VALUE(0);	 //Valeur de la sortie.
 }
 
 /*
