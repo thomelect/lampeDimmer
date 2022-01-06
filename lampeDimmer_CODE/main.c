@@ -41,7 +41,8 @@ enum RX_STATES
 //enum des différents paramètres d'une transmission
 enum TX_COMMANDES
 {
-	VAL_POT
+	VAL_POT,
+	VAL_SLEEP
 };
 
 //enum des différents commandes de transmission d'une réception
@@ -148,7 +149,11 @@ int main(void)
 			}
 		}
 		else //Si l'interrupteur du potentiomètre est à la position "OFF"...
+		{
 			outputVeille(veilleMode);
+			txCommande = VAL_SLEEP;
+			execTxCommand();
+		}
 		OUTPUT_VALUE(valueOut);
 	}
 }
@@ -196,6 +201,9 @@ void execTxCommand(void)
 	{
 	case VAL_POT:
 		sendPotValue(valueAdc);
+		break;
+	case VAL_SLEEP:
+		sendPotValue(valueOut);
 		break;
 	}
 }
