@@ -25,6 +25,8 @@ MainWindow::MainWindow(QWidget *parent):
     timer->start(100); // vous pouvez réduire l'interval durant les tests.
     */
 
+    serialRxIn = false;
+
     ui->setupUi(this);
     serial = new QSerialPort(this);
     connect(serial, SIGNAL(readyRead()), this, SLOT(readSerialData()));
@@ -51,6 +53,10 @@ MainWindow::~MainWindow()
 
 void MainWindow::boutonManage(int value)
 {
+    ui->lbIntensiteValue->setText(QString::number(intensite)); //La valeur du slider est affichée dans le label sous le slider.
+    ui->dialIntensite->setSliderPosition(intensite); //Modifie la position du slider en fonction de la valeur obtenue par le slider.
+    ui->statusBar->showMessage(QString::number((intensite / 2.55), 'f', 0) + '%');
+
     QPixmap pixmapOff("/images/off.png");
     QIcon ButtonIcon(pixmapOff);
     if (value)
@@ -89,9 +95,9 @@ void MainWindow::execRxCommand()
         ui->horizontalSliderIntensite->setSliderPosition(rxData[0]); //Modifie la position du slider en fonction de la valeur obtenue par le dial.
         ui->dialIntensite->setSliderPosition(rxData[0]); //Modifie la position du slider en fonction de la valeur obtenue par le slider.
         ui->lbIntensiteValue->setText(QString::number(rxData[0]));
+        serialRxIn = false;
     }
 
-    ui->statusBar->showMessage(QString::number(123));
 }
 
 /**
@@ -141,7 +147,7 @@ void MainWindow::parseRXData(uint8_t data)
         rxState = WAIT;
         if(data == '>')
         {
-
+            serialRxIn = true;
             execRxCommand();
         }
         else
@@ -190,13 +196,13 @@ void MainWindow::sendGetState()
 /**
 * @brief Fonction de lecture du'envoie sur le port série..
 */
-void MainWindow::sendSerialData()
+void MainWindow::sendSerialData(uint8_t cmd, uint8_t data)
 {
     char txData[5];
     txData[0] = '<';
     txData[1] = 1;
-    txData[2] = SEND_VAL;
-    txData[3] = intensite;
+    txData[2] = cmd;
+    txData[3] = data;
     txData[4] = '>';
     serial->write(txData, 5);
 }
@@ -212,38 +218,30 @@ void MainWindow::setupSerial()
 
 void MainWindow::on_comboBoxSleep_activated(int index)
 {
-    char txData[5];
-    txData[0] = '<';
-    txData[1] = 1;
-    txData[2] = SEND_SLEEP_MODE;
-    txData[3] = index;
-    txData[4] = '>';
-    serial->write(txData, 5);
+
+    sendSerialData(SEND_SLEEP_MODE, intensite);
 }
 
 void MainWindow::on_dialIntensite_valueChanged(void)
 {
     intensite = ui->dialIntensite->value();
-    ui->lbIntensiteValue->setText(QString::number(intensite));
-    ui->horizontalSliderIntensite->setSliderPosition(intensite); //Modifie la position du slider en fonction de la valeur obtenue par le dial.
     boutonManage(intensite);
-    sendSerialData();
+    if (!serialRxIn)
+        sendSerialData(SEND_VAL, intensite);
     qDebug() << intensite;
 }
 
 void MainWindow::on_horizontalSliderIntensite_valueChanged(void)
 {
     intensite = ui->horizontalSliderIntensite->value(); //On récupère la valeur du slider.
-    ui->lbIntensiteValue->setText(QString::number(intensite)); //La valeur du slider est affichée dans le label sous le slider.
-    ui->dialIntensite->setSliderPosition(intensite); //Modifie la position du slider en fonction de la valeur obtenue par le slider.
     boutonManage(intensite);
-    sendSerialData();  //Appel de la fonction sendData();
+    if (!serialRxIn)
+        sendSerialData(SEND_VAL, intensite);
     qDebug() << intensite;
 }
 
 void MainWindow::on_pushBottonOnOff_clicked()
 {
-    //boutonState = !boutonState;
     if (boutonState) //Met la lumière à "ON" et le bouton affiche maintenant "OFF".
     {
         boutonState = !boutonState;
@@ -256,7 +254,7 @@ void MainWindow::on_pushBottonOnOff_clicked()
         intensite = 0;
         ui->lbIntensiteValue->setText(QString::number(intensite));
     }
-    ui->horizontalSliderIntensite->setSliderPosition(intensite); //Modifie la position du slider.
-    ui->dialIntensite->setSliderPosition(intensite); //Modifie la position du dial.
-    sendSerialData();
+    boutonManage(intensite);
+    if (!serialRxIn)
+        sendSerialData(SEND_VAL, intensite);
 }

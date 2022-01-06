@@ -45,7 +45,7 @@ public:
         if (MainWindow->objectName().isEmpty())
             MainWindow->setObjectName(QStringLiteral("MainWindow"));
         MainWindow->setEnabled(true);
-        MainWindow->resize(295, 183);
+        MainWindow->resize(295, 173);
         MainWindow->setMaximumSize(QSize(300, 320));
         MainWindow->setDocumentMode(false);
         MainWindow->setTabShape(QTabWidget::Rounded);

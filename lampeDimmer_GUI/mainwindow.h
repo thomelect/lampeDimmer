@@ -54,7 +54,7 @@ private:
     /**
     * @brief  Fonction d'envoie sur le port série..
     */
-    void sendSerialData();
+    void sendSerialData(uint8_t cmd, uint8_t data);
 
     /*///////////////-Protocole de communication-////////////////*/
 
@@ -83,6 +83,7 @@ private:
     uint8_t rxData[_MAX_RXDATASIZE_];
     uint16_t rxErrorCommCnt;
     uint8_t seqCnt;
+    bool serialRxIn;
 
     /*/////////////////////-Autres fonctions-/////////////////////*/
 
