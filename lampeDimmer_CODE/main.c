@@ -58,8 +58,9 @@ volatile uint16_t msCntAdc = 0; //Compteur utilisés pour compter 25 fois un dé
 volatile uint8_t msFlagAdc = 0; //Flags qui est mis à 1 à chaques 25ms pour la mesure de l'ADC.
 volatile uint16_t msCntFade = 0; //Compteur utilisés pour compter 50 fois un délai de 1ms pour le fade de la sortie.
 volatile uint8_t msFlagFade = 0; //Flags qui est mis à 1 à chaques 50ms pour le fade de la sortie.
-uint16_t valueAdc[2] = {0, 0};
+uint16_t valueAdcTbl[2] = {0, 0};
 uint16_t valueOut = 0;
+uint16_t valueAdc = 0;
 uint8_t veilleMode = 0;
 int increment = 5;
 char msg[5];
@@ -117,21 +118,22 @@ int main(void)
 			if (msFlagAdc)
 			{
 				msFlagAdc = 0;
-				if (valueAdc != adcRead8())
+				if (valueAdcTbl != adcRead8())
 				{
 					for (uint8_t i = 0; i < 100; i++) //Une valeur moyenne sur un echantillon de 100 mesures est calculé afin d'éviter d'être entre deux valeurs.
 					{
-						valueAdc[1] += adcRead8();
+						valueAdcTbl[1] += adcRead8();
 						//valueOut += adcRead8();
 					}
-					valueAdc[1] /= 100;
+					valueAdcTbl[1] /= 100;
 					//valueOut /= 100;
-					if (valueAdc[1] >= 255) //Si valueOut dépasse 255..
-						valueAdc[1] = 255; //valueOut est limité à 255.
-					if (valueAdc[1] != valueAdc[0])
+					if (valueAdcTbl[1] >= 255) //Si valueOut dépasse 255..
+						valueAdcTbl[1] = 255; //valueOut est limité à 255.
+					if (valueAdcTbl[1] != valueAdcTbl[0])
 					{
-						valueAdc[0] = valueAdc[1]; //La nouvelle valeur remplace l'ancienne.
-						valueOut = valueAdc[1];
+						valueAdcTbl[0] = valueAdcTbl[1]; //La nouvelle valeur remplace l'ancienne.
+						valueOut = valueAdcTbl[1];
+						valueAdc = valueAdcTbl[1];
 						sendPotValue(valueOut);
 					}
 				}
@@ -175,6 +177,7 @@ void execRxCommand()
 		case SET_VAL: //Réception depuis l'interface de la valeur de la sortie.
 			if (SWITCH()) //Si l'interrupteur du potentiomètre est à la position "ON"...
 				valueOut = rxData[0];
+				sendPotValue(rxData[0]);
 			break;
 		case SET_SLEEP_MODE:
 				veilleMode = rxData[0];
@@ -183,7 +186,7 @@ void execRxCommand()
 	switch (txCommande)
 	{
 		case VAL_POT:
-			sendPotValue(valueOut);
+			sendPotValue(valueAdc);
 			break;
 	}
 }
