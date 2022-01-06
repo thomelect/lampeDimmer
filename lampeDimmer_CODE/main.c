@@ -92,6 +92,8 @@ void outputVeille(uint8_t value);
 */
 void parseRxData(uint8_t data);
 
+void sendPotValue(uint8_t data);
+
 /**
 *@brief  Fonction d'initialisation du Timer #0.
 */
@@ -127,8 +129,9 @@ int main(void)
 					if (valueOut >= 255) //Si valueOut dépasse 255..
 						valueOut = 255; //valueOut est limité à 255.
 				}
-				sprintf(msg, "%d\n\r", valueOut);
-				usartSendString(msg);
+// 				sprintf(msg, "%d\n\r", valueOut);
+// 				usartSendString(msg);
+				sendPotValue(valueOut);
 			}
 		}
 		else  //Si l'interrupteur du potentiomètre est à la position "OFF"...
@@ -171,23 +174,12 @@ void execRxCommand()
 				veilleMode = rxData[0];
 			break;
 	}
-	/*
 	switch (txCommande)
 	{
-		char txData[5];
 		case VAL_POT:
-			txData[0] = '<';
-			txData[1] = 1;
-			txData[2] = VAL_POT;
-			txData[3] = valueSend;
-			txData[4] = '>';
-			for (int x = 0; x <= 4; x++)
-			{
-				usartSendByte(txData[x]);
-			}
+			sendPotValue(valueOut);
 			break;
 	}
-	*/
 }
 
 void miscInit(void)
@@ -239,7 +231,7 @@ void outputVeille(uint8_t value)
 void parseRxData(uint8_t data)
 {
 	//switch case des différents paramètres de la trame de réception
-	switch (rxState)
+	switch(rxState)
 	{
 		//confirmation que la trame débute par '<'
 		default :
@@ -253,35 +245,47 @@ void parseRxData(uint8_t data)
 		case RXSIZE:
 			rxDataSize = data;
 			if(rxDataSize >= _MAX_RXDATASIZE_)
-				rxState = WAIT;
+			rxState = WAIT;
 			else
-				rxState = RXCOMMANDE;
+			rxState = RXCOMMANDE;
 			break;
 		//////////////////////////////////////////////////////////////////////////
-		//Traitement de la commande.
 		case RXCOMMANDE:
 			rxCommande = data;
 			if(rxDataSize)
-				rxState = RXDATA;
+			rxState = RXDATA;
 			else
-				rxState = VALIDATE;
+			rxState = VALIDATE;
 			break;
 		//////////////////////////////////////////////////////////////////////////
-		//Traitement de la donnée.
 		case RXDATA:
 			rxData[rxDataCnt++] = data;
 			if(rxDataCnt == rxDataSize)
-				rxState = VALIDATE;
+			rxState = VALIDATE;
 			break;
 		//////////////////////////////////////////////////////////////////////////
 		//confirmation que la trame se termine par '>'
 		case VALIDATE :
 			rxState = WAIT;
 			if(data == '>')
-				execRxCommand();//si oui la fonction execRxCommand() est appelée
+			execRxCommand();//si oui la fonction execRxCommand() est appelée
 			else
-				rxErrorCommCnt++;// sinon le nombre d'erreur augmente
+			rxErrorCommCnt++;// sinon le nombre d'erreur augmente
 			break;
+	}
+}
+
+void sendPotValue(uint8_t data)
+{
+	char txData[5];
+	txData[0] = '<';
+	txData[1] = 1;
+	txData[2] = VAL_POT;
+	txData[3] = data;
+	txData[4] = '>';
+	for (int x = 0; x <= 4; x++)
+	{
+		usartSendByte(txData[x]);
 	}
 }
 
@@ -316,3 +320,7 @@ void timer4Init(void)
 60 127 62
 60 255 62
 */
+
+/*	<	SIZE	CMD		DATA	>	*/
+
+//GET ÉTAT	<
