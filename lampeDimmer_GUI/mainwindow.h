@@ -28,7 +28,7 @@ private slots:
     /**
     * @brief  Fonction de lecture du port série..
     */
-    void readSerialData();
+    void readSerialData(void);
 
     void on_comboBoxSleep_activated(int index);
 
@@ -36,17 +36,19 @@ private slots:
 
     void on_horizontalSliderIntensite_valueChanged(void);
 
-    void on_pushBottonOnOff_clicked();
+    void on_pushBottonOnOff_clicked(void);
+
+    void on_pushButton_clicked();
 
 private:
 
     /*//////////////////-Communication série-///////////////////*/
 
-    void createMenus();
+    void createMenus(void);
     QMenu *toolsMenu;
     QAction *setupSerialAct;
 
-    void setupSerial();
+    void setupSerial(void);
     QSerialPort *serial;
     QTimer *timer;
     Ui::MainWindow *ui;
@@ -54,14 +56,14 @@ private:
     /**
     * @brief  Fonction d'envoie sur le port série..
     */
-    void sendSerialData(uint8_t cmd, uint8_t data);
+    void sendSerialData(uint8_t cmd, uint8_t data = 0);
 
     /*///////////////-Protocole de communication-////////////////*/
 
     /**
     *@brief  Fonction de traitement des données et commandes reçues.
     */
-    void execRxCommand();
+    void execRxCommand(void);
 
     /**
     *@brief  Fonction qui remplis la structure de donnés avec les paramètres correspondants qui lui sont envoyés en paramètre par la fonction usartRemRxData. Le switch case commence à l'état WAIT qui attend la réception de "<". RXDATA place alors les donnés reçus dans l'union de structure jusqu'à ce que la dernière donnée (ici, la longueur de la trame à été spécifié manuellement à 7 puisque nous n'envoyons pas l'octet qui contient la longueur de la trame. Finalement, VALIDATE s'assure que la trame se termine par ">"

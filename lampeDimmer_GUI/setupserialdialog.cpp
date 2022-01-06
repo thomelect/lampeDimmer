@@ -61,7 +61,7 @@ void SetupSerialDialog::on_btConnection_clicked()
                             && serial->setStopBits(QSerialPort::OneStop)
                             && serial->setFlowControl(QSerialPort::NoFlowControl))
                     {
-                        qDebug() << "Ouvert " << portName;
+//                        qDebug() << "Ouvert " << portName;
                         ui->btConnection->setEnabled(false);
                         ui->btActualiser->setText("Déconnecter");
                     }

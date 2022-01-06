@@ -24,6 +24,8 @@ MainWindow::MainWindow(QWidget *parent):
     connect(timer, SIGNAL(timeout()), this, SLOT(sendGetState()));
     timer->start(100); // vous pouvez réduire l'interval durant les tests.
     */
+    //sendSerialData(GET_ETAT, 0);
+
 
     serialRxIn = false;
 
@@ -33,8 +35,11 @@ MainWindow::MainWindow(QWidget *parent):
     createMenus();
     ui->pushBottonOnOff->setIcon(QIcon(":/images/off.png"));
     ui->pushBottonOnOff->setIconSize(QSize(65, 65));
-
-    ui->statusBar->showMessage(QString::number(000)+'%');
+    if (serial->isOpen())
+    {
+        qDebug() << "open";
+        //sendSerialData(GET_ETAT);
+    }
     //Feuille de style des boutons de la de l'interface MainWindow.
     this->setStyleSheet("#pushBottonOnOff {"
                         "background-color: none;"
@@ -75,7 +80,7 @@ void MainWindow::boutonManage(int value)
     }
 }
 
-void MainWindow::createMenus()
+void MainWindow::createMenus(void)
 {
     setupSerialAct = new QAction(tr("&Configuration du port série"), this);
     connect(setupSerialAct, &QAction::triggered, this, &MainWindow::setupSerial);
@@ -86,7 +91,7 @@ void MainWindow::createMenus()
 /**
  * @brief Traitement et exécution d'une commande reçue
  */
-void MainWindow::execRxCommand()
+void MainWindow::execRxCommand(void)
 {
 
     if (rxCommande == VAL_POT)
@@ -162,7 +167,7 @@ void MainWindow::parseRXData(uint8_t data)
 /**
 * @brief Fonction de lecture du port série..
 */
-void MainWindow::readSerialData() {
+void MainWindow::readSerialData(void) {
 
     QByteArray tmpRx;
 
@@ -177,37 +182,35 @@ void MainWindow::readSerialData() {
 }
 
 /**
- * @brief Envoi la commande GET_STATE. Déclenchée par le timer.
- */
-/*
-void MainWindow::sendGetState()
-{
-    if(serial->isOpen())
-    {
-        char txData[4];
-        txData[0] = '<';
-        txData[1] = 0;
-        txData[2] = GET_ETAT;
-        txData[3] = '>';
-        serial->write(txData,4);
-    }
-*/
-
-/**
 * @brief Fonction de lecture du'envoie sur le port série..
 */
 void MainWindow::sendSerialData(uint8_t cmd, uint8_t data)
 {
-    char txData[5];
-    txData[0] = '<';
-    txData[1] = 1;
-    txData[2] = cmd;
-    txData[3] = data;
-    txData[4] = '>';
-    serial->write(txData, 5);
+    if(serial->isOpen())
+    {
+        if (cmd == GET_ETAT)
+        {
+            char txData[4];
+            txData[0] = '<';
+            txData[1] = 0;
+            txData[2] = GET_ETAT;
+            txData[3] = '>';
+            serial->write(txData,4);
+        }
+        else
+        {
+            char txData[5];
+            txData[0] = '<';
+            txData[1] = 1;
+            txData[2] = cmd;
+            txData[3] = data;
+            txData[4] = '>';
+            serial->write(txData, 5);
+        }
+    }
 }
 
-void MainWindow::setupSerial()
+void MainWindow::setupSerial(void)
 {
     SetupSerialDialog setupDia(serial);
     setupDia.setWindowTitle("Configuration du port série");
@@ -219,7 +222,7 @@ void MainWindow::setupSerial()
 void MainWindow::on_comboBoxSleep_activated(int index)
 {
 
-    sendSerialData(SEND_SLEEP_MODE, intensite);
+    sendSerialData(SEND_SLEEP_MODE, index);
 }
 
 void MainWindow::on_dialIntensite_valueChanged(void)
@@ -240,7 +243,7 @@ void MainWindow::on_horizontalSliderIntensite_valueChanged(void)
     qDebug() << intensite;
 }
 
-void MainWindow::on_pushBottonOnOff_clicked()
+void MainWindow::on_pushBottonOnOff_clicked(void)
 {
     if (boutonState) //Met la lumière à "ON" et le bouton affiche maintenant "OFF".
     {
@@ -257,4 +260,9 @@ void MainWindow::on_pushBottonOnOff_clicked()
     boutonManage(intensite);
     if (!serialRxIn)
         sendSerialData(SEND_VAL, intensite);
+}
+
+void MainWindow::on_pushButton_clicked()
+{
+    sendSerialData(GET_ETAT);
 }
