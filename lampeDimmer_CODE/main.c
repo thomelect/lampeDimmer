@@ -81,35 +81,38 @@ uint8_t seqAuto = 0;
 //Prototypes de fonctions.
 
 /**
-*@brief Fonction de traitement des données et commandes reçues.
-*/
+ * @brief  Fonction de traitement des données et commandes reçues.
+ */
 void execRxCommand(void);
 
+/**
+ * @brief  Fonction de traitement pour l'envoie des donnés.
+ */
 void execTxCommand(void);
 
 /**
-*@brief  Fonction d'initialisation des différents I/O et fonctions.
+ * @brief  Fonction d'initialisation des différents I/O et fonctions.
 */
 void miscInit(void);
 
 void outputVeille(uint8_t value);
 
 /**
-*@brief Fonction qui remplis la structure de donnés avec les paramètres correspondants qui lui sont envoyés en paramètre par la fonction usartRemRxData. Le switch case commence à l'état WAIT qui attend la réception de "<". RXDATA place alors les donnés reçus dans l'union de structure jusqu'à ce que la dernière donnée (ici, la longueur de la trame à été spécifié manuellement à 7 puisque nous n'envoyons pas l'octet qui contient la longueur de la trame. Finalement, VALIDATE s'assure que la trame se termine par ">"
-*@param  data est l'octet reçu par la fonction usartRemRxData
-*/
+ * @brief		Fonction qui remplis la structure de donnés avec les paramètres correspondants qui lui sont envoyés en paramètre par la fonction usartRemRxData. Le switch case commence à l'état WAIT qui attend la réception de "<". RXDATA place alors les donnés reçus dans l'union de structure jusqu'à ce que la dernière donnée (ici, la longueur de la trame à été spécifié manuellement à 7 puisque nous n'envoyons pas l'octet qui contient la longueur de la trame. Finalement, VALIDATE s'assure que la trame se termine par ">"
+ * @param  data Octet reçu par la fonction usartRemRxData
+ */
 void parseRxData(uint8_t data);
 
 void sendPotValue(uint8_t data);
 
 /**
-*@brief  Fonction d'initialisation du Timer #0.
-*/
+ * @brief  Fonction d'initialisation du Timer #0.
+ */
 void timer0Init(void);
 
 /**
-*@brief  Fonction d'initialisation du timer #4 utilisé pour le PWM.
-*/
+ * @brief  Fonction d'initialisation du timer #4 utilisé pour le PWM.
+ */
 void timer4Init(void);
 
 int main(void)
@@ -125,15 +128,11 @@ int main(void)
 			if (msFlagAdc)
 			{
 				msFlagAdc = 0;
-				if (valueAdcTbl != adcRead8())
-				{
 					for (uint8_t i = 0; i < 100; i++) //Une valeur moyenne sur un echantillon de 100 mesures est calculé afin d'éviter d'être entre deux valeurs.
 					{
 						valueAdcTbl[1] += adcRead8();
-						//valueOut += adcRead8();
 					}
 					valueAdcTbl[1] /= 100;
-					//valueOut /= 100;
 					if (valueAdcTbl[1] >= 255) //Si valueOut dépasse 255..
 						valueAdcTbl[1] = 255;  //valueOut est limité à 255.
 					if (valueAdcTbl[1] != valueAdcTbl[0])
@@ -143,10 +142,6 @@ int main(void)
 						valueAdc = valueAdcTbl[1];
 						sendPotValue(valueOut);
 					}
-				}
-				// 				sprintf(msg, "%d\n\r", valueOut);
-				// 				usartSendString(msg);
-				//sendPotValue(valueOut);
 			}
 		}
 		else //Si l'interrupteur du potentiomètre est à la position "OFF"...
@@ -256,9 +251,9 @@ void outputVeille(uint8_t value)
 }
 
 /**
-* @brief Sépare les données reçues sur le port série.
-* @param data la donnée à traiter
-*/
+ * @brief		Fonction qui sépare les données reçues sur le port série.
+ * @param data  Donnée à traiter.
+ */
 void parseRxData(uint8_t data)
 {
 	//switch case des différents paramètres de la trame de réception
