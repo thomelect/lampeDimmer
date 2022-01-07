@@ -41,17 +41,19 @@ enum RX_STATES
 //enum des différents paramètres d'une transmission
 enum TX_COMMANDES
 {
+	VAL_ACTU,
 	VAL_POT,
-	VAL_ACTU
+	VAL_SLEEP_MODE
 };
 
 //enum des différents commandes de transmission d'une réception
 enum RX_COMMANDES
 {
+	GET_VAL_ACTU,
 	GET_VAL_POT,
-	SET_VAL,
+	GET_SLEEP_MODE,
 	SET_SLEEP_MODE,
-	GET_VAL_ACTU
+	SET_VAL
 };
 
 //déclaration des enums
@@ -66,7 +68,7 @@ volatile uint8_t msFlagFade = 0; //Flags qui est mis à 1 à chaques 50ms pour l
 uint16_t valueAdcTbl[2] = {0, 0};
 uint16_t valueOut = 0;
 uint16_t valueAdc = 0;
-uint8_t veilleMode = 0;
+uint8_t valueVeilleMode = 0;
 int increment = 5;
 char msg[5];
 
@@ -147,7 +149,7 @@ int main(void)
 		}
 		else //Si l'interrupteur du potentiomètre est à la position "OFF"...
 		{
-			outputVeille(veilleMode);
+			outputVeille(valueVeilleMode);
 			txCommande = VAL_ACTU;
 			execTxCommand();
 		}
@@ -178,21 +180,24 @@ void execRxCommand(void)
 {
 	switch (rxCommande)
 	{
-	case GET_VAL_POT: //État non utilisé
-		txCommande = VAL_POT;
-		execTxCommand();
-		break;
-	case SET_VAL:	  //Réception depuis l'interface de la valeur de la sortie.
-		if (SWITCH()) //Si l'interrupteur du potentiomètre est à la position "ON"...
-			valueOut = rxData[0];
-		break;
-	case SET_SLEEP_MODE:
-		veilleMode = rxData[0];
-		break;
 	case GET_VAL_ACTU:
 		txCommande = VAL_ACTU;
 		execTxCommand();
 		break;
+	case GET_VAL_POT: //État non utilisé
+		txCommande = VAL_POT;
+		execTxCommand();
+		break;
+	case GET_SLEEP_MODE:
+		txCommande = VAL_SLEEP_MODE;
+		break;
+	case SET_SLEEP_MODE:
+		valueVeilleMode = rxData[0];
+		break;
+	case SET_VAL:	  //Réception depuis l'interface de la valeur de la sortie.
+		if (SWITCH()) //Si l'interrupteur du potentiomètre est à la position "ON"...
+			valueOut = rxData[0];
+		break;	
 	}
 }
 
@@ -201,6 +206,17 @@ void execTxCommand(void)
 	char txData[5];
 	switch (txCommande)
 	{
+	case VAL_ACTU:
+		txData[0] = '<';
+		txData[1] = 1;
+		txData[2] = VAL_POT;
+		txData[3] = valueOut;
+		txData[4] = '>';
+		for (int x = 0; x <= 4; x++)
+		{
+			usartSendByte(txData[x]);
+		}
+		break;
 	case VAL_POT:
 		txData[0] = '<';
 		txData[1] = 1;
@@ -212,11 +228,11 @@ void execTxCommand(void)
 			usartSendByte(txData[x]);
 		}
 		break;
-	case VAL_ACTU:
+	case VAL_SLEEP_MODE:
 		txData[0] = '<';
 		txData[1] = 1;
-		txData[2] = VAL_POT;
-		txData[3] = valueOut;
+		txData[2] = VAL_SLEEP_MODE;
+		txData[3] = valueVeilleMode;
 		txData[4] = '>';
 		for (int x = 0; x <= 4; x++)
 		{
