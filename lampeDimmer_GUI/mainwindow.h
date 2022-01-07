@@ -13,6 +13,7 @@
 #include "setupserialdialog.h"
 
 #define _MAX_RXDATASIZE_ 16
+
 QT_BEGIN_NAMESPACE
 namespace Ui
 {
@@ -105,6 +106,8 @@ private:
     void createMenus(void);
     QMenu *toolsMenu;
     QAction *setupSerialAct;
+    QAction *setupLumiere;
+    QAction *setupInterface;
 
     /**
      * @brief  Fonction utilisée afin de gérer la fenêtre de connexion.

@@ -79,6 +79,14 @@ void MainWindow::createMenus(void)
     connect(setupSerialAct, &QAction::triggered, this, &MainWindow::setupSerial);
     toolsMenu = menuBar()->addMenu(tr("&Outils"));
     toolsMenu->addAction(setupSerialAct);
+
+    setupLumiere = new QAction(tr("&Paramètres Lumière"), this);
+    setupInterface = new QAction(tr("&Paramètres d'interface"), this);
+    //connect()
+    //connect(modeVeille, &QAction::triggered, this, &MainWindow::setupSerial);
+    toolsMenu = menuBar()->addMenu(tr("&Configuration"));
+    toolsMenu->addAction(setupLumiere);
+    toolsMenu->addAction(setupInterface);
 }
 
 /**
