@@ -7,10 +7,10 @@
 
 #ifndef MAINWINDOW_H
 #define MAINWINDOW_H
+#include "setupinterface.h"
 #include <QPixmap>
 #include <QMainWindow>
 #include <QtSerialPort/QSerialPort>
-#include "setupserialdialog.h"
 
 #define _MAX_RXDATASIZE_ 16
 
@@ -57,7 +57,8 @@ private:
     uint8_t intensite;
     bool serialRxIn;
     bool boutonState;
-
+    SetupInterface *statusSetupInterface;
+    SetupInterface::settingInterface_s partageSettingInterface;
     QPixmap *pixmapOff();
     QIcon *ButtonIcon();
 
@@ -101,13 +102,13 @@ private slots:
 private:
     /*//////////////////-Communication série-///////////////////*/
     /**
-     * @brief  Fonction utilisée afin de créer le menu "Outils".
+     * @brief  Fonction utilisée afin de créer les menus.
      */
     void createMenus(void);
     QMenu *toolsMenu;
     QAction *setupSerialAct;
-    QAction *setupLumiere;
-    QAction *setupInterface;
+    QAction *setupInterfaceAct;
+    QAction *setupLumiereAct;
 
     /**
      * @brief  Fonction utilisée afin de gérer la fenêtre de connexion.
@@ -125,6 +126,10 @@ private:
     void sendSerialData(uint8_t cmd, uint8_t data = 0);
 
     /*//////////////////////////////////////////////////////////*/
+
+    /*menu*/
+
+    void setupInterface(void);
 
     /*///////////////-Protocole de communication-////////////////*/
 

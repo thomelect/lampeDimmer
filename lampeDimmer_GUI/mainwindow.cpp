@@ -52,10 +52,14 @@ MainWindow::~MainWindow()
 
 void MainWindow::boutonManage(int value)
 {
-    ui->lbIntensiteValue->setText(QString::number(intensite)); //La valeur du slider est affichée dans le label sous le slider.
+
+//    statusSetupInterface->getStruct(&partageSettingInterface);
+    ui->lbIntensiteValue->setText(QString::number((intensite / partageSettingInterface.displayFormatMath), 'f', 0) + partageSettingInterface.displayFormat); //La valeur du slider est affichée dans le label sous le slider.
     ui->dialIntensite->setSliderPosition(intensite);           //Modifie la position du slider en fonction de la valeur obtenue par le slider.
     ui->horizontalSliderIntensite->setSliderPosition(intensite);
-    ui->statusBar->showMessage(QString::number((intensite / 2.55), 'f', 0) + '%');
+    ui->statusBar->showMessage(QString::number((intensite / partageSettingInterface.displayFormatMath), 'f', 0) + partageSettingInterface.displayFormat);
+    qDebug() << partageSettingInterface.displayFormat;
+    qDebug() << partageSettingInterface.displayFormatMath;
 
     QPixmap pixmapOff("/images/off.png");
     QIcon ButtonIcon(pixmapOff);
@@ -80,13 +84,12 @@ void MainWindow::createMenus(void)
     toolsMenu = menuBar()->addMenu(tr("&Outils"));
     toolsMenu->addAction(setupSerialAct);
 
-    setupLumiere = new QAction(tr("&Paramètres Lumière"), this);
-    setupInterface = new QAction(tr("&Paramètres d'interface"), this);
-    //connect()
-    //connect(modeVeille, &QAction::triggered, this, &MainWindow::setupSerial);
+    setupInterfaceAct = new QAction(tr("&Paramètres d'interface"), this);
+    setupLumiereAct = new QAction(tr("&Paramètres Lumière"), this);
+    connect(setupInterfaceAct, &QAction::triggered, this, &MainWindow::setupInterface);
     toolsMenu = menuBar()->addMenu(tr("&Configuration"));
-    toolsMenu->addAction(setupLumiere);
-    toolsMenu->addAction(setupInterface);
+    toolsMenu->addAction(setupInterfaceAct);
+    toolsMenu->addAction(setupLumiereAct);
 }
 
 /**
@@ -220,6 +223,17 @@ void MainWindow::setupSerial(void)
         qDebug() << "GET_ETAT initial";
         sendSerialData(GET_ETAT);
     }
+}
+
+void MainWindow::setupInterface(void)
+{
+    SetupInterface setupDia;
+    setupDia.setWindowTitle("Configuration de l'interface");
+    setupDia.setWindowFlags(Qt::WindowSystemMenuHint); // Pour retirer le ?
+    setupDia.setModal(1);
+    setupDia.exec();
+    statusSetupInterface->getStruct(&partageSettingInterface);
+    boutonManage(intensite);
 }
 
 void MainWindow::on_comboBoxSleep_activated(int index)
