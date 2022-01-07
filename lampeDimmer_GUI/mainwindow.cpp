@@ -27,17 +27,9 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent),
 
     serialRxIn = false;
 
-    test1 = true;
-    test2 = false;
-
     ui->setupUi(this);
     serial = new QSerialPort(this);
     connect(serial, SIGNAL(readyRead()), this, SLOT(readSerialData()));
-    if (serial->open(QIODevice::ReadWrite))
-    {
-        qDebug() << "jeudi";
-        //sendSerialData(GET_ETAT);
-    }
     createMenus();
     ui->pushBottonOnOff->setIcon(QIcon(":/images/off.png"));
     ui->pushBottonOnOff->setIconSize(QSize(65, 65));
@@ -175,18 +167,11 @@ void MainWindow::readSerialData(void)
 
     if (serial->bytesAvailable())
     {
-        //qDebug() << "available";
         tmpRx.resize(serial->bytesAvailable());
         serial->read(tmpRx.data(), tmpRx.size());
         for (uint16_t i = 0; i < tmpRx.size(); i++)
             parseRXData(tmpRx[i]);
     }
-    //    if (test1)
-    //    {
-    //        test1 = 0;
-    //        qDebug() << "jeudi";
-    //        sendSerialData(GET_ETAT);
-    //    }
 }
 
 /**
@@ -225,6 +210,11 @@ void MainWindow::setupSerial(void)
     setupDia.setWindowFlags(Qt::WindowSystemMenuHint); // Pour retirer le ?
     setupDia.setModal(1);
     setupDia.exec();
+    if (serial->isOpen())
+    {
+        qDebug() << "GET_ETAT initial";
+        sendSerialData(GET_ETAT);
+    }
 }
 
 void MainWindow::on_comboBoxSleep_activated(int index)
@@ -257,46 +247,9 @@ void MainWindow::on_horizontalSliderIntensite_valueChanged(void)
     }
 }
 
-void MainWindow::on_pushBottonOnOff_clicked(void)
-{
-
-    //        if (boutonState) //Met la lumière à "ON" et le bouton affiche maintenant "OFF".
-    //        {
-    //            sendSerialData(GET_ETAT);
-    //            test1 = true;
-    //            if (test2)
-    //            {
-    //                test2 = test1 = false;
-    //                boutonState = !boutonState;
-    //        //        intensite = 255;
-    //        //        ui->lbIntensiteValue->setText(QString::number(intensite));
-    //        //        sendSerialData(GET_ETAT);
-    //                intensite = valuePot;
-    //                //ui->lbIntensiteValue->setText(QString::number(intensite));
-    //                    //sendSerialData(SEND_VAL, valuePot);
-    //            }
-    //        }
-    //        else //Met la lumière à "OFF" et le bouton affiche maintenant "ON".
-    //        {
-    //            boutonState = !boutonState;
-    //            intensite = 0;
-    //            //ui->lbIntensiteValue->setText(QString::number(intensite));
-    //        }
-    ////        boutonManage(intensite);
-    ////        if (!serialRxIn)
-    ////            sendSerialData(SEND_VAL, intensite);
-}
-
 void MainWindow::on_pushButton_clicked()
 {
     sendSerialData(GET_ETAT);
-}
-
-void MainWindow::on_pushBottonOnOff_released()
-{
-    boutonManage(intensite);
-    if (!serialRxIn)
-        sendSerialData(SEND_VAL, intensite);
 }
 
 void MainWindow::on_pushBottonOnOff_pressed()
@@ -304,26 +257,20 @@ void MainWindow::on_pushBottonOnOff_pressed()
     if (boutonState) //Met la lumière à "ON" et le bouton affiche maintenant "OFF".
     {
         sendSerialData(GET_ETAT);
-        //        test1 = true;
-        //        if (test2)
-        //        {
-        //            test2 = test1 = false;
         boutonState = !boutonState;
-        //        intensite = 255;
-        //        ui->lbIntensiteValue->setText(QString::number(intensite));
-        //        sendSerialData(GET_ETAT);
         intensite = valuePot;
-        //ui->lbIntensiteValue->setText(QString::number(intensite));
-        //sendSerialData(SEND_VAL, valuePot);
-        //        }
     }
     else //Met la lumière à "OFF" et le bouton affiche maintenant "ON".
     {
         boutonState = !boutonState;
         intensite = 0;
-        //ui->lbIntensiteValue->setText(QString::number(intensite));
     }
-    //        boutonManage(intensite);
-    //        if (!serialRxIn)
-    //            sendSerialData(SEND_VAL, intensite);
+    sendSerialData(SEND_VAL, intensite);
+}
+
+void MainWindow::on_pushBottonOnOff_released()
+{
+    boutonManage(intensite);
+    if (!serialRxIn)
+        sendSerialData(SEND_VAL, intensite);
 }

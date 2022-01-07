@@ -10,9 +10,13 @@
 #include <QPixmap>
 #include <QMainWindow>
 #include <QtSerialPort/QSerialPort>
+#include "setupserialdialog.h"
 
 QT_BEGIN_NAMESPACE
-namespace Ui { class MainWindow; }
+namespace Ui
+{
+    class MainWindow;
+}
 QT_END_NAMESPACE
 
 class MainWindow : public QMainWindow
@@ -25,18 +29,13 @@ public:
 
 private slots:
 
-    /**
-    * @brief  Fonction de lecture du port série..
-    */
-    void readSerialData(void);
+
 
     void on_comboBoxSleep_activated(int index);
 
     void on_dialIntensite_valueChanged(void);
 
     void on_horizontalSliderIntensite_valueChanged(void);
-
-    void on_pushBottonOnOff_clicked(void);
 
     void on_pushButton_clicked();
 
@@ -45,7 +44,6 @@ private slots:
     void on_pushBottonOnOff_pressed();
 
 private:
-
     /*//////////////////-Communication série-///////////////////*/
 
     void createMenus(void);
@@ -58,29 +56,51 @@ private:
     Ui::MainWindow *ui;
 
     /**
-    * @brief  Fonction d'envoie sur le port série..
-    */
+     * @brief       Fonction d'envoie sur le port série.
+     * @param cmd   Commande envoyée
+     * @param data  Donnée à envoyer.
+     */
     void sendSerialData(uint8_t cmd, uint8_t data = 0);
+
+    /**
+     * @brief  Fonction de lecture du port série..
+     */
+    void readSerialData(void);
 
     /*///////////////-Protocole de communication-////////////////*/
 
     /**
-    *@brief  Fonction de traitement des données et commandes reçues.
-    */
+     * @brief  Fonction de traitement des données et commandes reçues.
+     */
     void execRxCommand(void);
 
     /**
-    *@brief  Fonction qui remplis la structure de donnés avec les paramètres correspondants qui lui sont envoyés en paramètre par la fonction usartRemRxData. Le switch case commence à l'état WAIT qui attend la réception de "<". RXDATA place alors les donnés reçus dans l'union de structure jusqu'à ce que la dernière donnée (ici, la longueur de la trame à été spécifié manuellement à 7 puisque nous n'envoyons pas l'octet qui contient la longueur de la trame. Finalement, VALIDATE s'assure que la trame se termine par ">"
-    *@param  data L'octet reçu par la fonction usartRemRxData
-    */
+     * @brief  Fonction qui remplis la structure de donnés avec les paramètres correspondants qui lui sont envoyés en paramètre par la fonction usartRemRxData. Le switch case commence à l'état WAIT qui attend la réception de "<". RXDATA place alors les donnés reçus dans l'union de structure jusqu'à ce que la dernière donnée (ici, la longueur de la trame à été spécifié manuellement à 7 puisque nous n'envoyons pas l'octet qui contient la longueur de la trame. Finalement, VALIDATE s'assure que la trame se termine par ">"
+     * @param  data L'octet reçu par la fonction usartRemRxData
+     */
     void parseRXData(uint8_t data);
 
-    #define _MAX_RXDATASIZE_    16
-    #define _SEQ_SIZE_          10
+#define _MAX_RXDATASIZE_ 16
+#define _SEQ_SIZE_ 10
 
-    enum RX_STATES {WAIT, RXSIZE, RXCOMMANDE, RXDATA, VALIDATE};
-    enum RX_COMMANDES {VAL_POT};
-    enum TX_COMMANDES {GET_ETAT, SEND_VAL, SEND_SLEEP_MODE};
+    enum RX_STATES
+    {
+        WAIT,
+        RXSIZE,
+        RXCOMMANDE,
+        RXDATA,
+        VALIDATE
+    };
+    enum RX_COMMANDES
+    {
+        VAL_POT
+    };
+    enum TX_COMMANDES
+    {
+        GET_ETAT,
+        SEND_VAL,
+        SEND_SLEEP_MODE
+    };
     RX_STATES rxState;
     RX_COMMANDES rxCommande;
     QByteArray tmpRxData;
@@ -91,16 +111,13 @@ private:
     uint8_t seqCnt;
     uint8_t valuePot;
     bool serialRxIn;
-    bool test1;
-    bool test2;
-
 
     /*/////////////////////-Autres fonctions-/////////////////////*/
 
     /**
-    *@brief  Fonction qui modifie la variable boutonState et l'affichage sur le bouton en fonction de la valeur des sliders.
-    *@param  data Valeurs des sliders.
-    */
+     * @brief  Fonction qui modifie la variable boutonState et l'affichage sur le bouton en fonction de la valeur des sliders.
+     * @param  data Valeurs des sliders.
+     */
     void boutonManage(int value);
 
     uint8_t intensite = 0;
@@ -108,6 +125,5 @@ private:
 
     QPixmap *pixmapOff();
     QIcon *ButtonIcon();
-
 };
 #endif // MAINWINDOW_H
