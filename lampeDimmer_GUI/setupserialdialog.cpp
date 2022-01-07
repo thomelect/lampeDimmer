@@ -52,7 +52,15 @@ void SetupSerialDialog::on_btActualiser_clicked()
     {
         ui->cbListPortSerie->addItem(info.portName() + " " + info.description());
     }
-    ui->cbListPortSerie->setCurrentIndex(ui->cbListPortSerie->findText(DEFAULT_PORT_DESC, Qt::MatchContains));
+    if (ui->cbListPortSerie->findText(DEFAULT_PORT_DESC, Qt::MatchContains) != -1)
+    {
+        ui->cbListPortSerie->setCurrentIndex(ui->cbListPortSerie->findText(DEFAULT_PORT_DESC, Qt::MatchContains));
+    }
+    else
+    {
+        ui->cbListPortSerie->setCurrentIndex(0);
+        qDebug() << ui->cbListPortSerie->currentText();
+    }
 }
 
 void SetupSerialDialog::on_btAnnuler_clicked()
