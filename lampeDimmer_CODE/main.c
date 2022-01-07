@@ -42,7 +42,6 @@ enum RX_STATES
 enum TX_COMMANDES
 {
 	VAL_POT,
-	VAL_SLEEP,
 	VAL_ACTU
 };
 
@@ -153,7 +152,7 @@ int main(void)
 		else //Si l'interrupteur du potentiomètre est à la position "OFF"...
 		{
 			outputVeille(veilleMode);
-			txCommande = VAL_SLEEP;
+			txCommande = VAL_ACTU;
 			execTxCommand();
 		}
 		OUTPUT_VALUE(valueOut);
