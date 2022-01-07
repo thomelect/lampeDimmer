@@ -42,7 +42,8 @@ enum RX_STATES
 enum TX_COMMANDES
 {
 	VAL_POT,
-	VAL_SLEEP
+	VAL_SLEEP,
+	VAL_ACTU
 };
 
 //enum des différents commandes de transmission d'une réception
@@ -203,6 +204,9 @@ void execTxCommand(void)
 		sendPotValue(valueAdc);
 		break;
 	case VAL_SLEEP:
+		sendPotValue(valueOut);
+		break;
+	case VAL_ACTU:
 		sendPotValue(valueOut);
 		break;
 	}
