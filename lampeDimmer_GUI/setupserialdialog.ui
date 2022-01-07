@@ -157,7 +157,7 @@
     <string>Actualiser</string>
    </property>
   </widget>
-  <widget class="QPushButton" name="btConnection">
+  <widget class="QPushButton" name="btConnexion">
    <property name="geometry">
     <rect>
      <x>139</x>
@@ -207,7 +207,7 @@
     <string>Connecter</string>
    </property>
   </widget>
-  <widget class="QLabel" name="lbbaudRate">
+  <widget class="QLabel" name="lbBaudRate">
    <property name="geometry">
     <rect>
      <x>9</x>
@@ -225,7 +225,7 @@
     <string>Baud rate :</string>
    </property>
   </widget>
-  <widget class="QPushButton" name="pbCANCEL">
+  <widget class="QPushButton" name="btAnnuler">
    <property name="geometry">
     <rect>
      <x>100</x>
@@ -238,7 +238,7 @@
     <string>Annuler</string>
    </property>
   </widget>
-  <widget class="QPushButton" name="pbOK">
+  <widget class="QPushButton" name="btOk">
    <property name="geometry">
     <rect>
      <x>190</x>

@@ -23,9 +23,10 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent),
     connect(timer, SIGNAL(timeout()), this, SLOT(sendGetState()));
     timer->start(100); // vous pouvez réduire l'interval durant les tests.
     */
-    //sendSerialData(GET_ETAT, 0);
 
+    intensite = 0;
     serialRxIn = false;
+    boutonState = true;
 
     ui->setupUi(this);
     serial = new QSerialPort(this);
@@ -60,14 +61,12 @@ void MainWindow::boutonManage(int value)
     QIcon ButtonIcon(pixmapOff);
     if (value)
     {
-        //ui->pushBottonOnOff->setText("OFF");
         ui->pushBottonOnOff->setIcon(QIcon(":/images/on.png"));
         ui->pushBottonOnOff->setIconSize(QSize(65, 65));
         boutonState = 0;
     }
     else
     {
-        //ui->pushBottonOnOff->setText("ON ");
         ui->pushBottonOnOff->setIcon(QIcon(":/images/off.png"));
         ui->pushBottonOnOff->setIconSize(QSize(65, 65));
         boutonState = 1;
@@ -162,9 +161,7 @@ void MainWindow::parseRXData(uint8_t data)
 */
 void MainWindow::readSerialData(void)
 {
-
     QByteArray tmpRx;
-
     if (serial->bytesAvailable())
     {
         tmpRx.resize(serial->bytesAvailable());
@@ -245,11 +242,6 @@ void MainWindow::on_horizontalSliderIntensite_valueChanged(void)
             sendSerialData(SEND_VAL, intensite);
         qDebug() << intensite;
     }
-}
-
-void MainWindow::on_pushButton_clicked()
-{
-    sendSerialData(GET_ETAT);
 }
 
 void MainWindow::on_pushBottonOnOff_pressed()
