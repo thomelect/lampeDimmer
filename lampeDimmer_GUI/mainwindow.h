@@ -36,7 +36,8 @@ private:
     };
     enum RX_COMMANDES
     {
-        VAL_POT
+        VAL_POT,
+        VAL_ACTU
     };
     enum TX_COMMANDES
     {
@@ -53,7 +54,8 @@ private:
     uint8_t rxDataCnt;
     uint8_t rxData[_MAX_RXDATASIZE_];
     uint16_t rxErrorCommCnt;
-    uint8_t valuePot;
+    uint8_t valueAdc;
+    uint8_t valueOut;
     uint8_t intensite;
     bool serialRxIn;
     bool boutonState;

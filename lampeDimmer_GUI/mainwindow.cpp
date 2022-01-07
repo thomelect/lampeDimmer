@@ -86,9 +86,17 @@ void MainWindow::createMenus(void)
  */
 void MainWindow::execRxCommand(void)
 {
+    switch (rxCommande)
+    {
+    case VAL_POT:
+        valueAdc = rxData[0];
+        break;
+    case VAL_ACTU:
+        valueOut = rxData[0];
+        break;
+    }
     if (rxCommande == VAL_POT)
     {
-        valuePot = rxData[0];
         ui->horizontalSliderIntensite->setSliderPosition(rxData[0]); //Modifie la position du slider en fonction de la valeur obtenue par le dial.
         ui->dialIntensite->setSliderPosition(rxData[0]);             //Modifie la position du slider en fonction de la valeur obtenue par le slider.
         ui->lbIntensiteValue->setText(QString::number(rxData[0]));
@@ -259,7 +267,7 @@ void MainWindow::on_pushBottonOnOff_pressed()
     {
         sendSerialData(GET_VAL_POT);
         boutonState = !boutonState;
-        intensite = valuePot;
+        intensite = valueAdc;
     }
     else //Met la lumière à "OFF" et le bouton affiche maintenant "ON".
     {
