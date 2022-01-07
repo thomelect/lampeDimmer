@@ -49,7 +49,7 @@ char msg[5];
 //variables nécessaires à la communication avec l'interface
 uint8_t rxDataSize;
 uint8_t rxDataCnt = 0; //Compteur de donnés reçus.
-uint8_t rxData[_MAX_RXDATASIZE_];
+uint16_t rxData[_MAX_RXDATASIZE_];
 uint16_t rxErrorCommCnt = 0;
 uint8_t moteurStopFlag = 0;
 uint8_t seqAuto = 0;
@@ -166,7 +166,7 @@ int main(void)
 					serialUSBRead(serialUSBRxData, CDC_TXRX_EPSIZE); //appel de la fonction parseRxData() avec en paramètre la valeur retournée par usartRemRxData().
 					
 					
-				for (uint8_t index = 0; serialUSBRxData[index]; index++)
+				for (uint8_t index = 0; index < (serialUSBRxData[1] + 4); index++)
 				{
 					parseRxData(serialUSBRxData[index]);
 				}
@@ -247,7 +247,9 @@ void execRxCommand(void)
 		break;
 	case SET_VAL:	  //Réception depuis l'interface de la valeur de la sortie.
 		if (SWITCH()) //Si l'interrupteur du potentiomètre est à la position "ON"...
+		{
 			valueOut = rxData[0];
+		}
 		break;
 	}
 }
@@ -276,7 +278,7 @@ void execTxCommand(void)
 		txData[4] = '>';
 		for (int x = 0; x <= 4; x++)
 		{
-			serialUSBWrite(txData, 5);
+			serialUSBWrite((uint8_t*)txData, 5);
 		}
 		break;
 	case VAL_SLEEP_MODE:
@@ -287,7 +289,7 @@ void execTxCommand(void)
 		txData[4] = '>';
 		for (int x = 0; x <= 4; x++)
 		{
-			serialUSBWrite(txData, 5);
+			serialUSBWrite((uint8_t*)txData, 5);
 		}
 		break;
 	}
