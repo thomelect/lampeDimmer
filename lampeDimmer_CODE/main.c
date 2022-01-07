@@ -103,7 +103,7 @@ void outputVeille(uint8_t value);
  */
 void parseRxData(uint8_t data);
 
-void sendPotValue(uint8_t data);
+/*void sendPotValue(uint8_t data);*/
 
 /**
  * @brief  Fonction d'initialisation du Timer #0.
@@ -140,7 +140,8 @@ int main(void)
 						valueAdcTbl[0] = valueAdcTbl[1]; //La nouvelle valeur remplace l'ancienne.
 						valueOut = valueAdcTbl[1];
 						valueAdc = valueAdcTbl[1];
-						sendPotValue(valueOut);
+						txCommande = VAL_ACTU;
+						execTxCommand();
 					}
 			}
 		}
@@ -197,13 +198,30 @@ void execRxCommand(void)
 
 void execTxCommand(void)
 {
+	char txData[5];
 	switch (txCommande)
 	{
 	case VAL_POT:
-		sendPotValue(valueAdc);
+		txData[0] = '<';
+		txData[1] = 1;
+		txData[2] = VAL_POT;
+		txData[3] = valueAdc;
+		txData[4] = '>';
+		for (int x = 0; x <= 4; x++)
+		{
+			usartSendByte(txData[x]);
+		}
 		break;
 	case VAL_ACTU:
-		sendPotValue(valueOut);
+		txData[0] = '<';
+		txData[1] = 1;
+		txData[2] = VAL_POT;
+		txData[3] = valueOut;
+		txData[4] = '>';
+		for (int x = 0; x <= 4; x++)
+		{
+			usartSendByte(txData[x]);
+		}
 		break;
 	}
 }
@@ -301,19 +319,19 @@ void parseRxData(uint8_t data)
 	}
 }
 
-void sendPotValue(uint8_t data)
-{
-	char txData[5];
-	txData[0] = '<';
-	txData[1] = 1;
-	txData[2] = VAL_POT;
-	txData[3] = data;
-	txData[4] = '>';
-	for (int x = 0; x <= 4; x++)
-	{
-		usartSendByte(txData[x]);
-	}
-}
+// void sendPotValue(uint8_t cmd, uint8_t data)
+// {
+// 	char txData[5];
+// 	txData[0] = '<';
+// 	txData[1] = 1;
+// 	txData[2] = VAL_POT;
+// 	txData[3] = data;
+// 	txData[4] = '>';
+// 	for (int x = 0; x <= 4; x++)
+// 	{
+// 		usartSendByte(txData[x]);
+// 	}
+// }
 
 void timer0Init(void)
 {
