@@ -56,6 +56,7 @@ void MainWindow::boutonManage(int value)
     ui->dialIntensite->setSliderPosition(intensite);           //Modifie la position du slider en fonction de la valeur obtenue par le slider.
     ui->horizontalSliderIntensite->setSliderPosition(intensite);
     ui->statusBar->showMessage(QString::number((intensite / 2.55), 'f', 0) + '%');
+    qDebug() << "SET_VAL : " + QString::number(intensite);
 
     QPixmap pixmapOff("/images/off.png");
     QIcon ButtonIcon(pixmapOff);
@@ -90,6 +91,7 @@ void MainWindow::execRxCommand(void)
     {
     case VAL_ACTU:
         valueOut = rxData[0];
+        qDebug() << "VAL_ACTU : " + QString::number(valueOut);
         break;
     case VAL_POT:
         valueAdc = rxData[0];
@@ -97,10 +99,12 @@ void MainWindow::execRxCommand(void)
         ui->dialIntensite->setSliderPosition(valueAdc);             //Modifie la position du slider en fonction de la valeur obtenue par le slider.
         ui->lbIntensiteValue->setText(QString::number(valueAdc));
         serialRxIn = false;
+        qDebug() << "VAL_POT : " + QString::number(valueAdc);
         break;
     case VAL_SLEEP_MODE:
         valueVeilleMode = rxData[0];
-        qDebug() << "VAL_SLEEP_MODE";
+        ui->comboBoxSleep->setCurrentIndex(valueVeilleMode);
+        qDebug() << "SLEEP_MODE : " + ui->comboBoxSleep->currentText();
         break;
     }
 }
@@ -143,7 +147,7 @@ void MainWindow::parseRXData(uint8_t data)
         break;
     case RXDATA:
         rxData[rxDataCnt++] = data;
-        qDebug() << data;
+        qDebug() << " ----------------- RXDATA : " + QString::number(data);
         if (rxDataCnt == rxDataSize)
             rxState = VALIDATE;
         break;
@@ -212,7 +216,6 @@ void MainWindow::sendSerialData(uint8_t cmd, uint8_t data)
             txData[2] = GET_SLEEP_MODE;
             txData[3] = '>';
             serial->write(txData, 4);
-            qDebug() << "GET_SLEEP_MODE";
         }
         else
         {
@@ -239,9 +242,6 @@ void MainWindow::setupSerial(void)
         qDebug() << "GET_VAL_ACTU initial";
         sendSerialData(GET_VAL_ACTU);
         sendSerialData(GET_SLEEP_MODE);
-
-        qDebug() << valueVeilleMode;
-        ui->comboBoxSleep->setCurrentIndex(valueVeilleMode);
     }
 }
 
@@ -259,7 +259,6 @@ void MainWindow::on_dialIntensite_valueChanged(void)
         boutonManage(intensite);
         if (!serialRxIn)
             sendSerialData(SET_VAL, intensite);
-        qDebug() << intensite;
     }
 }
 
@@ -271,7 +270,6 @@ void MainWindow::on_horizontalSliderIntensite_valueChanged(void)
         boutonManage(intensite);
         if (!serialRxIn)
             sendSerialData(SET_VAL, intensite);
-        qDebug() << intensite;
     }
 }
 
