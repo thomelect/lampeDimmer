@@ -10,9 +10,6 @@
 #include <QtSerialPort/QSerialPortInfo>
 #include <QDebug>
 
-#define DEFAULT_BAUD_RATE "1000000"
-#define DEFAULT_PORT_DESC "USB-SERIAL CH340"
-
 SetupSerialDialog::SetupSerialDialog(QSerialPort *s) : QDialog(0),
                                                        ui(new Ui::SetupSerialDialog)
 {
