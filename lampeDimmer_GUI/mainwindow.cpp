@@ -178,12 +178,21 @@ void MainWindow::sendSerialData(uint8_t cmd, uint8_t data)
 {
     if (serial->isOpen())
     {
-        if (cmd == GET_ETAT)
+        if (cmd == GET_VAL_POT)
         {
             char txData[4];
             txData[0] = '<';
             txData[1] = 0;
-            txData[2] = GET_ETAT;
+            txData[2] = GET_VAL_POT;
+            txData[3] = '>';
+            serial->write(txData, 4);
+        }
+        if (cmd == GET_VAL_ACTU)
+        {
+            char txData[4];
+            txData[0] = '<';
+            txData[1] = 0;
+            txData[2] = GET_VAL_ACTU;
             txData[3] = '>';
             serial->write(txData, 4);
         }
@@ -209,15 +218,15 @@ void MainWindow::setupSerial(void)
     setupDia.exec();
     if (serial->isOpen())
     {
-        qDebug() << "GET_ETAT initial";
-        sendSerialData(GET_ETAT);
+        qDebug() << "GET_VAL_ACTU initial";
+        sendSerialData(GET_VAL_ACTU);
     }
 }
 
 void MainWindow::on_comboBoxSleep_activated(int index)
 {
 
-    sendSerialData(SEND_SLEEP_MODE, index);
+    sendSerialData(SET_SLEEP_MODE, index);
 }
 
 void MainWindow::on_dialIntensite_valueChanged(void)
@@ -227,7 +236,7 @@ void MainWindow::on_dialIntensite_valueChanged(void)
         intensite = ui->dialIntensite->value();
         boutonManage(intensite);
         if (!serialRxIn)
-            sendSerialData(SEND_VAL, intensite);
+            sendSerialData(SET_VAL, intensite);
         qDebug() << intensite;
     }
 }
@@ -239,7 +248,7 @@ void MainWindow::on_horizontalSliderIntensite_valueChanged(void)
         intensite = ui->horizontalSliderIntensite->value(); //On récupère la valeur du slider.
         boutonManage(intensite);
         if (!serialRxIn)
-            sendSerialData(SEND_VAL, intensite);
+            sendSerialData(SET_VAL, intensite);
         qDebug() << intensite;
     }
 }
@@ -248,7 +257,7 @@ void MainWindow::on_pushBottonOnOff_pressed()
 {
     if (boutonState) //Met la lumière à "ON" et le bouton affiche maintenant "OFF".
     {
-        sendSerialData(GET_ETAT);
+        sendSerialData(GET_VAL_POT);
         boutonState = !boutonState;
         intensite = valuePot;
     }
@@ -257,12 +266,12 @@ void MainWindow::on_pushBottonOnOff_pressed()
         boutonState = !boutonState;
         intensite = 0;
     }
-    sendSerialData(SEND_VAL, intensite);
+    sendSerialData(SET_VAL, intensite);
 }
 
 void MainWindow::on_pushBottonOnOff_released()
 {
     boutonManage(intensite);
     if (!serialRxIn)
-        sendSerialData(SEND_VAL, intensite);
+        sendSerialData(SET_VAL, intensite);
 }

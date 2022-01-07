@@ -40,9 +40,10 @@ private:
     };
     enum TX_COMMANDES
     {
-        GET_ETAT,
-        SEND_VAL,
-        SEND_SLEEP_MODE
+        GET_VAL_POT,
+	    SET_VAL,
+	    SET_SLEEP_MODE,
+	    GET_VAL_ACTU
     };
     RX_STATES rxState;
     RX_COMMANDES rxCommande;
