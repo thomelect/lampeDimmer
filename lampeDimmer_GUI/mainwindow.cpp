@@ -15,9 +15,8 @@
 
 using namespace std;
 
-MainWindow::MainWindow(QWidget *parent):
-    QMainWindow(parent),
-    ui(new Ui::MainWindow)
+MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent),
+                                          ui(new Ui::MainWindow)
 {
     /*
     timer = new QTimer(this);
@@ -26,31 +25,33 @@ MainWindow::MainWindow(QWidget *parent):
     */
     //sendSerialData(GET_ETAT, 0);
 
-
     serialRxIn = false;
+
+    test1 = true;
+    test2 = false;
 
     ui->setupUi(this);
     serial = new QSerialPort(this);
     connect(serial, SIGNAL(readyRead()), this, SLOT(readSerialData()));
+    if (serial->open(QIODevice::ReadWrite))
+    {
+        qDebug() << "jeudi";
+        //sendSerialData(GET_ETAT);
+    }
     createMenus();
     ui->pushBottonOnOff->setIcon(QIcon(":/images/off.png"));
     ui->pushBottonOnOff->setIconSize(QSize(65, 65));
-    if (serial->isOpen())
-    {
-        qDebug() << "open";
-        //sendSerialData(GET_ETAT);
-    }
+
     //Feuille de style des boutons de la de l'interface MainWindow.
     this->setStyleSheet("#pushBottonOnOff {"
                         "background-color: none;"
                         "border: 0px"
-                        "}"
-                        );
+                        "}");
 }
 
 MainWindow::~MainWindow()
 {
-    if(serial->isOpen())
+    if (serial->isOpen())
         serial->close();
     delete serial;
     delete ui;
@@ -59,7 +60,7 @@ MainWindow::~MainWindow()
 void MainWindow::boutonManage(int value)
 {
     ui->lbIntensiteValue->setText(QString::number(intensite)); //La valeur du slider est affichée dans le label sous le slider.
-    ui->dialIntensite->setSliderPosition(intensite); //Modifie la position du slider en fonction de la valeur obtenue par le slider.
+    ui->dialIntensite->setSliderPosition(intensite);           //Modifie la position du slider en fonction de la valeur obtenue par le slider.
     ui->horizontalSliderIntensite->setSliderPosition(intensite);
     ui->statusBar->showMessage(QString::number((intensite / 2.55), 'f', 0) + '%');
 
@@ -94,17 +95,14 @@ void MainWindow::createMenus(void)
  */
 void MainWindow::execRxCommand(void)
 {
-
     if (rxCommande == VAL_POT)
     {
-        //intensite = rxData[0];
         valuePot = rxData[0];
         ui->horizontalSliderIntensite->setSliderPosition(rxData[0]); //Modifie la position du slider en fonction de la valeur obtenue par le dial.
-        ui->dialIntensite->setSliderPosition(rxData[0]); //Modifie la position du slider en fonction de la valeur obtenue par le slider.
+        ui->dialIntensite->setSliderPosition(rxData[0]);             //Modifie la position du slider en fonction de la valeur obtenue par le slider.
         ui->lbIntensiteValue->setText(QString::number(rxData[0]));
         serialRxIn = false;
     }
-
 }
 
 /**
@@ -113,10 +111,10 @@ void MainWindow::execRxCommand(void)
  */
 void MainWindow::parseRXData(uint8_t data)
 {
-    switch(rxState)
+    switch (rxState)
     {
-    default :
-        if(data == '<')
+    default:
+        if (data == '<')
         {
             rxState = RXSIZE;
             rxDataCnt = 0;
@@ -124,7 +122,7 @@ void MainWindow::parseRXData(uint8_t data)
         break;
     case RXSIZE:
         rxDataSize = data;
-        if(rxDataSize >= _MAX_RXDATASIZE_)
+        if (rxDataSize >= _MAX_RXDATASIZE_)
         {
             qDebug() << " \n\r Erreur de trame : Size trop grand. \n\r";
             rxState = WAIT;
@@ -136,7 +134,7 @@ void MainWindow::parseRXData(uint8_t data)
         break;
     case RXCOMMANDE:
         rxCommande = (RX_COMMANDES)data;
-        if(rxDataSize)
+        if (rxDataSize)
         {
 
             rxState = RXDATA;
@@ -147,12 +145,12 @@ void MainWindow::parseRXData(uint8_t data)
     case RXDATA:
         rxData[rxDataCnt++] = data;
         qDebug() << data;
-        if(rxDataCnt == rxDataSize)
+        if (rxDataCnt == rxDataSize)
             rxState = VALIDATE;
         break;
-    case VALIDATE :
+    case VALIDATE:
         rxState = WAIT;
-        if(data == '>')
+        if (data == '>')
         {
             serialRxIn = true;
             execRxCommand();
@@ -160,7 +158,8 @@ void MainWindow::parseRXData(uint8_t data)
         else
         {
             rxErrorCommCnt++;
-            qDebug() << " \n\r Error RX TRAME Error = " <<rxErrorCommCnt<<"   "<< " \n\r";
+            qDebug() << " \n\r Error RX TRAME Error = " << rxErrorCommCnt << "   "
+                     << " \n\r";
         }
         break;
     }
@@ -169,18 +168,25 @@ void MainWindow::parseRXData(uint8_t data)
 /**
 * @brief Fonction de lecture du port série..
 */
-void MainWindow::readSerialData(void) {
+void MainWindow::readSerialData(void)
+{
 
     QByteArray tmpRx;
 
-    if(serial->bytesAvailable())
+    if (serial->bytesAvailable())
     {
         //qDebug() << "available";
         tmpRx.resize(serial->bytesAvailable());
         serial->read(tmpRx.data(), tmpRx.size());
-        for(uint16_t i = 0 ; i < tmpRx.size() ; i++ )
+        for (uint16_t i = 0; i < tmpRx.size(); i++)
             parseRXData(tmpRx[i]);
     }
+    //    if (test1)
+    //    {
+    //        test1 = 0;
+    //        qDebug() << "jeudi";
+    //        sendSerialData(GET_ETAT);
+    //    }
 }
 
 /**
@@ -188,7 +194,7 @@ void MainWindow::readSerialData(void) {
 */
 void MainWindow::sendSerialData(uint8_t cmd, uint8_t data)
 {
-    if(serial->isOpen())
+    if (serial->isOpen())
     {
         if (cmd == GET_ETAT)
         {
@@ -197,7 +203,7 @@ void MainWindow::sendSerialData(uint8_t cmd, uint8_t data)
             txData[1] = 0;
             txData[2] = GET_ETAT;
             txData[3] = '>';
-            serial->write(txData,4);
+            serial->write(txData, 4);
         }
         else
         {
@@ -216,7 +222,7 @@ void MainWindow::setupSerial(void)
 {
     SetupSerialDialog setupDia(serial);
     setupDia.setWindowTitle("Configuration du port série");
-    setupDia.setWindowFlags( Qt::WindowSystemMenuHint); // Pour retirer le ?
+    setupDia.setWindowFlags(Qt::WindowSystemMenuHint); // Pour retirer le ?
     setupDia.setModal(1);
     setupDia.exec();
 }
@@ -229,45 +235,95 @@ void MainWindow::on_comboBoxSleep_activated(int index)
 
 void MainWindow::on_dialIntensite_valueChanged(void)
 {
-    intensite = ui->dialIntensite->value();
-    boutonManage(intensite);
-    if (!serialRxIn)
-        sendSerialData(SEND_VAL, intensite);
-    qDebug() << intensite;
+    if (!ui->pushBottonOnOff->isChecked())
+    {
+        intensite = ui->dialIntensite->value();
+        boutonManage(intensite);
+        if (!serialRxIn)
+            sendSerialData(SEND_VAL, intensite);
+        qDebug() << intensite;
+    }
 }
 
 void MainWindow::on_horizontalSliderIntensite_valueChanged(void)
 {
-    intensite = ui->horizontalSliderIntensite->value(); //On récupère la valeur du slider.
-    boutonManage(intensite);
-    if (!serialRxIn)
-        sendSerialData(SEND_VAL, intensite);
-    qDebug() << intensite;
+    if (!ui->pushBottonOnOff->isChecked())
+    {
+        intensite = ui->horizontalSliderIntensite->value(); //On récupère la valeur du slider.
+        boutonManage(intensite);
+        if (!serialRxIn)
+            sendSerialData(SEND_VAL, intensite);
+        qDebug() << intensite;
+    }
 }
 
 void MainWindow::on_pushBottonOnOff_clicked(void)
 {
-    if (boutonState) //Met la lumière à "ON" et le bouton affiche maintenant "OFF".
-    {
-        boutonState = !boutonState;
-//        intensite = 255;
-//        ui->lbIntensiteValue->setText(QString::number(intensite));
-        sendSerialData(GET_ETAT);
-        intensite = valuePot;
-        ui->lbIntensiteValue->setText(QString::number(intensite));
-    }
-    else //Met la lumière à "OFF" et le bouton affiche maintenant "ON".
-    {
-        boutonState = !boutonState;
-        intensite = 0;
-        ui->lbIntensiteValue->setText(QString::number(intensite));
-    }
-    boutonManage(intensite);
-    if (!serialRxIn)
-        sendSerialData(SEND_VAL, intensite);
+
+    //        if (boutonState) //Met la lumière à "ON" et le bouton affiche maintenant "OFF".
+    //        {
+    //            sendSerialData(GET_ETAT);
+    //            test1 = true;
+    //            if (test2)
+    //            {
+    //                test2 = test1 = false;
+    //                boutonState = !boutonState;
+    //        //        intensite = 255;
+    //        //        ui->lbIntensiteValue->setText(QString::number(intensite));
+    //        //        sendSerialData(GET_ETAT);
+    //                intensite = valuePot;
+    //                //ui->lbIntensiteValue->setText(QString::number(intensite));
+    //                    //sendSerialData(SEND_VAL, valuePot);
+    //            }
+    //        }
+    //        else //Met la lumière à "OFF" et le bouton affiche maintenant "ON".
+    //        {
+    //            boutonState = !boutonState;
+    //            intensite = 0;
+    //            //ui->lbIntensiteValue->setText(QString::number(intensite));
+    //        }
+    ////        boutonManage(intensite);
+    ////        if (!serialRxIn)
+    ////            sendSerialData(SEND_VAL, intensite);
 }
 
 void MainWindow::on_pushButton_clicked()
 {
     sendSerialData(GET_ETAT);
+}
+
+void MainWindow::on_pushBottonOnOff_released()
+{
+    boutonManage(intensite);
+    if (!serialRxIn)
+        sendSerialData(SEND_VAL, intensite);
+}
+
+void MainWindow::on_pushBottonOnOff_pressed()
+{
+    if (boutonState) //Met la lumière à "ON" et le bouton affiche maintenant "OFF".
+    {
+        sendSerialData(GET_ETAT);
+        //        test1 = true;
+        //        if (test2)
+        //        {
+        //            test2 = test1 = false;
+        boutonState = !boutonState;
+        //        intensite = 255;
+        //        ui->lbIntensiteValue->setText(QString::number(intensite));
+        //        sendSerialData(GET_ETAT);
+        intensite = valuePot;
+        //ui->lbIntensiteValue->setText(QString::number(intensite));
+        //sendSerialData(SEND_VAL, valuePot);
+        //        }
+    }
+    else //Met la lumière à "OFF" et le bouton affiche maintenant "ON".
+    {
+        boutonState = !boutonState;
+        intensite = 0;
+        //ui->lbIntensiteValue->setText(QString::number(intensite));
+    }
+    //        boutonManage(intensite);
+    //        if (!serialRxIn)
+    //            sendSerialData(SEND_VAL, intensite);
 }

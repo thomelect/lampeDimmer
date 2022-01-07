@@ -40,6 +40,10 @@ private slots:
 
     void on_pushButton_clicked();
 
+    void on_pushBottonOnOff_released();
+
+    void on_pushBottonOnOff_pressed();
+
 private:
 
     /*//////////////////-Communication série-///////////////////*/
@@ -87,6 +91,9 @@ private:
     uint8_t seqCnt;
     uint8_t valuePot;
     bool serialRxIn;
+    bool test1;
+    bool test2;
+
 
     /*/////////////////////-Autres fonctions-/////////////////////*/
 
