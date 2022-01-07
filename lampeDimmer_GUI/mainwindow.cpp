@@ -88,19 +88,20 @@ void MainWindow::execRxCommand(void)
 {
     switch (rxCommande)
     {
-    case VAL_POT:
-        valueAdc = rxData[0];
-        break;
     case VAL_ACTU:
         valueOut = rxData[0];
         break;
-    }
-    if (rxCommande == VAL_POT)
-    {
-        ui->horizontalSliderIntensite->setSliderPosition(rxData[0]); //Modifie la position du slider en fonction de la valeur obtenue par le dial.
-        ui->dialIntensite->setSliderPosition(rxData[0]);             //Modifie la position du slider en fonction de la valeur obtenue par le slider.
-        ui->lbIntensiteValue->setText(QString::number(rxData[0]));
+    case VAL_POT:
+        valueAdc = rxData[0];
+        ui->horizontalSliderIntensite->setSliderPosition(valueAdc); //Modifie la position du slider en fonction de la valeur obtenue par le dial.
+        ui->dialIntensite->setSliderPosition(valueAdc);             //Modifie la position du slider en fonction de la valeur obtenue par le slider.
+        ui->lbIntensiteValue->setText(QString::number(valueAdc));
         serialRxIn = false;
+        break;
+    case VAL_SLEEP_MODE:
+        valueVeilleMode = rxData[0];
+        qDebug() << "VAL_SLEEP_MODE";
+        break;
     }
 }
 
@@ -135,7 +136,6 @@ void MainWindow::parseRXData(uint8_t data)
         rxCommande = (RX_COMMANDES)data;
         if (rxDataSize)
         {
-
             rxState = RXDATA;
         }
         else
@@ -204,6 +204,16 @@ void MainWindow::sendSerialData(uint8_t cmd, uint8_t data)
             txData[3] = '>';
             serial->write(txData, 4);
         }
+        if (cmd == GET_SLEEP_MODE)
+        {
+            char txData[4];
+            txData[0] = '<';
+            txData[1] = 0;
+            txData[2] = GET_SLEEP_MODE;
+            txData[3] = '>';
+            serial->write(txData, 4);
+            qDebug() << "GET_SLEEP_MODE";
+        }
         else
         {
             char txData[5];
@@ -228,6 +238,10 @@ void MainWindow::setupSerial(void)
     {
         qDebug() << "GET_VAL_ACTU initial";
         sendSerialData(GET_VAL_ACTU);
+        sendSerialData(GET_SLEEP_MODE);
+
+        qDebug() << valueVeilleMode;
+        ui->comboBoxSleep->setCurrentIndex(valueVeilleMode);
     }
 }
 

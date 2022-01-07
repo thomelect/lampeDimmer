@@ -36,15 +36,17 @@ private:
     };
     enum RX_COMMANDES
     {
+        VAL_ACTU,
         VAL_POT,
-        VAL_ACTU
+        VAL_SLEEP_MODE
     };
     enum TX_COMMANDES
     {
+        GET_VAL_ACTU,
         GET_VAL_POT,
-	    SET_VAL,
-	    SET_SLEEP_MODE,
-	    GET_VAL_ACTU
+        GET_SLEEP_MODE,
+        SET_SLEEP_MODE,
+        SET_VAL
     };
     RX_STATES rxState;
     RX_COMMANDES rxCommande;
@@ -56,6 +58,7 @@ private:
     uint16_t rxErrorCommCnt;
     uint8_t valueAdc;
     uint8_t valueOut;
+    uint8_t valueVeilleMode;
     uint8_t intensite;
     bool serialRxIn;
     bool boutonState;
