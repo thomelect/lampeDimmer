@@ -10,6 +10,9 @@
 #include <QtSerialPort/QSerialPortInfo>
 #include <QDebug>
 
+#define DEFAULT_BAUD_RATE "1000000"
+#define DEFAULT_PORT_DESC "USB-SERIAL CH340"
+
 SetupSerialDialog::SetupSerialDialog(QSerialPort *s) : QDialog(0),
                                                        ui(new Ui::SetupSerialDialog)
 {
@@ -22,7 +25,8 @@ SetupSerialDialog::SetupSerialDialog(QSerialPort *s) : QDialog(0),
     ui->cbListBaudRate->addItem("921600");
     ui->cbListBaudRate->addItem("1000000");
     ui->cbListBaudRate->addItem("2000000");
-    ui->cbListBaudRate->setCurrentIndex(5);
+    ui->cbListBaudRate->setCurrentIndex(ui->cbListBaudRate->findText(DEFAULT_BAUD_RATE, Qt::MatchExactly));
+    //ui->cbListBaudRate->setCurrentIndex(5);
     if (serial->isOpen())
     {
         ui->btActualiser->setText("Déconnecter");
@@ -37,6 +41,26 @@ SetupSerialDialog::SetupSerialDialog(QSerialPort *s) : QDialog(0),
 SetupSerialDialog::~SetupSerialDialog()
 {
     delete ui;
+}
+
+void SetupSerialDialog::on_btActualiser_clicked()
+{
+    ui->cbListPortSerie->clear();
+    ui->btActualiser->setText("Actualiser");
+    ui->btOk->setEnabled(false);
+    serial->close();
+    ui->cbListPortSerie->setEnabled(true);
+    ui->btConnexion->setEnabled(true);
+    foreach (const QSerialPortInfo &info, QSerialPortInfo::availablePorts())
+    {
+        ui->cbListPortSerie->addItem(info.portName() + " " + info.description());
+    }
+    ui->cbListPortSerie->setCurrentIndex(ui->cbListPortSerie->findText(DEFAULT_PORT_DESC, Qt::MatchContains));
+}
+
+void SetupSerialDialog::on_btAnnuler_clicked()
+{
+    this->close();
 }
 
 void SetupSerialDialog::on_btConnexion_clicked()
@@ -67,25 +91,6 @@ void SetupSerialDialog::on_btConnexion_clicked()
 }
 
 void SetupSerialDialog::on_btOk_clicked()
-{
-    this->close();
-}
-
-void SetupSerialDialog::on_btActualiser_clicked()
-{
-    ui->cbListPortSerie->clear();
-    ui->btActualiser->setText("Actualiser");
-    ui->btOk->setEnabled(false);
-    serial->close();
-    ui->cbListPortSerie->setEnabled(true);
-    ui->btConnexion->setEnabled(true);
-    foreach (const QSerialPortInfo &info, QSerialPortInfo::availablePorts())
-    {
-        ui->cbListPortSerie->addItem(info.portName() + " " + info.description());
-    }
-}
-
-void SetupSerialDialog::on_btAnnuler_clicked()
 {
     this->close();
 }

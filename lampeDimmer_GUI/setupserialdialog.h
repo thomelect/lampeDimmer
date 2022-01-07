@@ -37,6 +37,12 @@ private slots:
     void on_btActualiser_clicked();
 
     /**
+     * @brief  Fonction appelée lorsque le bouton "Annuler" est appuyé.
+     *         La fenêtre est alors fermée.
+     */
+    void on_btAnnuler_clicked();
+
+    /**
      * @brief  Fonction appelée lorsque le bouton Connecter est appuyé.
      *         Essaie de connecter le port série sélectionné dans la liste.
      *         Des messages sont envoyés dans vers QDebug.
@@ -49,12 +55,6 @@ private slots:
      *         La fenêtre est alors fermée.
      */
     void on_btOk_clicked();
-
-    /**
-     * @brief  Fonction appelée lorsque le bouton "Annuler" est appuyé.
-     *         La fenêtre est alors fermée.
-     */
-    void on_btAnnuler_clicked();
 
 private:
     QSerialPort *serial;
