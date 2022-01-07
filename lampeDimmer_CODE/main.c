@@ -190,6 +190,7 @@ void execRxCommand(void)
 		break;
 	case GET_SLEEP_MODE:
 		txCommande = VAL_SLEEP_MODE;
+		execTxCommand();
 		break;
 	case SET_SLEEP_MODE:
 		valueVeilleMode = rxData[0];
