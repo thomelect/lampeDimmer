@@ -49,9 +49,10 @@ enum TX_COMMANDES
 //enum des différents commandes de transmission d'une réception
 enum RX_COMMANDES
 {
-	GET_ETAT,
+	GET_VAL_POT,
 	SET_VAL,
-	SET_SLEEP_MODE
+	SET_SLEEP_MODE,
+	GET_VAL_ACTU
 };
 
 //déclaration des enums
@@ -182,8 +183,8 @@ void execRxCommand(void)
 {
 	switch (rxCommande)
 	{
-	case GET_ETAT: //État non utilisé
-		txCommande = 0;
+	case GET_VAL_POT: //État non utilisé
+		txCommande = VAL_POT;
 		execTxCommand();
 		break;
 	case SET_VAL:	  //Réception depuis l'interface de la valeur de la sortie.
@@ -192,6 +193,10 @@ void execRxCommand(void)
 		break;
 	case SET_SLEEP_MODE:
 		veilleMode = rxData[0];
+		break;
+	case GET_VAL_ACTU:
+		txCommande = VAL_ACTU;
+		execTxCommand();
 		break;
 	}
 }
@@ -202,9 +207,6 @@ void execTxCommand(void)
 	{
 	case VAL_POT:
 		sendPotValue(valueAdc);
-		break;
-	case VAL_SLEEP:
-		sendPotValue(valueOut);
 		break;
 	case VAL_ACTU:
 		sendPotValue(valueOut);
