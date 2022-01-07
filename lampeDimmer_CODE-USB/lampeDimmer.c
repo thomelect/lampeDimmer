@@ -49,7 +49,7 @@ char msg[5];
 //variables nécessaires à la communication avec l'interface
 uint8_t rxDataSize;
 uint8_t rxDataCnt = 0; //Compteur de donnés reçus.
-uint16_t rxData[_MAX_RXDATASIZE_];
+uint8_t rxData[_MAX_RXDATASIZE_];
 uint16_t rxErrorCommCnt = 0;
 uint8_t moteurStopFlag = 0;
 uint8_t seqAuto = 0;
@@ -265,10 +265,7 @@ void execTxCommand(void)
 		txData[2] = VAL_POT;
 		txData[3] = valueOut;
 		txData[4] = '>';
-		for (int x = 0; x <= 4; x++)
-		{
-			serialUSBWrite((uint8_t*)txData, 5);
-		}
+		serialUSBWrite((uint8_t*)txData, 5);
 		break;
 	case VAL_POT:
 		txData[0] = '<';
@@ -276,10 +273,7 @@ void execTxCommand(void)
 		txData[2] = VAL_POT;
 		txData[3] = valueAdc;
 		txData[4] = '>';
-		for (int x = 0; x <= 4; x++)
-		{
-			serialUSBWrite((uint8_t*)txData, 5);
-		}
+		serialUSBWrite((uint8_t*)txData, 5);
 		break;
 	case VAL_SLEEP_MODE:
 		txData[0] = '<';
@@ -287,10 +281,7 @@ void execTxCommand(void)
 		txData[2] = VAL_SLEEP_MODE;
 		txData[3] = valueVeilleMode;
 		txData[4] = '>';
-		for (int x = 0; x <= 4; x++)
-		{
-			serialUSBWrite((uint8_t*)txData, 5);
-		}
+		serialUSBWrite((uint8_t*)txData, 5);
 		break;
 	}
 }
