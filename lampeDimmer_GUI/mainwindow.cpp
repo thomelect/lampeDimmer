@@ -96,9 +96,15 @@ void MainWindow::execRxCommand(void)
     case VAL_INIT:
         valueOut = rxData[0];
         valueVeilleMode = rxData[1];
+//        qDebug() << rxData[0];
+//        qDebug() << rxData[1];
         qDebug() << "VAL_ACTU : " + QString::number(valueOut);
-        ui->comboBoxSleep->setCurrentIndex(valueVeilleMode);
         qDebug() << "SLEEP_MODE : " + ui->comboBoxSleep->currentText();
+//        boutonManage(valueOut);
+        ui->horizontalSliderIntensite->setSliderPosition(valueAdc); //Modifie la position du slider en fonction de la valeur obtenue par le dial.
+                ui->dialIntensite->setSliderPosition(valueAdc);             //Modifie la position du slider en fonction de la valeur obtenue par le slider.
+                ui->lbIntensiteValue->setText(QString::number(valueAdc));
+        ui->comboBoxSleep->setCurrentIndex(valueVeilleMode);
         break;
     case VAL_POT:
         valueAdc = rxData[0];
@@ -257,9 +263,8 @@ void MainWindow::setupSerial(void)
     setupDia.exec();
     if (serial->isOpen())
     {
-        qDebug() << "GET_VAL_ACTU initial";
-        //sendSerialData(GET_VAL_ACTU);
-        sendSerialData(GET_SLEEP_MODE);
+        qDebug() << "GET_VAL_INIT";
+        sendSerialData(GET_VAL_INIT);
     }
 }
 
