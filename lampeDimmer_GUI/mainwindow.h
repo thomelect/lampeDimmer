@@ -37,12 +37,14 @@ private:
     enum RX_COMMANDES
     {
         VAL_ACTU,
+        VAL_INIT,
         VAL_POT,
         VAL_SLEEP_MODE
     };
     enum TX_COMMANDES
     {
         GET_VAL_ACTU,
+        GET_VAL_INIT,
         GET_VAL_POT,
         GET_SLEEP_MODE,
         SET_SLEEP_MODE,

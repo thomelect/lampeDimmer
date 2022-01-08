@@ -93,6 +93,20 @@ void MainWindow::execRxCommand(void)
         valueOut = rxData[0];
         qDebug() << "VAL_ACTU : " + QString::number(valueOut);
         break;
+    case VAL_INIT:
+        valueOut = rxData[0];
+        valueVeilleMode = rxData[1];
+//        qDebug() << rxData[0];
+//        qDebug() << rxData[1];
+        qDebug() << "VAL_ACTU : " + QString::number(valueOut);
+        qDebug() << "SLEEP_MODE : " + ui->comboBoxSleep->currentText();
+//        boutonManage(valueOut);
+        ui->horizontalSliderIntensite->setSliderPosition(valueAdc); //Modifie la position du slider en fonction de la valeur obtenue par le dial.
+                ui->dialIntensite->setSliderPosition(valueAdc);             //Modifie la position du slider en fonction de la valeur obtenue par le slider.
+                ui->lbIntensiteValue->setText(QString::number(valueAdc));
+        ui->comboBoxSleep->setCurrentIndex(valueVeilleMode);
+        serialRxIn = false;
+        break;
     case VAL_POT:
         valueAdc = rxData[0];
         ui->horizontalSliderIntensite->setSliderPosition(valueAdc); //Modifie la position du slider en fonction de la valeur obtenue par le dial.
@@ -102,6 +116,7 @@ void MainWindow::execRxCommand(void)
         qDebug() << "VAL_POT : " + QString::number(valueAdc);
         break;
     case VAL_SLEEP_MODE:
+        qDebug() << "GET_SLEEP_MODE answer";
         valueVeilleMode = rxData[0];
         ui->comboBoxSleep->setCurrentIndex(valueVeilleMode);
         qDebug() << "SLEEP_MODE : " + ui->comboBoxSleep->currentText();
@@ -190,15 +205,6 @@ void MainWindow::sendSerialData(uint8_t cmd, uint8_t data)
 {
     if (serial->isOpen())
     {
-        if (cmd == GET_VAL_POT)
-        {
-            char txData[4];
-            txData[0] = '<';
-            txData[1] = 0;
-            txData[2] = GET_VAL_POT;
-            txData[3] = '>';
-            serial->write(txData, 4);
-        }
         if (cmd == GET_VAL_ACTU)
         {
             char txData[4];
@@ -208,8 +214,27 @@ void MainWindow::sendSerialData(uint8_t cmd, uint8_t data)
             txData[3] = '>';
             serial->write(txData, 4);
         }
+        if (cmd == GET_VAL_INIT)
+        {
+            char txData[4];
+            txData[0] = '<';
+            txData[1] = 0;
+            txData[2] = GET_VAL_INIT;
+            txData[3] = '>';
+            serial->write(txData, 4);
+        }
+        if (cmd == GET_VAL_POT)
+        {
+            char txData[4];
+            txData[0] = '<';
+            txData[1] = 0;
+            txData[2] = GET_VAL_POT;
+            txData[3] = '>';
+            serial->write(txData, 4);
+        }
         if (cmd == GET_SLEEP_MODE)
         {
+            qDebug() << "GET_SLEEP_MODE request";
             char txData[4];
             txData[0] = '<';
             txData[1] = 0;
@@ -217,8 +242,20 @@ void MainWindow::sendSerialData(uint8_t cmd, uint8_t data)
             txData[3] = '>';
             serial->write(txData, 4);
         }
+        if (cmd == SET_VAL)
+        {
+            qDebug() << "here VAL";
+            char txData[5];
+            txData[0] = '<';
+            txData[1] = 1;
+            txData[2] = SET_VAL;
+            txData[3] = data;
+            txData[4] = '>';
+            serial->write(txData, 5);
+        }
         else
         {
+            qDebug() << "here";
             char txData[5];
             txData[0] = '<';
             txData[1] = 1;
@@ -239,9 +276,8 @@ void MainWindow::setupSerial(void)
     setupDia.exec();
     if (serial->isOpen())
     {
-        qDebug() << "GET_VAL_ACTU initial";
-        sendSerialData(GET_VAL_ACTU);
-        sendSerialData(GET_SLEEP_MODE);
+        qDebug() << "GET_VAL_INIT";
+        sendSerialData(GET_VAL_INIT);
     }
 }
 
@@ -267,6 +303,7 @@ void MainWindow::on_horizontalSliderIntensite_valueChanged(void)
     if (!ui->pushBottonOnOff->isChecked())
     {
         intensite = ui->horizontalSliderIntensite->value(); //On récupère la valeur du slider.
+        qDebug() << intensite;
         boutonManage(intensite);
         if (!serialRxIn)
             sendSerialData(SET_VAL, intensite);
