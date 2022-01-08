@@ -23,7 +23,6 @@
 #include <string.h>
 #include <sources/LUFA/Drivers/USB/USB.h>
 #include "adcBasic.h"
-#include "usart.h"
 #include "Descriptors.h"
 
 /* Macros: */
