@@ -38,20 +38,21 @@ private:
     {
         VAL_ACTU,
         VAL_INIT,
-        VAL_POT,
-        VAL_SLEEP_MODE
+        VAL_POT/*,*/
+//        VAL_SLEEP_MODE
     };
     enum TX_COMMANDES
     {
         GET_VAL_ACTU,
         GET_VAL_INIT,
         GET_VAL_POT,
-        GET_SLEEP_MODE,
+//        GET_SLEEP_MODE,
         SET_SLEEP_MODE,
         SET_VAL
     };
     RX_STATES rxState;
     RX_COMMANDES rxCommande;
+    TX_COMMANDES txCommande;
 
     QByteArray tmpRxData;
     uint8_t rxDataSize;
@@ -127,7 +128,7 @@ private:
      * @param cmd   Commande envoyée
      * @param data  Donnée à envoyer.
      */
-    void sendSerialData(uint8_t cmd, uint8_t data = 0);
+    void sendSerialData(/*uint8_t cmd, uint8_t data = 0*/);
 
     /*//////////////////////////////////////////////////////////*/
 

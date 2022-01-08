@@ -90,36 +90,44 @@ void MainWindow::execRxCommand(void)
     switch (rxCommande)
     {
     case VAL_ACTU:
+        /*// ACQUISITION //*/
         valueOut = rxData[0];
+
+        /*// DEBUG //*/
         qDebug() << "VAL_ACTU : " + QString::number(valueOut);
         break;
     case VAL_INIT:
+        /*// ACQUISITION //*/
         valueOut = rxData[0];
         valueVeilleMode = rxData[1];
-//        qDebug() << rxData[0];
-//        qDebug() << rxData[1];
+
+        /*// DEBUG //*/
         qDebug() << "VAL_ACTU : " + QString::number(valueOut);
         qDebug() << "SLEEP_MODE : " + ui->comboBoxSleep->currentText();
-//        boutonManage(valueOut);
-        ui->horizontalSliderIntensite->setSliderPosition(valueAdc); //Modifie la position du slider en fonction de la valeur obtenue par le dial.
-                ui->dialIntensite->setSliderPosition(valueAdc);             //Modifie la position du slider en fonction de la valeur obtenue par le slider.
-                ui->lbIntensiteValue->setText(QString::number(valueAdc));
-        ui->comboBoxSleep->setCurrentIndex(valueVeilleMode);
-        serialRxIn = false;
-        break;
-    case VAL_POT:
-        valueAdc = rxData[0];
+
+        /*// CHANGEMENTS GUI //*/
         ui->horizontalSliderIntensite->setSliderPosition(valueAdc); //Modifie la position du slider en fonction de la valeur obtenue par le dial.
         ui->dialIntensite->setSliderPosition(valueAdc);             //Modifie la position du slider en fonction de la valeur obtenue par le slider.
         ui->lbIntensiteValue->setText(QString::number(valueAdc));
-        serialRxIn = false;
-        qDebug() << "VAL_POT : " + QString::number(valueAdc);
-        break;
-    case VAL_SLEEP_MODE:
-        qDebug() << "GET_SLEEP_MODE answer";
-        valueVeilleMode = rxData[0];
         ui->comboBoxSleep->setCurrentIndex(valueVeilleMode);
-        qDebug() << "SLEEP_MODE : " + ui->comboBoxSleep->currentText();
+
+        /*// FLAG DE RÉCEPTION //*/
+        serialRxIn = false;
+        break;
+    case VAL_POT:
+        /*// ACQUISITION //*/
+        valueAdc = rxData[0];
+
+        /*// DEBUG //*/
+        qDebug() << "VAL_POT : " + QString::number(valueAdc);
+
+        /*// CHANGEMENTS GUI //*/
+        ui->horizontalSliderIntensite->setSliderPosition(valueAdc); //Modifie la position du slider en fonction de la valeur obtenue par le dial.
+        ui->dialIntensite->setSliderPosition(valueAdc);             //Modifie la position du slider en fonction de la valeur obtenue par le slider.
+        ui->lbIntensiteValue->setText(QString::number(valueAdc));
+
+        /*// FLAG DE RÉCEPTION //*/
+        serialRxIn = false;
         break;
     }
 }
@@ -201,68 +209,99 @@ void MainWindow::readSerialData(void)
 /**
 * @brief Fonction de lecture du'envoie sur le port série..
 */
-void MainWindow::sendSerialData(uint8_t cmd, uint8_t data)
+void MainWindow::sendSerialData(/*uint8_t cmd, uint8_t data*/)
 {
     if (serial->isOpen())
     {
-        if (cmd == GET_VAL_ACTU)
-        {
-            char txData[4];
+//        if (cmd == GET_VAL_ACTU)
+//        {
+//            char txData[4];
+//            txData[0] = '<';
+//            txData[1] = 0;
+//            txData[2] = GET_VAL_ACTU;
+//            txData[3] = '>';
+//            serial->write(txData, 4);
+//        }
+//        if (cmd == GET_VAL_INIT)
+//        {
+//            char txData[4];
+//            txData[0] = '<';
+//            txData[1] = 0;
+//            txData[2] = GET_VAL_INIT;
+//            txData[3] = '>';
+//            serial->write(txData, 4);
+//        }
+//        if (cmd == GET_VAL_POT)
+//        {
+//            char txData[4];
+//            txData[0] = '<';
+//            txData[1] = 0;
+//            txData[2] = GET_VAL_POT;
+//            txData[3] = '>';
+//            serial->write(txData, 4);
+//        }
+//        if (cmd == SET_VAL)
+//        {
+//            qDebug() << "here VAL";
+//            char txData[5];
+//            txData[0] = '<';
+//            txData[1] = 1;
+//            txData[2] = SET_VAL;
+//            txData[3] = data;
+//            txData[4] = '>';
+//            serial->write(txData, 5);
+//        }
+//        else
+//        {
+//            qDebug() << "here";
+//            char txData[5];
+//            txData[0] = '<';
+//            txData[1] = 1;
+//            txData[2] = cmd;
+//            txData[3] = data;
+//            txData[4] = '>';
+//            serial->write(txData, 5);
+//        }
+        char txData[5];
+        switch (txCommande) {
+        case GET_VAL_ACTU:
             txData[0] = '<';
             txData[1] = 0;
             txData[2] = GET_VAL_ACTU;
             txData[3] = '>';
             serial->write(txData, 4);
-        }
-        if (cmd == GET_VAL_INIT)
-        {
-            char txData[4];
+            break;
+        case GET_VAL_INIT:
             txData[0] = '<';
             txData[1] = 0;
             txData[2] = GET_VAL_INIT;
             txData[3] = '>';
             serial->write(txData, 4);
-        }
-        if (cmd == GET_VAL_POT)
-        {
-            char txData[4];
+            break;
+        case GET_VAL_POT:
             txData[0] = '<';
             txData[1] = 0;
             txData[2] = GET_VAL_POT;
             txData[3] = '>';
             serial->write(txData, 4);
-        }
-        if (cmd == GET_SLEEP_MODE)
-        {
-            qDebug() << "GET_SLEEP_MODE request";
-            char txData[4];
-            txData[0] = '<';
-            txData[1] = 0;
-            txData[2] = GET_SLEEP_MODE;
-            txData[3] = '>';
-            serial->write(txData, 4);
-        }
-        if (cmd == SET_VAL)
-        {
-            qDebug() << "here VAL";
-            char txData[5];
+            break;
+        case SET_SLEEP_MODE:
             txData[0] = '<';
             txData[1] = 1;
-            txData[2] = SET_VAL;
-            txData[3] = data;
+            txData[2] = SET_SLEEP_MODE;
+            txData[3] = valueVeilleMode;
             txData[4] = '>';
             serial->write(txData, 5);
-        }
-        else
-        {
+            break;
+        case SET_VAL:
             qDebug() << "here";
-            char txData[5];
             txData[0] = '<';
             txData[1] = 1;
-            txData[2] = cmd;
-            txData[3] = data;
+            txData[2] = SET_SLEEP_MODE;
+            txData[3] = intensite;
             txData[4] = '>';
             serial->write(txData, 5);
+            break;
         }
     }
 }
@@ -277,14 +316,16 @@ void MainWindow::setupSerial(void)
     if (serial->isOpen())
     {
         qDebug() << "GET_VAL_INIT";
-        sendSerialData(GET_VAL_INIT);
+        txCommande = GET_VAL_INIT;
+        sendSerialData(/*GET_VAL_INIT*/);
     }
 }
 
 void MainWindow::on_comboBoxSleep_activated(int index)
 {
-
-    sendSerialData(SET_SLEEP_MODE, index);
+    valueVeilleMode = index;
+    txCommande = SET_SLEEP_MODE;
+    sendSerialData(/*SET_SLEEP_MODE, index*/);
 }
 
 void MainWindow::on_dialIntensite_valueChanged(void)
@@ -294,7 +335,10 @@ void MainWindow::on_dialIntensite_valueChanged(void)
         intensite = ui->dialIntensite->value();
         boutonManage(intensite);
         if (!serialRxIn)
-            sendSerialData(SET_VAL, intensite);
+        {
+            txCommande = SET_VAL;
+            sendSerialData(/*SET_VAL, intensite*/);
+        }
     }
 }
 
@@ -304,9 +348,11 @@ void MainWindow::on_horizontalSliderIntensite_valueChanged(void)
     {
         intensite = ui->horizontalSliderIntensite->value(); //On récupère la valeur du slider.
         qDebug() << intensite;
-        boutonManage(intensite);
         if (!serialRxIn)
-            sendSerialData(SET_VAL, intensite);
+        {
+            txCommande = SET_VAL;
+            sendSerialData(/*SET_VAL, intensite*/);
+        }
     }
 }
 
@@ -314,7 +360,8 @@ void MainWindow::on_pushBottonOnOff_pressed()
 {
     if (boutonState) //Met la lumière à "ON" et le bouton affiche maintenant "OFF".
     {
-        sendSerialData(GET_VAL_POT);
+        txCommande = GET_VAL_POT;
+        sendSerialData(/*GET_VAL_POT*/);
         boutonState = !boutonState;
         intensite = valueAdc;
     }
@@ -323,12 +370,16 @@ void MainWindow::on_pushBottonOnOff_pressed()
         boutonState = !boutonState;
         intensite = 0;
     }
-    sendSerialData(SET_VAL, intensite);
+    txCommande = SET_VAL;
+    sendSerialData(/*SET_VAL, intensite*/);
 }
 
 void MainWindow::on_pushBottonOnOff_released()
 {
     boutonManage(intensite);
     if (!serialRxIn)
-        sendSerialData(SET_VAL, intensite);
+    {
+        txCommande = SET_VAL;
+        sendSerialData(/*SET_VAL, intensite*/);
+    }
 }
