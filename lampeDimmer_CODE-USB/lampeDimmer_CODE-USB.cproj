@@ -147,10 +147,10 @@
       </AvrGcc>
     </ToolchainSettings>
     <UsesExternalMakeFile>True</UsesExternalMakeFile>
-    <OutputDirectory>D:\clg\TSO\avr\projetsPerso\Micro\lampeDimmer\lampeDimmer_CODE - USB</OutputDirectory>
+    <OutputDirectory>D:\Electronique\Programmation-ETC\avr\projetsPerso\Micro\lampeDimmer\lampeDimmer_CODE-USB</OutputDirectory>
     <BuildTarget>all</BuildTarget>
     <CleanTarget>clean</CleanTarget>
-    <ExternalMakeFilePath>D:\clg\TSO\avr\projetsPerso\Micro\lampeDimmer\lampeDimmer_CODE - USB\makefile</ExternalMakeFilePath>
+    <ExternalMakeFilePath>D:\Electronique\Programmation-ETC\avr\projetsPerso\Micro\lampeDimmer\lampeDimmer_CODE-USB\makefile</ExternalMakeFilePath>
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="adcBasic.c">
@@ -166,12 +166,6 @@
       <SubType>compile</SubType>
     </Compile>
     <Compile Include="lampeDimmer.c">
-      <SubType>compile</SubType>
-    </Compile>
-    <Compile Include="usart.c">
-      <SubType>compile</SubType>
-    </Compile>
-    <Compile Include="usart.h">
       <SubType>compile</SubType>
     </Compile>
   </ItemGroup>

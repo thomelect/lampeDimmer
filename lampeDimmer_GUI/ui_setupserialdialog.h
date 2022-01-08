@@ -27,10 +27,10 @@ public:
     QComboBox *cbListBaudRate;
     QComboBox *cbListPortSerie;
     QPushButton *btActualiser;
-    QPushButton *btConnection;
-    QLabel *lbbaudRate;
-    QPushButton *pbCANCEL;
-    QPushButton *pbOK;
+    QPushButton *btConnexion;
+    QLabel *lbBaudRate;
+    QPushButton *btAnnuler;
+    QPushButton *btOk;
 
     void setupUi(QDialog *SetupSerialDialog)
     {
@@ -65,26 +65,26 @@ public:
         palette2.setBrush(QPalette::Inactive, QPalette::WindowText, brush);
         palette2.setBrush(QPalette::Disabled, QPalette::WindowText, brush1);
         btActualiser->setPalette(palette2);
-        btConnection = new QPushButton(SetupSerialDialog);
-        btConnection->setObjectName(QStringLiteral("btConnection"));
-        btConnection->setGeometry(QRect(139, 10, 131, 23));
+        btConnexion = new QPushButton(SetupSerialDialog);
+        btConnexion->setObjectName(QStringLiteral("btConnexion"));
+        btConnexion->setGeometry(QRect(139, 10, 131, 23));
         QPalette palette3;
         palette3.setBrush(QPalette::Active, QPalette::WindowText, brush);
         palette3.setBrush(QPalette::Inactive, QPalette::WindowText, brush);
         palette3.setBrush(QPalette::Disabled, QPalette::WindowText, brush1);
-        btConnection->setPalette(palette3);
-        lbbaudRate = new QLabel(SetupSerialDialog);
-        lbbaudRate->setObjectName(QStringLiteral("lbbaudRate"));
-        lbbaudRate->setGeometry(QRect(9, 73, 71, 16));
+        btConnexion->setPalette(palette3);
+        lbBaudRate = new QLabel(SetupSerialDialog);
+        lbBaudRate->setObjectName(QStringLiteral("lbBaudRate"));
+        lbBaudRate->setGeometry(QRect(9, 73, 71, 16));
         QFont font;
         font.setPointSize(10);
-        lbbaudRate->setFont(font);
-        pbCANCEL = new QPushButton(SetupSerialDialog);
-        pbCANCEL->setObjectName(QStringLiteral("pbCANCEL"));
-        pbCANCEL->setGeometry(QRect(100, 100, 80, 25));
-        pbOK = new QPushButton(SetupSerialDialog);
-        pbOK->setObjectName(QStringLiteral("pbOK"));
-        pbOK->setGeometry(QRect(190, 100, 80, 25));
+        lbBaudRate->setFont(font);
+        btAnnuler = new QPushButton(SetupSerialDialog);
+        btAnnuler->setObjectName(QStringLiteral("btAnnuler"));
+        btAnnuler->setGeometry(QRect(100, 100, 80, 25));
+        btOk = new QPushButton(SetupSerialDialog);
+        btOk->setObjectName(QStringLiteral("btOk"));
+        btOk->setGeometry(QRect(190, 100, 80, 25));
 
         retranslateUi(SetupSerialDialog);
 
@@ -95,10 +95,10 @@ public:
     {
         SetupSerialDialog->setWindowTitle(QApplication::translate("SetupSerialDialog", "Dialog", Q_NULLPTR));
         btActualiser->setText(QApplication::translate("SetupSerialDialog", "Actualiser", Q_NULLPTR));
-        btConnection->setText(QApplication::translate("SetupSerialDialog", "Connecter", Q_NULLPTR));
-        lbbaudRate->setText(QApplication::translate("SetupSerialDialog", "Baud rate :", Q_NULLPTR));
-        pbCANCEL->setText(QApplication::translate("SetupSerialDialog", "Annuler", Q_NULLPTR));
-        pbOK->setText(QApplication::translate("SetupSerialDialog", "Confirmer", Q_NULLPTR));
+        btConnexion->setText(QApplication::translate("SetupSerialDialog", "Connecter", Q_NULLPTR));
+        lbBaudRate->setText(QApplication::translate("SetupSerialDialog", "Baud rate :", Q_NULLPTR));
+        btAnnuler->setText(QApplication::translate("SetupSerialDialog", "Annuler", Q_NULLPTR));
+        btOk->setText(QApplication::translate("SetupSerialDialog", "Confirmer", Q_NULLPTR));
     } // retranslateUi
 
 };
