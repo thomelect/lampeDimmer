@@ -69,8 +69,8 @@ enum TX_COMMANDES
 {
 	VAL_ACTU,
 	VAL_INIT,
-	VAL_POT,
-	VAL_SLEEP_MODE
+	VAL_POT/*,*/
+	/*VAL_SLEEP_MODE*/
 };
 
 //enum des différents commandes de transmission d'une réception
@@ -79,7 +79,7 @@ enum RX_COMMANDES
 	GET_VAL_ACTU,
 	GET_VAL_INIT,
 	GET_VAL_POT,
-	GET_SLEEP_MODE,
+	/*GET_SLEEP_MODE,*/
 	SET_SLEEP_MODE,
 	SET_VAL
 };
@@ -244,10 +244,10 @@ void execRxCommand(void)
 		txCommande = VAL_POT;
 		execTxCommand();
 		break;
-	case GET_SLEEP_MODE:
-		txCommande = VAL_SLEEP_MODE;
-		execTxCommand();
-		break;
+// 	case GET_SLEEP_MODE:
+// 		txCommande = VAL_SLEEP_MODE;
+// 		execTxCommand();
+// 		break;
 	case SET_SLEEP_MODE:
 		valueVeilleMode = rxData[0];
 		break;
@@ -290,14 +290,14 @@ void execTxCommand(void)
 		txData[4] = '>';
 		serialUSBWrite((uint8_t*)txData, 5);
 		break;
-	case VAL_SLEEP_MODE:
-		txData[0] = '<';
-		txData[1] = 1;
-		txData[2] = VAL_SLEEP_MODE;
-		txData[3] = valueVeilleMode;
-		txData[4] = '>';
-		serialUSBWrite((uint8_t*)txData, 5);
-		break;
+// 	case VAL_SLEEP_MODE:
+// 		txData[0] = '<';
+// 		txData[1] = 1;
+// 		txData[2] = VAL_SLEEP_MODE;
+// 		txData[3] = valueVeilleMode;
+// 		txData[4] = '>';
+// 		serialUSBWrite((uint8_t*)txData, 5);
+// 		break;
 	}
 }
 
