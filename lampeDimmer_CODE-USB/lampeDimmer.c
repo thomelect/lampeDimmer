@@ -68,6 +68,7 @@ enum RX_STATES
 enum TX_COMMANDES
 {
 	VAL_ACTU,
+	VAL_INIT,
 	VAL_POT,
 	VAL_SLEEP_MODE
 };
@@ -76,6 +77,7 @@ enum TX_COMMANDES
 enum RX_COMMANDES
 {
 	GET_VAL_ACTU,
+	GET_VAL_INIT,
 	GET_VAL_POT,
 	GET_SLEEP_MODE,
 	SET_SLEEP_MODE,
@@ -234,6 +236,10 @@ void execRxCommand(void)
 		txCommande = VAL_ACTU;
 		execTxCommand();
 		break;
+	case GET_VAL_INIT:
+		txCommande = VAL_INIT;
+		execTxCommand();
+		break;
 	case GET_VAL_POT: //État non utilisé
 		txCommande = VAL_POT;
 		execTxCommand();
@@ -256,7 +262,7 @@ void execRxCommand(void)
 
 void execTxCommand(void)
 {
-	char txData[5];
+	char txData[6];
 	switch (txCommande)
 	{
 	case VAL_ACTU:
@@ -266,6 +272,15 @@ void execTxCommand(void)
 		txData[3] = valueOut;
 		txData[4] = '>';
 		serialUSBWrite((uint8_t*)txData, 5);
+		break;
+	case VAL_INIT:
+		txData[0] = '<';
+		txData[1] = 2;
+		txData[2] = VAL_INIT;
+		txData[3] = valueAdc;
+		txData[4] = valueVeilleMode;
+		txData[5] = '>';
+		serialUSBWrite((uint8_t*)txData, 6);
 		break;
 	case VAL_POT:
 		txData[0] = '<';
