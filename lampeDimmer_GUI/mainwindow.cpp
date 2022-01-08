@@ -105,6 +105,7 @@ void MainWindow::execRxCommand(void)
                 ui->dialIntensite->setSliderPosition(valueAdc);             //Modifie la position du slider en fonction de la valeur obtenue par le slider.
                 ui->lbIntensiteValue->setText(QString::number(valueAdc));
         ui->comboBoxSleep->setCurrentIndex(valueVeilleMode);
+        serialRxIn = false;
         break;
     case VAL_POT:
         valueAdc = rxData[0];
@@ -241,8 +242,20 @@ void MainWindow::sendSerialData(uint8_t cmd, uint8_t data)
             txData[3] = '>';
             serial->write(txData, 4);
         }
+        if (cmd == SET_VAL)
+        {
+            qDebug() << "here VAL";
+            char txData[5];
+            txData[0] = '<';
+            txData[1] = 1;
+            txData[2] = SET_VAL;
+            txData[3] = data;
+            txData[4] = '>';
+            serial->write(txData, 5);
+        }
         else
         {
+            qDebug() << "here";
             char txData[5];
             txData[0] = '<';
             txData[1] = 1;
@@ -290,6 +303,7 @@ void MainWindow::on_horizontalSliderIntensite_valueChanged(void)
     if (!ui->pushBottonOnOff->isChecked())
     {
         intensite = ui->horizontalSliderIntensite->value(); //On récupère la valeur du slider.
+        qDebug() << intensite;
         boutonManage(intensite);
         if (!serialRxIn)
             sendSerialData(SET_VAL, intensite);
