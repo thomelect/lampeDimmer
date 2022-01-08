@@ -1,7 +1,8 @@
 /**
  * @file       setupserialdialog.h
  * @brief      Classe qui affiche une boite de dialogue pour configurer le port série
- * @author     Marc Juneau
+ * @author     Base : Marc Juneau
+ * @author     Adaptation : Thomas Desrosiers
  * @version    0.01
  * @date       8 février 2019
  */
@@ -11,8 +12,14 @@
 #include <QDialog>
 #include <QtSerialPort/QSerialPort>
 
-namespace Ui {
-class SetupSerialDialog;
+#define DEFAULT_BAUD_RATE "1000000"
+#define DEFAULT_PORT_DESC "USB-SERIAL CH340"
+//"USB-SERIAL CH340"
+//"Périphérique série USB"
+
+namespace Ui
+{
+    class SetupSerialDialog;
 }
 
 class SetupSerialDialog : public QDialog
@@ -21,35 +28,44 @@ class SetupSerialDialog : public QDialog
 
 public:
     /**
-     * @brief Constructeur de la classe SetupSerialDialog
-     * @param s Port série à configurer
+     * @brief    Constructeur de la classe SetupSerialDialog.
+     * @param s  Port série à configurer.
      */
-    explicit SetupSerialDialog(QSerialPort * s);
+    explicit SetupSerialDialog(QSerialPort *s);
     ~SetupSerialDialog();
 
 private slots:
     /**
-     * @brief Lorsque le bouton Scan est appuyé
-     * Fait la mise à jour de la liste des ports disponibles.
-     * Si le port série était connecté, il est automatiquement fermé.
+     * @brief  Fonction appelée lorsque le bouton Scan est appuyé.
+     * @li     Fait la mise à jour de la liste des ports disponibles.
+     * @li     Si le port série est connecté, il utilisé comme un bouton "déconnecter".
      */
     void on_btActualiser_clicked();
 
     /**
-     * @brief Lorsque le bouton Connecter est appuyé
-     * Essaie de connecter le port série sélectionné dans la liste.
-     * Des messages sont envoyés dans vers QDebug
+     * @brief  Fonction appelée lorsque le bouton "Annuler" est appuyé.
+     *         La fenêtre est alors fermée.
      */
-    void on_btConnection_clicked();
+    void on_btAnnuler_clicked();
 
-    void on_pbOK_clicked();
+    /**
+     * @brief  Fonction appelée lorsque le bouton Connecter est appuyé.
+     * @li     Essaie de connecter le port série sélectionné dans la liste.
+     * @li     Des messages sont envoyés dans vers QDebug.
+     * @li     Si le port série est connecté, le bouton est désactivé.
+     */
+    void on_btConnexion_clicked();
 
-    void on_pbCANCEL_clicked();
+    /**
+     * @brief  Fonction appelée lorsque le bouton "Ok" est appuyé.
+     *         La fenêtre est alors fermée.
+     */
+    void on_btOk_clicked();
 
 private:
     QSerialPort *serial;
     Ui::SetupSerialDialog *ui;
-    const uint32_t BAUD_RATE[7] = {9600,19200,115200,250000,921600,1000000,2000000};
+    const uint32_t BAUD_RATE[7] = {9600, 19200, 115200, 250000, 921600, 1000000, 2000000};
 };
 
 #endif // SETUPSERIALDIALOG_H
