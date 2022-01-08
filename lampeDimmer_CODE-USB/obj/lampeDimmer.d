@@ -91,7 +91,7 @@ obj/lampeDimmer.o: lampeDimmer.c sources/LUFA/Drivers/USB/USB.h \
  sources/LUFA/Drivers/USB/Class/Device/RNDISClassDevice.h \
  sources/LUFA/Drivers/USB/Class/Device/../Common/RNDISClassCommon.h \
  sources/LUFA/Drivers/USB/Class/Device/../Common/CDCClassCommon.h \
- sources/LUFA/Drivers/USB/Class/StillImageClass.h adcBasic.h usart.h \
+ sources/LUFA/Drivers/USB/Class/StillImageClass.h adcBasic.h \
  Descriptors.h sources/LUFA/../LUFA/Drivers/USB/USB.h
 
 sources/LUFA/Drivers/USB/USB.h:
@@ -283,8 +283,6 @@ sources/LUFA/Drivers/USB/Class/Device/../Common/CDCClassCommon.h:
 sources/LUFA/Drivers/USB/Class/StillImageClass.h:
 
 adcBasic.h:
-
-usart.h:
 
 Descriptors.h:
 

@@ -1,18 +1,19 @@
 /**
- * @file       setupserialdialog.cpp
+ * @file       setupserialdialog.h
  * @brief      Classe qui affiche une boite de dialogue pour configurer le port série
- * @author     Marc Juneau
+ * @author     Base : Marc Juneau
+ * @author     Adaptation : Thomas Desrosiers
  * @version    0.01
  * @date       8 février 2019
  */
+
 #include "setupserialdialog.h"
 #include "ui_setupserialdialog.h"
 #include <QtSerialPort/QSerialPortInfo>
 #include <QDebug>
 
-SetupSerialDialog::SetupSerialDialog(QSerialPort *s) :
-    QDialog(0),
-    ui(new Ui::SetupSerialDialog)
+SetupSerialDialog::SetupSerialDialog(QSerialPort *s) : QDialog(0),
+                                                       ui(new Ui::SetupSerialDialog)
 {
     serial = s;
     ui->setupUi(this);
@@ -23,16 +24,16 @@ SetupSerialDialog::SetupSerialDialog(QSerialPort *s) :
     ui->cbListBaudRate->addItem("921600");
     ui->cbListBaudRate->addItem("1000000");
     ui->cbListBaudRate->addItem("2000000");
-    ui->cbListBaudRate->setCurrentIndex(5);
-    if(serial->isOpen())
+    ui->cbListBaudRate->setCurrentIndex(ui->cbListBaudRate->findText(DEFAULT_BAUD_RATE, Qt::MatchExactly));
+    if (serial->isOpen())
     {
         ui->btActualiser->setText("Déconnecter");
         ui->cbListPortSerie->addItem(serial->portName());
         ui->cbListPortSerie->setEnabled(false);
-        ui->btConnection->setEnabled(false);
+        ui->btConnexion->setEnabled(false);
     }
     else
-        ui->pbOK->setEnabled(false);
+        ui->btOk->setEnabled(false);
 }
 
 SetupSerialDialog::~SetupSerialDialog()
@@ -40,14 +41,43 @@ SetupSerialDialog::~SetupSerialDialog()
     delete ui;
 }
 
-void SetupSerialDialog::on_btConnection_clicked()
+void SetupSerialDialog::on_btActualiser_clicked()
 {
-    ui->pbOK->setEnabled(true);
+    ui->cbListPortSerie->clear();
+    ui->btActualiser->setText("Actualiser");
+    ui->btOk->setEnabled(false);
+    serial->close();
+    ui->cbListPortSerie->setEnabled(true);
+    ui->btConnexion->setEnabled(true);
+    foreach (const QSerialPortInfo &info, QSerialPortInfo::availablePorts())
+    {
+        ui->cbListPortSerie->addItem(info.portName() + " " + info.description());
+    }
+    if (ui->cbListPortSerie->findText(DEFAULT_PORT_DESC, Qt::MatchContains) != -1)
+    {
+        ui->cbListPortSerie->setCurrentIndex(ui->cbListPortSerie->findText(DEFAULT_PORT_DESC, Qt::MatchContains));
+    }
+    else
+    {
+        ui->cbListPortSerie->setCurrentIndex(0);
+        qDebug() << ui->cbListPortSerie->currentText();
+    }
+}
+
+void SetupSerialDialog::on_btAnnuler_clicked()
+{
+    this->close();
+}
+
+void SetupSerialDialog::on_btConnexion_clicked()
+{
+    ui->btOk->setEnabled(true);
     if (ui->cbListPortSerie->count() > 0)
     {
         QString portName = ui->cbListPortSerie->itemText(ui->cbListPortSerie->currentIndex());
-        foreach (const QSerialPortInfo &info, QSerialPortInfo::availablePorts()) {
-            QString infoTag =  info.portName() + " " + info.description();
+        foreach (const QSerialPortInfo &info, QSerialPortInfo::availablePorts())
+        {
+            QString infoTag = info.portName() + " " + info.description();
             if (infoTag == portName)
             {
                 serial->setPort(info);
@@ -55,14 +85,9 @@ void SetupSerialDialog::on_btConnection_clicked()
                 if (serial->open(QIODevice::ReadWrite))
                 {
                     qDebug() << "open " << portName;
-                    if (serial->setBaudRate(BAUD_RATE[ui->cbListBaudRate->currentIndex()])
-                            && serial->setDataBits(QSerialPort::Data8)
-                            && serial->setParity(QSerialPort::NoParity)
-                            && serial->setStopBits(QSerialPort::OneStop)
-                            && serial->setFlowControl(QSerialPort::NoFlowControl))
+                    if (serial->setBaudRate(BAUD_RATE[ui->cbListBaudRate->currentIndex()]) && serial->setDataBits(QSerialPort::Data8) && serial->setParity(QSerialPort::NoParity) && serial->setStopBits(QSerialPort::OneStop) && serial->setFlowControl(QSerialPort::NoFlowControl))
                     {
-                        qDebug() << "Ouvert " << portName;
-                        ui->btConnection->setEnabled(false);
+                        ui->btConnexion->setEnabled(false);
                         ui->btActualiser->setText("Déconnecter");
                     }
                 }
@@ -71,23 +96,7 @@ void SetupSerialDialog::on_btConnection_clicked()
     }
 }
 
-void SetupSerialDialog::on_pbOK_clicked()
-{
-    this->close();
-}
-
-void SetupSerialDialog::on_btActualiser_clicked()
-{
-    ui->cbListPortSerie->clear();
-    ui->btActualiser->setText("Actualiser");
-    ui->pbOK->setEnabled(false);
-    serial->close();
-    ui->cbListPortSerie->setEnabled(true);
-    ui->btConnection->setEnabled(true);
-    foreach(const QSerialPortInfo &info,QSerialPortInfo::availablePorts()) { ui->cbListPortSerie->addItem(info.portName() + " " + info.description()); }
-}
-
-void SetupSerialDialog::on_pbCANCEL_clicked()
+void SetupSerialDialog::on_btOk_clicked()
 {
     this->close();
 }
