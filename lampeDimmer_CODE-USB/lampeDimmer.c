@@ -1,17 +1,18 @@
 ﻿/**
-  * @file       demoUSBSerial.c
-  * @brief      Programme de démonstration du lien série USB
-  * @author     Marc Juneau (marcjuneau@gmail.com)
-  * @version    0.01
-  * @date       15 février 2020
+  * @file       lampeDimmer.c
+  * @brief      Programme utilisé pour la communication avec le contrôleur de la lampe.
+  * @author     Base : Marc Juneau
+  * @author     Adaptation : Thomas Desrosiers
+  * @version    2.0
+  * @date       8 Janvier 2021
   *
-  * @mainpage
-  *		Programme de démonstration du lien série USB
-  *	@author Marc Juneau
-  *	@section MainSection1 Description
-  *
-  * Ce programme démontre le fonctionnement minimale d'un lien série USB.
-  * Il utilise la bibliothèque LUFA pour un périphérique CDC
+  * @mainpage	lampeDimmer
+  * @author     Base : Marc Juneau
+  * @author     Adaptation : Thomas Desrosiers
+  *	@section	MainSection1 Description
+  *				Programme de gestion de la communication par USB.
+  *	@li			Ce programme démontre le fonctionnement minimale d'un lien série USB.
+  *	@li			Il utilise la bibliothèque LUFA pour un périphérique CDC
   */
 
 #include <avr/io.h>
@@ -25,16 +26,19 @@
 #include "usart.h"
 #include "Descriptors.h"
 
+/* Macros: */
 #define OUTPUT_VALUE(val) (OCR4A = val) //Valeur PWM output R.
 #define OUTPUT_INIT() DDRC |= (1 << 7)	//Init output R.
 #define SWITCH_INIT() PORTB |= (1 << 1) //Bouton sur PD1.
 #define SWITCH() ((PINB & (1 << 1)) == 0)
 
+/* Defines: */
 #define TIMER_CNT_CYCLE_ADC 25	//Nombre de cycle comptés en interruption.
 #define TIMER_CNT_CYCLE_FADE 50 //Nombre de cycle comptés en interruption.
 #define INCREMENT_STEP 1		//Incrément pour le fadding.
 #define _MAX_RXDATASIZE_ 16
 
+/* Variables: */
 volatile uint16_t msCntAdc = 0;	 //Compteur utilisés pour compter 25 fois un délai de 1ms pour la mesure de l'ADC.
 volatile uint8_t msFlagAdc = 0;	 //Flags qui est mis à 1 à chaques 25ms pour la mesure de l'ADC.
 volatile uint16_t msCntFade = 0; //Compteur utilisés pour compter 50 fois un délai de 1ms pour le fade de la sortie.
@@ -44,17 +48,14 @@ uint16_t valueOut = 0;
 uint16_t valueAdc = 0;
 uint8_t valueVeilleMode = 0;
 int increment = 5;
-char msg[5];
 
-//variables nécessaires à la communication avec l'interface
+/* Variables nécessaires à la communication avec l'interface: */
 uint8_t rxDataSize;
 uint8_t rxDataCnt = 0; //Compteur de donnés reçus.
 uint8_t rxData[_MAX_RXDATASIZE_];
 uint16_t rxErrorCommCnt = 0;
-uint8_t moteurStopFlag = 0;
-uint8_t seqAuto = 0;
 
-//enum des différents paramètres d'une réception
+/* Enum des différents étapes d'une réception: */
 enum RX_STATES
 {
 	WAIT,
@@ -64,32 +65,30 @@ enum RX_STATES
 	VALIDATE
 };
 
-//enum des différents paramètres d'une transmission
+/* Enum des différentes commandes utilisées en transmission: */
 enum TX_COMMANDES
 {
 	VAL_ACTU,
 	VAL_INIT,
-	VAL_POT/*,*/
-	/*VAL_SLEEP_MODE*/
+	VAL_POT
 };
 
-//enum des différents commandes de transmission d'une réception
+/* Enum des différentes commandes utilisées en réception: */
 enum RX_COMMANDES
 {
 	GET_VAL_ACTU,
 	GET_VAL_INIT,
 	GET_VAL_POT,
-	/*GET_SLEEP_MODE,*/
 	SET_SLEEP_MODE,
 	SET_VAL
 };
 
-//déclaration des enums
+/* Déclaration des enums: */
 enum RX_STATES rxState;
 enum TX_COMMANDES txCommande;
 enum RX_COMMANDES rxCommande;
 
-// Prototypes des fonctions locales
+/* Prototypes des fonctions locales: */
 void hardwareInit(void);
 void CDC_Task(void);
 uint8_t serialUSBWrite(uint8_t *source, uint8_t size);
@@ -97,8 +96,7 @@ uint8_t serialUSBAvailable(void);
 uint8_t serialUSBRead(uint8_t *dest, uint8_t size);
 uint8_t serialUSBRxData[CDC_TXRX_EPSIZE];
 
-//Prototypes de fonctions.
-
+/* Prototypes de fonctions: */
 /**
  * @brief  Fonction de traitement des données et commandes reçues.
  */
@@ -114,18 +112,20 @@ void execTxCommand(void);
 */
 void miscInit(void);
 
+/**
+ *@brief		Fonction qui traite la valeur de sortie en fonction du mode veille actuel.
+ *@param value  Mode veille.
+ */
 void outputVeille(uint8_t value);
 
 /**
  * @brief		Fonction qui remplis la structure de donnés avec les paramètres correspondants qui lui sont envoyés en paramètre par la fonction usartRemRxData. Le switch case commence à l'état WAIT qui attend la réception de "<". RXDATA place alors les donnés reçus dans l'union de structure jusqu'à ce que la dernière donnée (ici, la longueur de la trame à été spécifié manuellement à 7 puisque nous n'envoyons pas l'octet qui contient la longueur de la trame. Finalement, VALIDATE s'assure que la trame se termine par ">"
- * @param  data Octet reçu par la fonction usartRemRxData
+ * @param data  Octet reçu par la fonction usartRemRxData
  */
 void parseRxData(uint8_t data);
 
-/*void sendPotValue(uint8_t data);*/
-
 /**
- * @brief  Fonction d'initialisation du Timer #0.
+ * @brief  Fonction d'initialisation du timer #0.
  */
 void timer0Init(void);
 
@@ -135,8 +135,8 @@ void timer0Init(void);
 void timer4Init(void);
 
 /**
-  * @brief Programme principale
-  * @return rien
+  * @brief   Programme principale
+  * @return  Rien
   */
 int main(void)
 {
@@ -144,73 +144,49 @@ int main(void)
 	sei();
 	for (;;)
 	{
-		
-		//if(serialUSBAvailable())
-		//{
-			//uint8_t rxSize = serialUSBRead(serialUSBRxData,CDC_TXRX_EPSIZE);
-			//if(rxSize)
-			//{
-				//serialUSBWrite(serialUSBRxData,rxSize);	
-			//}
-		//}
-		//if (serialUSBAvailable())
-		//{
-			//uint8_t rxSize = serialUSBRead(serialUSBRxData, CDC_TXRX_EPSIZE);
-			//if (rxSize)
-			//{
-				//parseRxData(*serialUSBRxData);
-				//usartSendByte(serialUSBRxData);
-				//serialUSBWrite(serialUSBRxData,rxSize);
-				//			}
-				// 		}
-				if (serialUSBAvailable()) //Si un caractère est disponible...
+		if (serialUSBAvailable()) //Si un caractère est disponible...
+		{
+			serialUSBRead(serialUSBRxData, CDC_TXRX_EPSIZE); //appel de la fonction parseRxData() avec en paramètre la valeur retournée par usartRemRxData().
+			for (uint8_t index = 0; index < (serialUSBRxData[1] + 4); index++)
+			{
+				parseRxData(serialUSBRxData[index]);
+			}
+		}
+		if (SWITCH()) //Si l'interrupteur du potentiomètre est à la position "ON"...
+		{
+			if (msFlagAdc)
+			{
+				msFlagAdc = 0;
+				for (uint8_t i = 0; i < 100; i++) //Une valeur moyenne sur un echantillon de 100 mesures est calculé afin d'éviter d'être entre deux valeurs.
 				{
-					serialUSBRead(serialUSBRxData, CDC_TXRX_EPSIZE); //appel de la fonction parseRxData() avec en paramètre la valeur retournée par usartRemRxData().
-					
-					
-				for (uint8_t index = 0; index < (serialUSBRxData[1] + 4); index++)
-				{
-					parseRxData(serialUSBRxData[index]);
+					valueAdcTbl[1] += adcRead8();
 				}
-					//serialUSBWrite(serialUSBRxData, 6);
-				}
-				if (SWITCH()) //Si l'interrupteur du potentiomètre est à la position "ON"...
+				valueAdcTbl[1] /= 100;
+				if (valueAdcTbl[1] >= 255) //Si valueOut dépasse 255..
+					valueAdcTbl[1] = 255;  //valueOut est limité à 255.
+				if (valueAdcTbl[1] != valueAdcTbl[0])
 				{
-					if (msFlagAdc)
-					{
-						msFlagAdc = 0;
-						for (uint8_t i = 0; i < 100; i++) //Une valeur moyenne sur un echantillon de 100 mesures est calculé afin d'éviter d'être entre deux valeurs.
-						{
-							valueAdcTbl[1] += adcRead8();
-						}
-						valueAdcTbl[1] /= 100;
-						if (valueAdcTbl[1] >= 255) //Si valueOut dépasse 255..
-							valueAdcTbl[1] = 255;  //valueOut est limité à 255.
-						if (valueAdcTbl[1] != valueAdcTbl[0])
-						{
-							valueAdcTbl[0] = valueAdcTbl[1]; //La nouvelle valeur remplace l'ancienne.
-							valueOut = valueAdcTbl[1];
-							valueAdc = valueAdcTbl[1];
-							txCommande = VAL_ACTU;
-							execTxCommand();
-						}
-					}
-				}
-				else //Si l'interrupteur du potentiomètre est à la position "OFF"...
-				{
-					outputVeille(valueVeilleMode);
+					valueAdcTbl[0] = valueAdcTbl[1]; //La nouvelle valeur remplace l'ancienne.
+					valueOut = valueAdcTbl[1];
+					valueAdc = valueAdcTbl[1];
 					txCommande = VAL_ACTU;
 					execTxCommand();
 				}
-				OUTPUT_VALUE(valueOut);
-			//}
-		//}
+			}
+		}
+		else //Si l'interrupteur du potentiomètre est à la position "OFF"...
+		{
+			outputVeille(valueVeilleMode);
+			txCommande = VAL_ACTU;
+			execTxCommand();
+		}
+		OUTPUT_VALUE(valueOut);
 		USB_USBTask();
 	}
 }
 
 /**
-*@brief Interruption de la comparaison sur OCR0A (timer0) qui met msFlag à 1 lorsque msCnt atteint TIMER_CNT_CYCLE qui est définie dans le define. msCnt est incrémenté à chaques 1ms.
+*@brief  Interruption de la comparaison sur OCR0A (timer0) qui met msFlag à 1 lorsque msCnt atteint TIMER_CNT_CYCLE qui est définie dans le define. msCnt est incrémenté à chaques 1ms.
 */
 ISR(TIMER0_COMPA_vect)
 {
@@ -244,10 +220,6 @@ void execRxCommand(void)
 		txCommande = VAL_POT;
 		execTxCommand();
 		break;
-// 	case GET_SLEEP_MODE:
-// 		txCommande = VAL_SLEEP_MODE;
-// 		execTxCommand();
-// 		break;
 	case SET_SLEEP_MODE:
 		valueVeilleMode = rxData[0];
 		break;
@@ -271,7 +243,7 @@ void execTxCommand(void)
 		txData[2] = VAL_POT;
 		txData[3] = valueOut;
 		txData[4] = '>';
-		serialUSBWrite((uint8_t*)txData, 5);
+		serialUSBWrite((uint8_t *)txData, 5);
 		break;
 	case VAL_INIT:
 		txData[0] = '<';
@@ -280,7 +252,7 @@ void execTxCommand(void)
 		txData[3] = valueAdc;
 		txData[4] = valueVeilleMode;
 		txData[5] = '>';
-		serialUSBWrite((uint8_t*)txData, 6);
+		serialUSBWrite((uint8_t *)txData, 6);
 		break;
 	case VAL_POT:
 		txData[0] = '<';
@@ -288,21 +260,13 @@ void execTxCommand(void)
 		txData[2] = VAL_POT;
 		txData[3] = valueAdc;
 		txData[4] = '>';
-		serialUSBWrite((uint8_t*)txData, 5);
+		serialUSBWrite((uint8_t *)txData, 5);
 		break;
-// 	case VAL_SLEEP_MODE:
-// 		txData[0] = '<';
-// 		txData[1] = 1;
-// 		txData[2] = VAL_SLEEP_MODE;
-// 		txData[3] = valueVeilleMode;
-// 		txData[4] = '>';
-// 		serialUSBWrite((uint8_t*)txData, 5);
-// 		break;
 	}
 }
 
 /**
-  * @brief Initialise le matériel spécifique à cette application
+  * @brief  Initialise le matériel spécifique à cette application.
   */
 void hardwareInit(void)
 {
@@ -314,8 +278,6 @@ void hardwareInit(void)
 	adcInit();	  //Appel de la fonction d'initialisation du ADC.
 	timer0Init(); //Initialisation de timer 0.
 	timer4Init(); //Initialisation de timer 4.
-	//usartInit(1000000, 16000000); //Initialisation du USART à 1Mbps.
-
 	OUTPUT_INIT();
 	SWITCH_INIT();
 
@@ -430,13 +392,15 @@ void timer4Init(void)
 	OUTPUT_VALUE(0);	 //Valeur de la sortie.
 }
 
-//Fonctions USB.
+/************************************************************************/
+/*                            Fonctions USB.                            */
+/************************************************************************/
 
 /**
-  * @brief Transmission des données sur le lien série USB
-  * @param source	adresse de la source (1 ou plusieurs octets)
-  * @param size		nombre d'octets à transmettre (doit respecter la source)
-  * @return le nombre d'octets transmis
+  * @brief		   Transmission des données sur le lien série USB.
+  * @param source  Adresse de la source (1 ou plusieurs octets).
+  * @param size	   Nombre d'octets à transmettre (doit respecter la source).
+  * @return		   Nombre d'octets transmis.
   */
 uint8_t serialUSBWrite(uint8_t *source, uint8_t size)
 {
@@ -455,8 +419,8 @@ uint8_t serialUSBWrite(uint8_t *source, uint8_t size)
 	return size;
 }
 /**
-  * @brief Vérifie s'il y a des données reçues par le lien série USB
-  * @return le nombre d'octets disponible dans le FIFO
+  * @brief   Vérifie s'il y a des données reçues par le lien série USB.
+  * @return  Nombre d'octets disponible dans le FIFO.
   */
 uint8_t serialUSBAvailable()
 {
@@ -467,10 +431,10 @@ uint8_t serialUSBAvailable()
 	return Endpoint_BytesInEndpoint();
 }
 /**
-  * @brief Réception des données sur le lien série USB
-  * @param dest	adresse de la destination (1 ou plusieurs octets)
-  * @param size	nombre d'octets à lire du FIGO (doit respecter la destination)
-  * @return le nombre d'octets lus
+  * @brief		 Réception des données sur le lien série USB.
+  * @param dest	 Adresse de la destination (1 ou plusieurs octets).
+  * @param size	 Nombre d'octets à lire du FIGO (doit respecter la destination).
+  * @return		 Nombre d'octets lus.
   */
 uint8_t serialUSBRead(uint8_t *dest, uint8_t size)
 {
@@ -489,12 +453,12 @@ uint8_t serialUSBRead(uint8_t *dest, uint8_t size)
 	return rxSize;
 }
 
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Fonctions qui doivent-être définies dans ce programme pour répondre aux demandes de l'hôte
-// Elles sont appelées par les fonctions de LUFA.
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+/**********************************************************************************************/
+/* Fonctions qui doivent-être définies dans ce programme pour répondre aux demandes de l'hôte */
+/*                       Elles sont appelées par les fonctions de LUFA.                       */
+/**********************************************************************************************/
 /**
- * @brief Fonction gère l'événement USB_Connect. Ceci indique que le périphérique est énuméré.
+ * @brief  Fonction gère l'événement USB_Connect. Ceci indique que le périphérique est énuméré.
  */
 void EVENT_USB_Device_Connect(void)
 {
@@ -502,7 +466,7 @@ void EVENT_USB_Device_Connect(void)
 }
 
 /**
- * @brief Fonction gère l'événement USB_Disconnect. Ceci indique que le périphérique n'est plus connecté à l'hôte
+ * @brief  Fonction gère l'événement USB_Disconnect. Ceci indique que le périphérique n'est plus connecté à l'hôte
  */
 void EVENT_USB_Device_Disconnect(void)
 {
@@ -520,8 +484,8 @@ static CDC_LineEncoding_t lineEncoding = {
 
 /**
  * @brief Fonction gère l'événement USB_ConfigurationChanged. 
- *        Ceci indique que l'hôte a activé la configuration après l'énumération. 
- *        La fonction récupère alors la configuration des Endpoints.
+ * @li    Ceci indique que l'hôte a activé la configuration après l'énumération. 
+ * @li    La fonction récupère alors la configuration des Endpoints.
  */
 void EVENT_USB_Device_ConfigurationChanged(void)
 {
@@ -535,8 +499,8 @@ void EVENT_USB_Device_ConfigurationChanged(void)
 }
 
 /**
- * @brief Fonction gère l'événement USB_ControlRequest. 
- *        C'est ici que sont gérés les requêtes de contrôle CDC envoyées par l'hôte.
+ * @brief  Fonction gère l'événement USB_ControlRequest. 
+ * @n      C'est ici que sont gérés les requêtes de contrôle CDC envoyées par l'hôte.
  */
 void EVENT_USB_Device_ControlRequest(void)
 {
