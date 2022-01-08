@@ -28,39 +28,7 @@ Laboratoire qui vise à expérimenter la lecture d'un clavier matriciel. La mét
 #define INCREMENT_STEP 1		//Incrément pour le fadding.
 #define _MAX_RXDATASIZE_ 16
 
-//enum des différents paramètres d'une réception
-enum RX_STATES
-{
-	WAIT,
-	RXSIZE,
-	RXCOMMANDE,
-	RXDATA,
-	VALIDATE
-};
-
-//enum des différents paramètres d'une transmission
-enum TX_COMMANDES
-{
-	VAL_ACTU,
-	VAL_POT,
-	VAL_SLEEP_MODE
-};
-
-//enum des différents commandes de transmission d'une réception
-enum RX_COMMANDES
-{
-	GET_VAL_ACTU,
-	GET_VAL_POT,
-	GET_SLEEP_MODE,
-	SET_SLEEP_MODE,
-	SET_VAL
-};
-
-//déclaration des enums
-enum RX_STATES rxState;
-enum TX_COMMANDES txCommande;
-enum RX_COMMANDES rxCommande;
-
+/* Variables: */
 volatile uint16_t msCntAdc = 0;	 //Compteur utilisés pour compter 25 fois un délai de 1ms pour la mesure de l'ADC.
 volatile uint8_t msFlagAdc = 0;	 //Flags qui est mis à 1 à chaques 25ms pour la mesure de l'ADC.
 volatile uint16_t msCntFade = 0; //Compteur utilisés pour compter 50 fois un délai de 1ms pour le fade de la sortie.
@@ -70,18 +38,47 @@ uint16_t valueOut = 0;
 uint16_t valueAdc = 0;
 uint8_t valueVeilleMode = 0;
 int increment = 5;
-char msg[5];
 
-//variables nécessaires à la communication avec l'interface
+/* Variables nécessaires à la communication avec l'interface: */
 uint8_t rxDataSize;
 uint8_t rxDataCnt = 0; //Compteur de donnés reçus.
 uint8_t rxData[_MAX_RXDATASIZE_];
 uint16_t rxErrorCommCnt = 0;
-uint8_t moteurStopFlag = 0;
-uint8_t seqAuto = 0;
 
-//Prototypes de fonctions.
+/* Enum des différents étapes d'une réception: */
+enum RX_STATES
+{
+	WAIT,
+	RXSIZE,
+	RXCOMMANDE,
+	RXDATA,
+	VALIDATE
+};
 
+/* Enum des différentes commandes utilisées en transmission: */
+enum TX_COMMANDES
+{
+	VAL_ACTU,
+	VAL_INIT,
+	VAL_POT
+};
+
+/* Enum des différentes commandes utilisées en réception: */
+enum RX_COMMANDES
+{
+	GET_VAL_ACTU,
+	GET_VAL_INIT,
+	GET_VAL_POT,
+	SET_SLEEP_MODE,
+	SET_VAL
+};
+
+//déclaration des enums
+enum RX_STATES rxState;
+enum TX_COMMANDES txCommande;
+enum RX_COMMANDES rxCommande;
+
+/* Prototypes de fonctions: */
 /**
  * @brief  Fonction de traitement des données et commandes reçues.
  */
@@ -97,18 +94,20 @@ void execTxCommand(void);
 */
 void miscInit(void);
 
+/**
+ *@brief		Fonction qui traite la valeur de sortie en fonction du mode veille actuel.
+ *@param value  Mode veille.
+ */
 void outputVeille(uint8_t value);
 
 /**
  * @brief		Fonction qui remplis la structure de donnés avec les paramètres correspondants qui lui sont envoyés en paramètre par la fonction usartRemRxData. Le switch case commence à l'état WAIT qui attend la réception de "<". RXDATA place alors les donnés reçus dans l'union de structure jusqu'à ce que la dernière donnée (ici, la longueur de la trame à été spécifié manuellement à 7 puisque nous n'envoyons pas l'octet qui contient la longueur de la trame. Finalement, VALIDATE s'assure que la trame se termine par ">"
- * @param  data Octet reçu par la fonction usartRemRxData
+ * @param data  Octet reçu par la fonction usartRemRxData
  */
 void parseRxData(uint8_t data);
 
-/*void sendPotValue(uint8_t data);*/
-
 /**
- * @brief  Fonction d'initialisation du Timer #0.
+ * @brief  Fonction d'initialisation du timer #0.
  */
 void timer0Init(void);
 
@@ -184,12 +183,12 @@ void execRxCommand(void)
 		txCommande = VAL_ACTU;
 		execTxCommand();
 		break;
-	case GET_VAL_POT: //État non utilisé
-		txCommande = VAL_POT;
+	case GET_VAL_INIT:
+		txCommande = VAL_INIT;
 		execTxCommand();
 		break;
-	case GET_SLEEP_MODE:
-		txCommande = VAL_SLEEP_MODE;
+	case GET_VAL_POT: //État non utilisé
+		txCommande = VAL_POT;
 		execTxCommand();
 		break;
 	case SET_SLEEP_MODE:
@@ -197,14 +196,16 @@ void execRxCommand(void)
 		break;
 	case SET_VAL:	  //Réception depuis l'interface de la valeur de la sortie.
 		if (SWITCH()) //Si l'interrupteur du potentiomètre est à la position "ON"...
+		{
 			valueOut = rxData[0];
-		break;	
+		}
+		break;
 	}
 }
 
 void execTxCommand(void)
 {
-	char txData[5];
+	char txData[6];
 	switch (txCommande)
 	{
 	case VAL_ACTU:
@@ -218,22 +219,23 @@ void execTxCommand(void)
 			usartSendByte(txData[x]);
 		}
 		break;
+	case VAL_INIT:
+		txData[0] = '<';
+		txData[1] = 2;
+		txData[2] = VAL_INIT;
+		txData[3] = valueAdc;
+		txData[4] = valueVeilleMode;
+		txData[5] = '>';
+		for (int x = 0; x <= 5; x++)
+		{
+			usartSendByte(txData[x]);
+		}
+		break;
 	case VAL_POT:
 		txData[0] = '<';
 		txData[1] = 1;
 		txData[2] = VAL_POT;
 		txData[3] = valueAdc;
-		txData[4] = '>';
-		for (int x = 0; x <= 4; x++)
-		{
-			usartSendByte(txData[x]);
-		}
-		break;
-	case VAL_SLEEP_MODE:
-		txData[0] = '<';
-		txData[1] = 1;
-		txData[2] = VAL_SLEEP_MODE;
-		txData[3] = valueVeilleMode;
 		txData[4] = '>';
 		for (int x = 0; x <= 4; x++)
 		{
@@ -336,20 +338,6 @@ void parseRxData(uint8_t data)
 	}
 }
 
-// void sendPotValue(uint8_t cmd, uint8_t data)
-// {
-// 	char txData[5];
-// 	txData[0] = '<';
-// 	txData[1] = 1;
-// 	txData[2] = VAL_POT;
-// 	txData[3] = data;
-// 	txData[4] = '>';
-// 	for (int x = 0; x <= 4; x++)
-// 	{
-// 		usartSendByte(txData[x]);
-// 	}
-// }
-
 void timer0Init(void)
 {
 	//TCCR0A : COM0A1 COM0A0 COM0B1 COM0B0 – – WGM01 WGM00
@@ -375,13 +363,3 @@ void timer4Init(void)
 	OCR4C = 255 - 1;	 //62.5ns * 4 * 255 = 127.5us.
 	OUTPUT_VALUE(0);	 //Valeur de la sortie.
 }
-
-/*
-60 0 62
-60 127 62
-60 255 62
-*/
-
-/*	<	SIZE	CMD		DATA	>	*/
-
-//GET ÉTAT	<
