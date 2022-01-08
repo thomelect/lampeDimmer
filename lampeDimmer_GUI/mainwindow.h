@@ -24,8 +24,7 @@ class MainWindow : public QMainWindow
 {
     Q_OBJECT
 private:
-    // enums communication
-
+    /* Enum des différents étapes d'une réception: */
     enum RX_STATES
     {
         WAIT,
@@ -34,12 +33,14 @@ private:
         RXDATA,
         VALIDATE
     };
+    /* Enum des différentes commandes utilisées en réception: */
     enum RX_COMMANDES
     {
         VAL_ACTU,
         VAL_INIT,
         VAL_POT
     };
+    /* Enum des différentes commandes utilisées en transmission: */
     enum TX_COMMANDES
     {
         GET_VAL_ACTU,
@@ -48,6 +49,7 @@ private:
         SET_SLEEP_MODE,
         SET_VAL
     };
+    /* Déclaration des enums: */
     RX_STATES rxState;
     RX_COMMANDES rxCommande;
     TX_COMMANDES txCommande;
@@ -122,11 +124,9 @@ private:
     Ui::MainWindow *ui;
 
     /**
-     * @brief       Fonction d'envoie sur le port série.
-     * @param cmd   Commande envoyée
-     * @param data  Donnée à envoyer.
+     * @brief  Fonction d'envoie sur le port série.
      */
-    void sendSerialData(/*uint8_t cmd, uint8_t data = 0*/);
+    void sendSerialData();
 
     /*//////////////////////////////////////////////////////////*/
 
@@ -139,11 +139,11 @@ private:
 
     /**
      * @brief       Fonction qui remplis la structure de donnés avec les paramètres correspondants qui lui sont envoyés en paramètre par la fonction usartRemRxData.
-     *              Le switch case commence à l'état WAIT qui attend la réception de "<".
-     *              RXDATA place alors les donnés reçus dans l'union de structure jusqu'à ce que la dernière donnée soit reçue.
+     * @n           Le switch case commence à l'état WAIT qui attend la réception de "<".
+     * @n           RXDATA place alors les donnés reçus dans l'union de structure jusqu'à ce que la dernière donnée soit reçue.
      *              (ici, la longueur de la trame à été spécifié manuellement à 7 puisque nous n'envoyons pas l'octet qui contient la longueur de la trame.).
-     *              Finalement, VALIDATE s'assure que la trame se termine par ">"
-     * @param  data Octet reçu par la fonction usartRemRxData.
+     * @n           Finalement, VALIDATE s'assure que la trame se termine par ">"
+     * @param data  Octet reçu par la fonction usartRemRxData.
      */
     void parseRXData(uint8_t data);
 
@@ -153,7 +153,7 @@ private:
 
     /**
      * @brief       Fonction qui modifie la variable boutonState et l'affichage sur le bouton en fonction de la valeur des sliders.
-     * @param  data Valeurs des sliders.
+     * @param data  Valeurs des sliders.
      */
     void boutonManage(int value);
 };

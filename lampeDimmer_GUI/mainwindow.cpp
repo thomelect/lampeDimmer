@@ -18,12 +18,6 @@ using namespace std;
 MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent),
                                           ui(new Ui::MainWindow)
 {
-    /*
-    timer = new QTimer(this);
-    connect(timer, SIGNAL(timeout()), this, SLOT(sendGetState()));
-    timer->start(100); // vous pouvez réduire l'interval durant les tests.
-    */
-
     intensite = 0;
     serialRxIn = false;
     boutonState = true;
@@ -133,8 +127,8 @@ void MainWindow::execRxCommand(void)
 }
 
 /**
- * @brief Sépare les données reçues sur le port série.
- * @param data la donnée à traiter
+ * @brief       Sépare les données reçues sur le port série.
+ * @param data  Donnée à traiter
  */
 void MainWindow::parseRXData(uint8_t data)
 {
@@ -192,8 +186,8 @@ void MainWindow::parseRXData(uint8_t data)
 }
 
 /**
-* @brief Fonction de lecture du port série..
-*/
+ * @brief  Fonction de lecture du port série..
+ */
 void MainWindow::readSerialData(void)
 {
     QByteArray tmpRx;
@@ -207,9 +201,9 @@ void MainWindow::readSerialData(void)
 }
 
 /**
-* @brief Fonction de lecture du'envoie sur le port série..
-*/
-void MainWindow::sendSerialData(/*uint8_t cmd, uint8_t data*/)
+ * @brief  Fonction de lecture du'envoie sur le port série..
+ */
+void MainWindow::sendSerialData()
 {
     if (serial->isOpen())
     {
@@ -246,13 +240,12 @@ void MainWindow::sendSerialData(/*uint8_t cmd, uint8_t data*/)
             serial->write(txData, 5);
             break;
         case SET_VAL:
-            char txData1[5];
-            txData1[0] = '<';
-            txData1[1] = 1;
-            txData1[2] = SET_VAL;
-            txData1[3] = intensite;
-            txData1[4] = '>';
-            serial->write(txData1, 5);
+            txData[0] = '<';
+            txData[1] = 1;
+            txData[2] = SET_VAL;
+            txData[3] = intensite;
+            txData[4] = '>';
+            serial->write(txData, 5);
             break;
         }
     }

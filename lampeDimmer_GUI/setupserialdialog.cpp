@@ -1,10 +1,12 @@
 /**
- * @file       setupserialdialog.cpp
+ * @file       setupserialdialog.h
  * @brief      Classe qui affiche une boite de dialogue pour configurer le port série
- * @author     Marc Juneau
+ * @author     Base : Marc Juneau
+ * @author     Adaptation : Thomas Desrosiers
  * @version    0.01
  * @date       8 février 2019
  */
+
 #include "setupserialdialog.h"
 #include "ui_setupserialdialog.h"
 #include <QtSerialPort/QSerialPortInfo>
@@ -23,7 +25,6 @@ SetupSerialDialog::SetupSerialDialog(QSerialPort *s) : QDialog(0),
     ui->cbListBaudRate->addItem("1000000");
     ui->cbListBaudRate->addItem("2000000");
     ui->cbListBaudRate->setCurrentIndex(ui->cbListBaudRate->findText(DEFAULT_BAUD_RATE, Qt::MatchExactly));
-    //ui->cbListBaudRate->setCurrentIndex(5);
     if (serial->isOpen())
     {
         ui->btActualiser->setText("Déconnecter");

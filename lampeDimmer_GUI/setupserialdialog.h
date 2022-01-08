@@ -1,7 +1,8 @@
 /**
  * @file       setupserialdialog.h
  * @brief      Classe qui affiche une boite de dialogue pour configurer le port série
- * @author     Marc Juneau
+ * @author     Base : Marc Juneau
+ * @author     Adaptation : Thomas Desrosiers
  * @version    0.01
  * @date       8 février 2019
  */
@@ -36,8 +37,8 @@ public:
 private slots:
     /**
      * @brief  Fonction appelée lorsque le bouton Scan est appuyé.
-     *         Fait la mise à jour de la liste des ports disponibles.
-     *         Si le port série est connecté, il utilisé comme un bouton "déconnecter".
+     * @li     Fait la mise à jour de la liste des ports disponibles.
+     * @li     Si le port série est connecté, il utilisé comme un bouton "déconnecter".
      */
     void on_btActualiser_clicked();
 
@@ -49,9 +50,9 @@ private slots:
 
     /**
      * @brief  Fonction appelée lorsque le bouton Connecter est appuyé.
-     *         Essaie de connecter le port série sélectionné dans la liste.
-     *         Des messages sont envoyés dans vers QDebug.
-     *         Si le port série est connecté, le bouton est désactivé.
+     * @li     Essaie de connecter le port série sélectionné dans la liste.
+     * @li     Des messages sont envoyés dans vers QDebug.
+     * @li     Si le port série est connecté, le bouton est désactivé.
      */
     void on_btConnexion_clicked();
 
