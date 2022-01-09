@@ -13,7 +13,7 @@
 #include <QtSerialPort/QSerialPort>
 
 #define DEFAULT_BAUD_RATE "1000000"
-#define DEFAULT_PORT_DESC "USB-SERIAL CH340"
+#define DEFAULT_PORT_DESC "Périphérique série USB"
 //"USB-SERIAL CH340"
 //"Périphérique série USB"
 
