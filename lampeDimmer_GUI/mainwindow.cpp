@@ -100,9 +100,9 @@ void MainWindow::execRxCommand(void)
         qDebug() << "SLEEP_MODE : " + ui->comboBoxSleep->currentText();
 
         /*// CHANGEMENTS GUI //*/
-        ui->horizontalSliderIntensite->setSliderPosition(valueAdc); //Modifie la position du slider en fonction de la valeur obtenue par le dial.
-        ui->dialIntensite->setSliderPosition(valueAdc);             //Modifie la position du slider en fonction de la valeur obtenue par le slider.
-        ui->lbIntensiteValue->setText(QString::number(valueAdc));
+        ui->horizontalSliderIntensite->setSliderPosition(valueOut); //Modifie la position du slider en fonction de la valeur obtenue par le dial.
+        ui->dialIntensite->setSliderPosition(valueOut);             //Modifie la position du slider en fonction de la valeur obtenue par le slider.
+        ui->lbIntensiteValue->setText(QString::number(valueOut));
         ui->comboBoxSleep->setCurrentIndex(valueVeilleMode);
 
         /*// FLAG DE RÉCEPTION //*/
