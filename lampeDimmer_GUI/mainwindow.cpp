@@ -12,11 +12,12 @@
 #include <QDebug>
 #include <QMenuBar>
 #include <QString>
+#include <QtSerialPort/QSerialPortInfo>
 
 using namespace std;
 
 MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent),
-                                          ui(new Ui::MainWindow)
+    ui(new Ui::MainWindow)
 {
     intensite = 0;
     serialRxIn = false;
@@ -28,7 +29,11 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent),
     createMenus();
     ui->pushBottonOnOff->setIcon(QIcon(":/images/off.png"));
     ui->pushBottonOnOff->setIconSize(QSize(65, 65));
-
+    QWidget widget;
+    statusLabel = new QLabel(this);
+    statusLabel->setText("Non connecté");
+    ui->statusBar->addPermanentWidget(statusLabel);
+    ssetuppSSeriall();
     //Feuille de style des boutons de la de l'interface MainWindow.
     this->setStyleSheet("#pushBottonOnOff {"
                         "background-color: none;"
@@ -266,6 +271,46 @@ void MainWindow::setupSerial(void)
     }
 }
 
+void MainWindow::ssetuppSSeriall(void)
+{
+    foreach (const QSerialPortInfo &info, QSerialPortInfo::availablePorts())
+    {
+        if (info.description() == "Périphérique série USB")
+        {
+            portList = (info.portName() + " " + info.description());
+        }
+        qDebug() << portList;
+    }
+    if (!portList.isEmpty())
+    {
+        QString portName = portList;
+        foreach (const QSerialPortInfo &info, QSerialPortInfo::availablePorts())
+        {
+            QString infoTag = info.portName() + " " + info.description();
+            if (infoTag == portName)
+            {
+                serial->setPort(info);
+                qDebug() << "try  " << portName;
+                if (serial->open(QIODevice::ReadWrite))
+                {
+                    qDebug() << "open " << portName;
+                    if (serial->setBaudRate(DEFAULT_BAUD_RATE_1) && serial->setDataBits(QSerialPort::Data8) && serial->setParity(QSerialPort::NoParity) && serial->setStopBits(QSerialPort::OneStop) && serial->setFlowControl(QSerialPort::NoFlowControl))
+                    {
+                        statusLabel->setText("Connecté " + info.portName());
+                        statusLabel->setToolTip(infoTag);
+                    }
+                }
+            }
+        }
+    }
+        if (serial->isOpen())
+        {
+            qDebug() << "GET_VAL_INIT";
+            txCommande = GET_VAL_INIT;
+            sendSerialData();
+        }
+}
+
 void MainWindow::on_comboBoxSleep_activated(int index)
 {
     valueVeilleMode = index;
@@ -327,4 +372,8 @@ void MainWindow::on_pushBottonOnOff_released()
         txCommande = SET_VAL;
         sendSerialData();
     }
+}
+void MainWindow::on_pushButton_clicked()
+{
+    ssetuppSSeriall();
 }
