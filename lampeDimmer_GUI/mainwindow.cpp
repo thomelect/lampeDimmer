@@ -13,6 +13,9 @@
 #include <QMenuBar>
 #include <QString>
 #include <QtSerialPort/QSerialPortInfo>
+#include <iostream>
+#include <fstream>
+#include <QFile>
 
 using namespace std;
 
@@ -25,6 +28,7 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent),
 
     ui->setupUi(this);
     serial = new QSerialPort(this);
+    saveRead = new SaveReadFile("./saveData");
     connect(serial, SIGNAL(readyRead()), this, SLOT(readSerialData()));
     createMenus();
     ui->pushBottonOnOff->setIcon(QIcon(":/images/off.png"));
@@ -375,5 +379,15 @@ void MainWindow::on_pushBottonOnOff_released()
 }
 void MainWindow::on_pushButton_clicked()
 {
-    ssetuppSSeriall();
+    connectInfo = new QString[2];
+    saveRead->readFromfile(connectInfo);
+    qDebug() << "Line #1 " + connectInfo[0];
+    qDebug() << "Line #2 " + connectInfo[1];
+
+}
+
+void MainWindow::on_pushButton_2_clicked()
+{
+    QString test[2] = {"123", "abc"};
+    saveRead->saveToFile(test);
 }

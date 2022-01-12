@@ -7,12 +7,14 @@
 
 #ifndef MAINWINDOW_H
 #define MAINWINDOW_H
+
+
+#include "setupserialdialog.h"
+#include "savereadfile.h"
 #include <QPixmap>
 #include <QMainWindow>
-
 #include <QLabel>
 #include <QtSerialPort/QSerialPort>
-#include "setupserialdialog.h"
 
 #define _MAX_RXDATASIZE_ 16
 #define DEFAULT_BAUD_RATE_1 1000000
@@ -73,6 +75,7 @@ private:
 
     QPixmap *pixmapOff();
     QIcon *ButtonIcon();
+    SaveReadFile *saveRead;
 
 public:
     MainWindow(QWidget *parent = nullptr);
@@ -113,6 +116,8 @@ private slots:
 
     void on_pushButton_clicked();
 
+    void on_pushButton_2_clicked();
+
 private:
     /*//////////////////-Communication série-///////////////////*/
     /**
@@ -128,6 +133,7 @@ private:
     void setupSerial(void);
     void ssetuppSSeriall(void);
     QString portList;
+    QString *connectInfo;
     QLabel *statusLabel;
     QSerialPort *serial;
     QTimer *timer;
