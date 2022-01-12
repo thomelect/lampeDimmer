@@ -17,6 +17,9 @@ SetupSerialDialog::SetupSerialDialog(QSerialPort *s) : QDialog(0),
 {
     serial = s;
     ui->setupUi(this);
+    connectInfo = new QString[3];
+    saveRead = (SaveReadFile *)shared;
+    saveRead->readFromfile(connectInfo, 3);
     ui->cbListBaudRate->addItem("9600");
     ui->cbListBaudRate->addItem("19200");
     ui->cbListBaudRate->addItem("115200");
@@ -24,7 +27,7 @@ SetupSerialDialog::SetupSerialDialog(QSerialPort *s) : QDialog(0),
     ui->cbListBaudRate->addItem("921600");
     ui->cbListBaudRate->addItem("1000000");
     ui->cbListBaudRate->addItem("2000000");
-    ui->cbListBaudRate->setCurrentIndex(ui->cbListBaudRate->findText(DEFAULT_BAUD_RATE, Qt::MatchExactly));
+    ui->cbListBaudRate->setCurrentIndex(ui->cbListBaudRate->findText(connectInfo[0], Qt::MatchExactly));
     if (serial->isOpen())
     {
         ui->btActualiser->setText("Déconnecter");
@@ -53,9 +56,9 @@ void SetupSerialDialog::on_btActualiser_clicked()
     {
         ui->cbListPortSerie->addItem(info.portName() + " " + info.description());
     }
-    if (ui->cbListPortSerie->findText(DEFAULT_PORT_DESC, Qt::MatchContains) != -1)
+    if (ui->cbListPortSerie->findText(connectInfo[1], Qt::MatchContains) != -1)
     {
-        ui->cbListPortSerie->setCurrentIndex(ui->cbListPortSerie->findText(DEFAULT_PORT_DESC, Qt::MatchContains));
+        ui->cbListPortSerie->setCurrentIndex(ui->cbListPortSerie->findText(connectInfo[1], Qt::MatchContains));
     }
     else
     {
@@ -89,6 +92,10 @@ void SetupSerialDialog::on_btConnexion_clicked()
                     {
                         ui->btConnexion->setEnabled(false);
                         ui->btActualiser->setText("Déconnecter");
+                        connectInfo[0] = QString::number(BAUD_RATE[ui->cbListBaudRate->currentIndex()]);
+                        connectInfo[1] = info.description();
+                        connectInfo[2] = info.serialNumber();
+                        saveRead->saveToFile(connectInfo, 3);
                     }
                 }
             }

@@ -3,6 +3,7 @@
 #include <QFile>
 #include <iostream>
 #include <fstream>
+#include <QDateTime>
 
 SaveReadFile::SaveReadFile(QString fileName)
 {
@@ -14,21 +15,23 @@ SaveReadFile::~SaveReadFile()
 
 }
 
-void SaveReadFile::saveToFile(QString *data)
+void SaveReadFile::saveToFile(QString *data, uint8_t size)
 {
     QFile file(_fileName);
     file.setFileName(_fileName);
     file.open(QIODevice::WriteOnly | QIODevice::Text);
     QTextStream out(&file);
-    out << data[0] << endl;
-    out << data[1] << endl;
+    out.setCodec("UTF-8");
+    for (uint8_t index = 0; index < size; index++) {
+        out << data[index] << endl;
+    }
+    out << QDateTime::currentDateTime().toString();
+    out.flush();
     file.close();
-//    out << tr("%1").arg(QDateTime::currentDateTime().toString());
 }
 
-QString SaveReadFile::readFromfile(QString *dest)
+void SaveReadFile::readFromfile(QString *dest, uint8_t size)
 {
-    QString readReturn[2];
     QFile file(_fileName);
     file.setFileName(_fileName);
     if (file.exists())
@@ -36,7 +39,7 @@ QString SaveReadFile::readFromfile(QString *dest)
         if(file.open(QIODevice::ReadOnly|QIODevice::Text))
         {
             qDebug() << "Fichier existant!";
-            for (uint8_t index = 0; !file.atEnd(); index++) {
+            for (uint8_t index = 0; index < size; index++) {
                 dest[index] = file.readLine();
                 dest[index].remove(QRegExp("\\n"));
             }
@@ -50,5 +53,5 @@ QString SaveReadFile::readFromfile(QString *dest)
         }
         file.close();
     }
-    return *readReturn;
+//    return readReturn;
 }
