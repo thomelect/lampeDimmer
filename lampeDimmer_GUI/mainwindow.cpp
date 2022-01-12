@@ -25,18 +25,21 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent),
     intensite = 0;
     serialRxIn = false;
     boutonState = true;
+    connectInfo = new QString[2];
 
     ui->setupUi(this);
     serial = new QSerialPort(this);
-    saveRead = new SaveReadFile("./saveData");
     connect(serial, SIGNAL(readyRead()), this, SLOT(readSerialData()));
     createMenus();
     ui->pushBottonOnOff->setIcon(QIcon(":/images/off.png"));
     ui->pushBottonOnOff->setIconSize(QSize(65, 65));
-    QWidget widget;
+
     statusLabel = new QLabel(this);
     statusLabel->setText("Non connecté");
     ui->statusBar->addPermanentWidget(statusLabel);
+
+    saveRead = new SaveReadFile("./saveData");
+    saveRead->readFromfile(connectInfo);
     ssetuppSSeriall();
     //Feuille de style des boutons de la de l'interface MainWindow.
     this->setStyleSheet("#pushBottonOnOff {"
@@ -279,7 +282,7 @@ void MainWindow::ssetuppSSeriall(void)
 {
     foreach (const QSerialPortInfo &info, QSerialPortInfo::availablePorts())
     {
-        if (info.description() == "Périphérique série USB")
+        if (info.description() == connectInfo[0])
         {
             portList = (info.portName() + " " + info.description());
         }
@@ -298,7 +301,7 @@ void MainWindow::ssetuppSSeriall(void)
                 if (serial->open(QIODevice::ReadWrite))
                 {
                     qDebug() << "open " << portName;
-                    if (serial->setBaudRate(DEFAULT_BAUD_RATE_1) && serial->setDataBits(QSerialPort::Data8) && serial->setParity(QSerialPort::NoParity) && serial->setStopBits(QSerialPort::OneStop) && serial->setFlowControl(QSerialPort::NoFlowControl))
+                    if (serial->setBaudRate(connectInfo[1].toInt()) && serial->setDataBits(QSerialPort::Data8) && serial->setParity(QSerialPort::NoParity) && serial->setStopBits(QSerialPort::OneStop) && serial->setFlowControl(QSerialPort::NoFlowControl))
                     {
                         statusLabel->setText("Connecté " + info.portName());
                         statusLabel->setToolTip(infoTag);
