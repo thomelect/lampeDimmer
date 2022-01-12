@@ -1,17 +1,18 @@
 #ifndef SAVEREADFILE_H
 #define SAVEREADFILE_H
 
-#include <String>
-
- std;
+#include <QString>
 
 class SaveReadFile
 {
 public:
-    SaveReadFile();
+    SaveReadFile(QString fileName);
     ~SaveReadFile();
 
-    void saveToFile(stri)
+    void saveToFile(QString data);
+    QString readFromfile(QString *dest);
+private:
+    QString _fileName;
 };
 
 #endif // SAVEREADFILE_H

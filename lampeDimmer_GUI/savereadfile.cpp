@@ -1,35 +1,47 @@
 #include "savereadfile.h"
 #include <QDebug>
 #include <QFile>
+#include <iostream>
+#include <fstream>
 
-SaveReadFile::SaveReadFile()
+SaveReadFile::SaveReadFile(QString fileName)
+{
+    _fileName = fileName;
+}
+
+SaveReadFile::~SaveReadFile()
 {
 
 }
 
-void SaveReadFile::saveToFile(QString fileName, QString data)
+void SaveReadFile::saveToFile(QString data)
 {
 
 }
 
-QString SaveReadFile::readFromfile(QString fileName)
+QString SaveReadFile::readFromfile(QString *dest)
 {
     QString readReturn[2];
-    QString filePath = fileName;
-    QFile file(filePath);
-    if(file.open(QIODevice::ReadOnly|QIODevice::Text))
+    QFile file(_fileName);
+    file.setFileName(_fileName);
+    if (file.exists())
     {
-        qDebug() << "Fichier existant!";
-        for (uint8_t index = 0; !file.atEnd(); index++) {
-            readReturn[index] = file.readLine();
+        if(file.open(QIODevice::ReadOnly|QIODevice::Text))
+        {
+            qDebug() << "Fichier existant!";
+            for (uint8_t index = 0; !file.atEnd(); index++) {
+                dest[index] = file.readLine();
+                dest[index].remove(QRegExp("\\n"));
+            }
         }
-        qDebug() << "Line #1 " + readReturn[0];
-        qDebug() << "Line #2 " + readReturn[1];
+        file.close();
     }
-    else
-    {
-        qDebug() << "Fichier "+filePath+" créé!";
+    else {
+        if(file.open(QIODevice::WriteOnly|QIODevice::Text))
+        {
+            qDebug() << "Fichier " + _fileName + " créé!";
+        }
+        file.close();
     }
-    file.close();
     return *readReturn;
 }

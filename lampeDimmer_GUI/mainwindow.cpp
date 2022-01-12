@@ -28,6 +28,7 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent),
 
     ui->setupUi(this);
     serial = new QSerialPort(this);
+    saveRead = new SaveReadFile("./saveData");
     connect(serial, SIGNAL(readyRead()), this, SLOT(readSerialData()));
     createMenus();
     ui->pushBottonOnOff->setIcon(QIcon(":/images/off.png"));
@@ -379,20 +380,8 @@ void MainWindow::on_pushBottonOnOff_released()
 void MainWindow::on_pushButton_clicked()
 {
     connectInfo = new QString[2];
-    QString filePath = "./saveData";
-    QFile file(filePath);
-    if(file.open(QIODevice::ReadOnly|QIODevice::Text))
-        {
-            qDebug() << "Fichier existant!";
-            for (uint8_t index = 0; !file.atEnd(); index++) {
-                connectInfo[index] = file.readLine();
-            }
-            qDebug() << "Line #1 " + connectInfo[0];
-            qDebug() << "Line #2 " + connectInfo[1];
-        }
-        else
-        {
-            qDebug() << "Fichier "+filePath+" créé!";
-        }
-        file.close();
+    saveRead->readFromfile(connectInfo);
+    qDebug() << "Line #1 " + connectInfo[0];
+    qDebug() << "Line #2 " + connectInfo[1];
+
 }
