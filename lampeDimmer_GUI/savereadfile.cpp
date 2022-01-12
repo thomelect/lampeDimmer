@@ -20,8 +20,10 @@ void SaveReadFile::saveToFile(QString *data)
     file.setFileName(_fileName);
     file.open(QIODevice::WriteOnly | QIODevice::Text);
     QTextStream out(&file);
+    out.setCodec("UTF-8");
     out << data[0] << endl;
-    out << data[1] << endl;
+    out << data[1];
+    out.flush();
     file.close();
 //    out << tr("%1").arg(QDateTime::currentDateTime().toString());
 }

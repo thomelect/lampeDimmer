@@ -13,9 +13,6 @@
 #include <QMenuBar>
 #include <QString>
 #include <QtSerialPort/QSerialPortInfo>
-#include <iostream>
-#include <fstream>
-#include <QFile>
 
 using namespace std;
 
@@ -265,7 +262,7 @@ void MainWindow::sendSerialData()
 
 void MainWindow::setupSerial(void)
 {
-    SetupSerialDialog setupDia(serial);
+    SetupSerialDialog setupDia(serial, saveRead);
     setupDia.setWindowTitle("Configuration du port série");
     setupDia.setWindowFlags(Qt::WindowSystemMenuHint); // Pour retirer le ?
     setupDia.setModal(1);
