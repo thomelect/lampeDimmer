@@ -72,6 +72,7 @@ private:
     uint8_t intensite;
     bool serialRxIn;
     bool boutonState;
+    int sizeTbl;
 
     QPixmap *pixmapOff();
     QIcon *ButtonIcon();
@@ -132,7 +133,7 @@ private:
      */
     void setupSerial(void);
     void ssetuppSSeriall(void);
-    QString portList;
+    QString portConfig;
     QString *connectInfo;
     QLabel *statusLabel;
     QSerialPort *serial;

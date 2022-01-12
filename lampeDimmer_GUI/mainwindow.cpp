@@ -22,8 +22,8 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent),
     intensite = 0;
     serialRxIn = false;
     boutonState = true;
-    connectInfo = new QString[2];
-
+    connectInfo = new QString[3];
+    qDebug() << (sizeof(connectInfo));
     ui->setupUi(this);
     serial = new QSerialPort(this);
     connect(serial, SIGNAL(readyRead()), this, SLOT(readSerialData()));
@@ -36,7 +36,7 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent),
     ui->statusBar->addPermanentWidget(statusLabel);
 
     saveRead = new SaveReadFile("./saveData");
-    saveRead->readFromfile(connectInfo);
+    saveRead->readFromfile(connectInfo, 3);
     ssetuppSSeriall();
     //Feuille de style des boutons de la de l'interface MainWindow.
     this->setStyleSheet("#pushBottonOnOff {"
@@ -281,13 +281,13 @@ void MainWindow::ssetuppSSeriall(void)
     {
         if (info.description() == connectInfo[0])
         {
-            portList = (info.portName() + " " + info.description());
+            portConfig = (info.portName() + " " + info.description());
         }
-        qDebug() << portList;
+        qDebug() << portConfig;
     }
-    if (!portList.isEmpty())
+    if (!portConfig.isEmpty())
     {
-        QString portName = portList;
+        QString portName = portConfig;
         foreach (const QSerialPortInfo &info, QSerialPortInfo::availablePorts())
         {
             QString infoTag = info.portName() + " " + info.description();
@@ -379,15 +379,16 @@ void MainWindow::on_pushBottonOnOff_released()
 }
 void MainWindow::on_pushButton_clicked()
 {
-    connectInfo = new QString[2];
-    saveRead->readFromfile(connectInfo);
-    qDebug() << "Line #1 " + connectInfo[0];
-    qDebug() << "Line #2 " + connectInfo[1];
+    //connectInfo = new QString[3];
+    saveRead->readFromfile(connectInfo, 3);
+    qDebug() << "Line #0 " + connectInfo[0];
+    qDebug() << "Line #1 " + connectInfo[1];
+    qDebug() << "Line #2 " + connectInfo[2];
 
 }
 
 void MainWindow::on_pushButton_2_clicked()
 {
-    QString test[2] = {"123", "abc"};
-    saveRead->saveToFile(test);
+    QString test[3] = {"123", "abc", "xyz"};
+    saveRead->saveToFile(test, 3);
 }
