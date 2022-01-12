@@ -9,7 +9,7 @@ public:
     SaveReadFile(QString fileName);
     ~SaveReadFile();
 
-    void saveToFile(QString data);
+    void saveToFile(QString *data);
     QString readFromfile(QString *dest);
 private:
     QString _fileName;

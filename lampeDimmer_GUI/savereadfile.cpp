@@ -14,9 +14,16 @@ SaveReadFile::~SaveReadFile()
 
 }
 
-void SaveReadFile::saveToFile(QString data)
+void SaveReadFile::saveToFile(QString *data)
 {
-
+    QFile file(_fileName);
+    file.setFileName(_fileName);
+    file.open(QIODevice::WriteOnly | QIODevice::Text);
+    QTextStream out(&file);
+    out << data[0] << endl;
+    out << data[1] << endl;
+    file.close();
+//    out << tr("%1").arg(QDateTime::currentDateTime().toString());
 }
 
 QString SaveReadFile::readFromfile(QString *dest)

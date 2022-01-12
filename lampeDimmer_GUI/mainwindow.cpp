@@ -385,3 +385,9 @@ void MainWindow::on_pushButton_clicked()
     qDebug() << "Line #2 " + connectInfo[1];
 
 }
+
+void MainWindow::on_pushButton_2_clicked()
+{
+    QString test[2] = {"123", "abc"};
+    saveRead->saveToFile(test);
+}
