@@ -128,6 +128,7 @@ private:
     void setupSerial(void);
     void ssetuppSSeriall(void);
     QString portList;
+    QString *connectInfo;
     QLabel *statusLabel;
     QSerialPort *serial;
     QTimer *timer;
