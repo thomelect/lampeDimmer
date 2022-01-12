@@ -387,32 +387,12 @@ void MainWindow::on_pushButton_clicked()
             for (uint8_t index = 0; !file.atEnd(); index++) {
                 connectInfo[index] = file.readLine();
             }
-            qDebug() << "Line #1" + connectInfo[0];
-            qDebug() << "Line #2" + connectInfo[1];
+            qDebug() << "Line #1 " + connectInfo[0];
+            qDebug() << "Line #2 " + connectInfo[1];
         }
         else
         {
             qDebug() << "Fichier "+filePath+" créé!";
         }
         file.close();
-//    ssetuppSSeriall();
-//    connectInfo = new QString[2];
-//    char connectInfoChar[128];
-//    ifstream monFichier("./saveData");
-//    if (monFichier) //Si le fichier est ouvert...
-//    {
-//        connectInfo->readLine
-//        monFichier.getline(connectInfoChar, 256);
-//        connectInfo = connectInfoChar;
-
-//         std::cin.getline(connectInfo[0], 0); //Lecture du fichier.
-//        monFichier.close();
-//    }
-//    else //Sinon...
-//    {
-//        ofstream monFichier;
-//        monFichier.open(nomFichierConfiguration); //création du fichier.
-//        monFichier << defaultConfig;              //Écriture d'une valeur par défaut.
-//        monFichier.close();
-//    }
 }
