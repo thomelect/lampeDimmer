@@ -53,6 +53,11 @@ SetupSerialDialog::~SetupSerialDialog()
     delete ui;
 }
 
+QString SetupSerialDialog::getInfoPort()
+{
+    return infoStatus;
+}
+
 void SetupSerialDialog::on_btActualiser_clicked()
 {
     ui->cbListPortSerie->clear();
@@ -69,9 +74,9 @@ void SetupSerialDialog::on_btActualiser_clicked()
             connectInfoCom = info.portName(); //Le nom du port associé à ce numéro de série est conservé dans connectInfoCom.
         }
     }
-    if (ui->cbListPortSerie->findText(connectInfoCom, Qt::MatchExactly) != -1) //Si le nom de port contenu dans connectInfoCom correspond à un des items de la combobox...
+    if (ui->cbListPortSerie->findText(connectInfoCom, Qt::MatchContains) != -1) //Si le nom de port contenu dans connectInfoCom correspond à un des items de la combobox...
     {
-        ui->cbListPortSerie->setCurrentIndex(ui->cbListPortSerie->findText(connectInfoCom, Qt::MatchExactly)); //Affichage de l'item de la combobox qui se trouve à l'index précisé.
+        ui->cbListPortSerie->setCurrentIndex(ui->cbListPortSerie->findText(connectInfoCom, Qt::MatchContains)); //Affichage de l'item de la combobox qui se trouve à l'index précisé.
     }
     else //Sinon (Si le nom de port contenu dans connectInfoCom ne correspond à aucun de ceux des items de la combobox)...
     {
@@ -90,10 +95,10 @@ void SetupSerialDialog::on_btConnexion_clicked()
     ui->btOk->setEnabled(true);
     if (ui->cbListPortSerie->count() > 0)
     {
-        QString portName = ui->cbListPortSerie->itemText(ui->cbListPortSerie->currentIndex());
+        QString portName = infoStatus = ui->cbListPortSerie->itemText(ui->cbListPortSerie->currentIndex());
         foreach (const QSerialPortInfo &info, QSerialPortInfo::availablePorts()) //Pour tout les ports disponibles...
         {
-            QString infoTag = info.portName() + " " + info.description();
+            QString infoTag = (info.portName() + " " + info.description());
             if (infoTag == portName)
             {
                 serial->setPort(info);
@@ -103,6 +108,7 @@ void SetupSerialDialog::on_btConnexion_clicked()
                     qDebug() << "open " << portName;
                     if (serial->setBaudRate(BAUD_RATE[ui->cbListBaudRate->currentIndex()]) && serial->setDataBits(QSerialPort::Data8) && serial->setParity(QSerialPort::NoParity) && serial->setStopBits(QSerialPort::OneStop) && serial->setFlowControl(QSerialPort::NoFlowControl))
                     {
+                        infoStatus = ui->cbListPortSerie->itemText(ui->cbListPortSerie->currentIndex());
                         ui->btConnexion->setEnabled(false);
                         ui->btActualiser->setText("Déconnecter");
                         connectInfo[0] = QString::number(BAUD_RATE[ui->cbListBaudRate->currentIndex()]);
