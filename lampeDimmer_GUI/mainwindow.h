@@ -123,7 +123,6 @@ private slots:
     void on_pushBottonOnOff_released();
 
 private:
-    /*//////////////////-Menu / Fenêtres-///////////////////*/
     /**
      * @brief  Fonction utilisée afin de créer le menu "Outils".
      */
@@ -139,10 +138,6 @@ private:
      * @brief  Fonction utilisée afin de connecter automatiquement l'application au port série correspondant aux informations lut dans le fichier.
      */
     void autoSetupSerial(void);
-
-    /*//////////////////////////////////////////////////////////*/
-
-    /*///////////////-Protocole de communication-////////////////*/
 
     /**
      * @brief  Fonction de traitement des données et commandes reçues.
@@ -164,9 +159,10 @@ private:
      */
     void parseRXData(uint8_t data);
 
-    /*//////////////////////////////////////////////////////////*/
-
-    /*/////////////////////-Autres fonctions-/////////////////////*/
+    /**
+     * @brief  Fonction qui sert à activer / désactiver les boutons en fonction d'une connexion ou non à un port série.
+     */
+    void boutonEnabler();
 
     /**
      * @brief       Fonction qui modifie la variable boutonState et l'affichage sur le bouton en fonction de la valeur des sliders.

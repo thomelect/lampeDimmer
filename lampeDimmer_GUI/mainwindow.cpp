@@ -91,19 +91,28 @@ void MainWindow::autoSetupSerial(void)
             qDebug() << "GET_VAL_INIT";
             txCommande = GET_VAL_INIT;
             execTxCommand();
-            ui->comboBoxSleep->setDisabled(false);
-            ui->dialIntensite->setEnabled(true);
-            ui->pushBottonOnOff->setEnabled(true);
-            ui->horizontalSliderIntensite->setEnabled(true);
         }
-        else {
-            statusLabel->setText("Non connecté");
-            statusLabel->setToolTip("");
-            ui->comboBoxSleep->setDisabled(true);
-            ui->dialIntensite->setDisabled(true);
-            ui->pushBottonOnOff->setDisabled(true);
-            ui->horizontalSliderIntensite->setDisabled(true);
-        }
+        boutonEnabler();
+    }
+}
+
+void MainWindow::boutonEnabler()
+{
+    if (serial->isOpen())
+    {
+        ui->comboBoxSleep->setDisabled(false);
+        ui->dialIntensite->setEnabled(true);
+        ui->pushBottonOnOff->setEnabled(true);
+        ui->horizontalSliderIntensite->setEnabled(true);
+    }
+    else
+    {
+        statusLabel->setText("Non connecté");
+        statusLabel->setToolTip("");
+        ui->comboBoxSleep->setDisabled(true);
+        ui->dialIntensite->setDisabled(true);
+        ui->pushBottonOnOff->setDisabled(true);
+        ui->horizontalSliderIntensite->setDisabled(true);
     }
 }
 
@@ -325,22 +334,11 @@ void MainWindow::setupSerial(void)
     {
         statusLabel->setText("Connecté " + serial->portName()); //Indique à l'utilisateur que la connexion est réussie ainsi que le nom du port.
         statusLabel->setToolTip(setupDia.getInfoPort());
-        ui->comboBoxSleep->setEnabled(true);
-        ui->dialIntensite->setEnabled(true);
-        ui->pushBottonOnOff->setEnabled(true);
-        ui->horizontalSliderIntensite->setEnabled(true);
         qDebug() << "GET_VAL_INIT";
         txCommande = GET_VAL_INIT;
         execTxCommand();
     }
-    else {
-        statusLabel->setText("Non connecté");
-        statusLabel->setToolTip("");
-        ui->comboBoxSleep->setDisabled(true);
-        ui->dialIntensite->setDisabled(true);
-        ui->pushBottonOnOff->setDisabled(true);
-        ui->horizontalSliderIntensite->setDisabled(true);
-    }
+    boutonEnabler();
 }
 
 void MainWindow::on_comboBoxSleep_activated(int index)
