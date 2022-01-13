@@ -1,18 +1,22 @@
-/*
- * Fichier: mainwindow.h
- * Auteur: Thomas Desrosiers
- * Date: 2021 03 23
- * Desc.: Laboratoire #5 du cours d'intégration de systèmes.
-*/
+/**
+ * @file    mainwindow.cpp
+ * @author  Thomas Desrosiers
+ * @date    2022/01/12
+ * @brief   Programme utilisé pour la communication avec le contrôleur de la lampe.
+ */
 
 #ifndef MAINWINDOW_H
 #define MAINWINDOW_H
+
+#include "setupserialdialog.h"
+#include "savereadfile.h"
 #include <QPixmap>
 #include <QMainWindow>
+#include <QLabel>
 #include <QtSerialPort/QSerialPort>
-#include "setupserialdialog.h"
 
 #define _MAX_RXDATASIZE_ 16
+
 QT_BEGIN_NAMESPACE
 namespace Ui
 {
@@ -23,8 +27,13 @@ QT_END_NAMESPACE
 class MainWindow : public QMainWindow
 {
     Q_OBJECT
+
+public:
+    MainWindow(QWidget *parent = nullptr);
+    ~MainWindow();
+
 private:
-    /* Enum des différents étapes d'une réception: */
+    /* Enums étapes réception: */
     enum RX_STATES
     {
         WAIT,
@@ -33,14 +42,14 @@ private:
         RXDATA,
         VALIDATE
     };
-    /* Enum des différentes commandes utilisées en réception: */
+    /* Enums commandes réception: */
     enum RX_COMMANDES
     {
         VAL_ACTU,
         VAL_INIT,
         VAL_POT
     };
-    /* Enum des différentes commandes utilisées en transmission: */
+    /* Enums commandes transmission: */
     enum TX_COMMANDES
     {
         GET_VAL_ACTU,
@@ -49,12 +58,15 @@ private:
         SET_SLEEP_MODE,
         SET_VAL
     };
-    /* Déclaration des enums: */
+    /* Déclaration enums: */
     RX_STATES rxState;
     RX_COMMANDES rxCommande;
     TX_COMMANDES txCommande;
 
+    /* Déclarations variables: */
     QByteArray tmpRxData;
+    QString portConfig;
+    QString *connectInfo;
     uint8_t rxDataSize;
     uint8_t rxDataCnt;
     uint8_t rxData[_MAX_RXDATASIZE_];
@@ -65,13 +77,17 @@ private:
     uint8_t intensite;
     bool serialRxIn;
     bool boutonState;
+    int sizeTbl;
 
+    /* Déclarations classes: */
+    QLabel *statusLabel;
+    QSerialPort *serial;
+    QMenu *toolsMenu;
+    QAction *setupSerialAct;
     QPixmap *pixmapOff();
     QIcon *ButtonIcon();
-
-public:
-    MainWindow(QWidget *parent = nullptr);
-    ~MainWindow();
+    SaveReadFile *saveRead; //Déclaration d'un objet de la classe SaveReadFile.
+    Ui::MainWindow *ui;
 
 private slots:
 
@@ -107,26 +123,27 @@ private slots:
     void on_pushBottonOnOff_released();
 
 private:
-    /*//////////////////-Communication série-///////////////////*/
+    /*//////////////////-Menu / Fenêtres-///////////////////*/
     /**
      * @brief  Fonction utilisée afin de créer le menu "Outils".
      */
     void createMenus(void);
-    QMenu *toolsMenu;
-    QAction *setupSerialAct;
 
     /**
      * @brief  Fonction utilisée afin de gérer la fenêtre de connexion.
      */
     void setupSerial(void);
-    QSerialPort *serial;
-    QTimer *timer;
-    Ui::MainWindow *ui;
+
+private:
+    /**
+     * @brief  Fonction utilisée afin de connecter automatiquement l'application au port série correspondant aux informations lut dans le fichier.
+     */
+    void autoSetupSerial(void);
 
     /**
-     * @brief  Fonction d'envoie sur le port série.
+     * @brief  Fonction d'envoie des commandes sur le port série.
      */
-    void sendSerialData();
+    void execTxCommand();
 
     /*//////////////////////////////////////////////////////////*/
 
