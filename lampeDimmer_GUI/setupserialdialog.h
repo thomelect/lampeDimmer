@@ -67,6 +67,7 @@ private:
     QSerialPort *serial;
     SaveReadFile *saveRead;
     QString *connectInfo;
+    QString connectInfoCom;
     Ui::SetupSerialDialog *ui;
     const uint32_t BAUD_RATE[7] = {9600, 19200, 115200, 250000, 921600, 1000000, 2000000};
 };

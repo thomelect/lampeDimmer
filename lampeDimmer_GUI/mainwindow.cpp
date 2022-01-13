@@ -23,7 +23,7 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent),
     serialRxIn = false;
     boutonState = true;
     connectInfo = new QString[3];
-    qDebug() << (sizeof(connectInfo));
+
     ui->setupUi(this);
     serial = new QSerialPort(this);
     connect(serial, SIGNAL(readyRead()), this, SLOT(readSerialData()));
@@ -277,42 +277,44 @@ void MainWindow::setupSerial(void)
 
 void MainWindow::ssetuppSSeriall(void)
 {
-    foreach (const QSerialPortInfo &info, QSerialPortInfo::availablePorts())
+    if (!connectInfo[2].isEmpty())
     {
-        if (info.description() == connectInfo[0])
-        {
-            portConfig = (info.portName() + " " + info.description());
-        }
-        qDebug() << portConfig;
-    }
-    if (!portConfig.isEmpty())
-    {
-        QString portName = portConfig;
         foreach (const QSerialPortInfo &info, QSerialPortInfo::availablePorts())
         {
-            QString infoTag = info.portName() + " " + info.description();
-            if (infoTag == portName)
+            if (info.serialNumber() == connectInfo[2]) //Si le numéro de série lu dans le fichier correspond à cleui d'un périphérique connecté...
             {
-                serial->setPort(info);
-                qDebug() << "try  " << portName;
-                if (serial->open(QIODevice::ReadWrite))
+                portConfig = (info.portName() + " " + info.description()); //Information utilisées pour la connexion.
+            }
+            qDebug() << portConfig;
+        }
+        if (!portConfig.isEmpty()) //Information utilisées pour la connexion sont existantes...
+        {
+            foreach (const QSerialPortInfo &info, QSerialPortInfo::availablePorts())
+            {
+                QString infoTag = info.portName() + " " + info.description();
+                if (infoTag == portConfig)
                 {
-                    qDebug() << "open " << portName;
-                    if (serial->setBaudRate(connectInfo[1].toInt()) && serial->setDataBits(QSerialPort::Data8) && serial->setParity(QSerialPort::NoParity) && serial->setStopBits(QSerialPort::OneStop) && serial->setFlowControl(QSerialPort::NoFlowControl))
+                    serial->setPort(info);
+                    qDebug() << "try  " << portConfig; //Indique à l'utilisateur qu'une tentative de connexion est en cours.
+                    if (serial->open(QIODevice::ReadWrite))
                     {
-                        statusLabel->setText("Connecté " + info.portName());
-                        statusLabel->setToolTip(infoTag);
+                        qDebug() << "open " << portConfig; //Indique à l'utilisateur qu'une tentative de connexion est en cours.
+                        if (serial->setBaudRate(connectInfo[1].toInt()) && serial->setDataBits(QSerialPort::Data8) && serial->setParity(QSerialPort::NoParity) && serial->setStopBits(QSerialPort::OneStop) && serial->setFlowControl(QSerialPort::NoFlowControl))
+                        {
+                            statusLabel->setText("Connecté " + info.portName()); //Indique à l'utilisateur que la connexion est réussie.
+                            statusLabel->setToolTip(infoTag);
+                        }
                     }
                 }
             }
         }
+            if (serial->isOpen())
+            {
+                qDebug() << "GET_VAL_INIT";
+                txCommande = GET_VAL_INIT;
+                sendSerialData();
+            }
     }
-        if (serial->isOpen())
-        {
-            qDebug() << "GET_VAL_INIT";
-            txCommande = GET_VAL_INIT;
-            sendSerialData();
-        }
 }
 
 void MainWindow::on_comboBoxSleep_activated(int index)
@@ -376,19 +378,4 @@ void MainWindow::on_pushBottonOnOff_released()
         txCommande = SET_VAL;
         sendSerialData();
     }
-}
-void MainWindow::on_pushButton_clicked()
-{
-    //connectInfo = new QString[3];
-    saveRead->readFromfile(connectInfo, 3);
-    qDebug() << "Line #0 " + connectInfo[0];
-    qDebug() << "Line #1 " + connectInfo[1];
-    qDebug() << "Line #2 " + connectInfo[2];
-
-}
-
-void MainWindow::on_pushButton_2_clicked()
-{
-    QString test[3] = {"123", "abc", "xyz"};
-    saveRead->saveToFile(test, 3);
 }

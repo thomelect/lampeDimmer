@@ -15,13 +15,12 @@
 SetupSerialDialog::SetupSerialDialog(QSerialPort *s, void *shared) : QDialog(0),
                                                        ui(new Ui::SetupSerialDialog)
 {
-
-
-    serial = s;
-    ui->setupUi(this);
     connectInfo = new QString[3];
     saveRead = (SaveReadFile *)shared;
     saveRead->readFromfile(connectInfo, 3);
+
+    serial = s;
+    ui->setupUi(this);
     ui->cbListBaudRate->addItem("9600");
     ui->cbListBaudRate->addItem("19200");
     ui->cbListBaudRate->addItem("115200");
@@ -29,7 +28,15 @@ SetupSerialDialog::SetupSerialDialog(QSerialPort *s, void *shared) : QDialog(0),
     ui->cbListBaudRate->addItem("921600");
     ui->cbListBaudRate->addItem("1000000");
     ui->cbListBaudRate->addItem("2000000");
-    ui->cbListBaudRate->setCurrentIndex(ui->cbListBaudRate->findText(connectInfo[0], Qt::MatchExactly));
+    if (ui->cbListBaudRate->findText(connectInfo[0], Qt::MatchExactly) != -1)
+    {
+        ui->cbListBaudRate->setCurrentIndex(ui->cbListBaudRate->findText(connectInfo[0], Qt::MatchExactly));
+    }
+    else
+    {
+        ui->cbListBaudRate->setCurrentIndex(0);
+        qDebug() << ui->cbListPortSerie->currentText();
+    }
     if (serial->isOpen())
     {
         ui->btActualiser->setText("Déconnecter");
@@ -57,10 +64,14 @@ void SetupSerialDialog::on_btActualiser_clicked()
     foreach (const QSerialPortInfo &info, QSerialPortInfo::availablePorts())
     {
         ui->cbListPortSerie->addItem(info.portName() + " " + info.description());
+        if (info.serialNumber() == connectInfo[2])
+        {
+            connectInfoCom = info.portName();
+        }
     }
-    if (ui->cbListPortSerie->findText(connectInfo[1], Qt::MatchContains) != -1)
+    if (ui->cbListPortSerie->findText(connectInfoCom, Qt::MatchExactly) != -1)
     {
-        ui->cbListPortSerie->setCurrentIndex(ui->cbListPortSerie->findText(connectInfo[1], Qt::MatchContains));
+        ui->cbListPortSerie->setCurrentIndex(ui->cbListPortSerie->findText(connectInfoCom, Qt::MatchExactly));
     }
     else
     {

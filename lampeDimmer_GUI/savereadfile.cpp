@@ -53,5 +53,4 @@ void SaveReadFile::readFromfile(QString *dest, uint8_t size)
         }
         file.close();
     }
-//    return readReturn;
 }
