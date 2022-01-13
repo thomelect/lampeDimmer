@@ -31,6 +31,12 @@ public:
     explicit SetupSerialDialog(QSerialPort *s, void *shared);
     ~SetupSerialDialog();
 
+    /**
+     * @brief   Fonction qui retourne les informations actuelle du port.
+     * @return  Le nom du port actuellement connecté ainsi que sa description.
+     */
+    QString getInfoPort();
+
 private:
     /*Constantes : */
     const uint32_t BAUD_RATE[7] = {9600, 19200, 115200, 250000, 921600, 1000000, 2000000};
@@ -38,6 +44,7 @@ private:
     /*Déclarations variables : */
     QString *connectInfo;
     QString connectInfoCom;
+    QString infoStatus;
 
     /*Déclarations objets : */
     QSerialPort *serial;

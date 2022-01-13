@@ -140,11 +140,6 @@ private:
      */
     void autoSetupSerial(void);
 
-    /**
-     * @brief  Fonction d'envoie des commandes sur le port série.
-     */
-    void execTxCommand();
-
     /*//////////////////////////////////////////////////////////*/
 
     /*///////////////-Protocole de communication-////////////////*/
@@ -153,6 +148,11 @@ private:
      * @brief  Fonction de traitement des données et commandes reçues.
      */
     void execRxCommand(void);
+
+    /**
+     * @brief  Fonction d'envoie des commandes sur le port série.
+     */
+    void execTxCommand();
 
     /**
      * @brief       Fonction qui remplis la structure de donnés avec les paramètres correspondants qui lui sont envoyés en paramètre par la fonction usartRemRxData.
