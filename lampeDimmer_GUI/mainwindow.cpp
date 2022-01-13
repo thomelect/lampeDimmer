@@ -32,12 +32,12 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent),
     ui->pushBottonOnOff->setIconSize(QSize(65, 65));
 
     statusLabel = new QLabel(this);
-    statusLabel->setText("Non connecté");
     ui->statusBar->addPermanentWidget(statusLabel);
 
     saveRead = new SaveReadFile("./saveData"); //Objet de la classe SaveReadFile.
     saveRead->readFromfile(connectInfo, 3);    //Lecture des 3 premières lignes du fichier.
     autoSetupSerial();                         //Appel de la fonction de connexion automatique.
+
     //Feuille de style des boutons de la de l'interface MainWindow.
     this->setStyleSheet("#pushBottonOnOff {"
                         "background-color: none;"
@@ -92,6 +92,27 @@ void MainWindow::autoSetupSerial(void)
             txCommande = GET_VAL_INIT;
             execTxCommand();
         }
+        boutonEnabler();
+    }
+}
+
+void MainWindow::boutonEnabler()
+{
+    if (serial->isOpen())
+    {
+        ui->comboBoxSleep->setDisabled(false);
+        ui->dialIntensite->setEnabled(true);
+        ui->pushBottonOnOff->setEnabled(true);
+        ui->horizontalSliderIntensite->setEnabled(true);
+    }
+    else
+    {
+        statusLabel->setText("Non connecté");
+        statusLabel->setToolTip("");
+        ui->comboBoxSleep->setDisabled(true);
+        ui->dialIntensite->setDisabled(true);
+        ui->pushBottonOnOff->setDisabled(true);
+        ui->horizontalSliderIntensite->setDisabled(true);
     }
 }
 
@@ -178,6 +199,57 @@ void MainWindow::execRxCommand(void)
 }
 
 /**
+ * @brief  Fonction de lecture du'envoie sur le port série..
+ */
+void MainWindow::execTxCommand()
+{
+    if (serial->isOpen())
+    {
+        char txData[5];
+        switch (txCommande)
+        {
+        case GET_VAL_ACTU:
+            txData[0] = '<';
+            txData[1] = 0;
+            txData[2] = GET_VAL_ACTU;
+            txData[3] = '>';
+            serial->write(txData, 4);
+            break;
+        case GET_VAL_INIT:
+            txData[0] = '<';
+            txData[1] = 0;
+            txData[2] = GET_VAL_INIT;
+            txData[3] = '>';
+            serial->write(txData, 4);
+            break;
+        case GET_VAL_POT:
+            txData[0] = '<';
+            txData[1] = 0;
+            txData[2] = GET_VAL_POT;
+            txData[3] = '>';
+            serial->write(txData, 4);
+            break;
+        case SET_SLEEP_MODE:
+            txData[0] = '<';
+            txData[1] = 1;
+            txData[2] = SET_SLEEP_MODE;
+            txData[3] = valueVeilleMode;
+            txData[4] = '>';
+            serial->write(txData, 5);
+            break;
+        case SET_VAL:
+            txData[0] = '<';
+            txData[1] = 1;
+            txData[2] = SET_VAL;
+            txData[3] = intensite;
+            txData[4] = '>';
+            serial->write(txData, 5);
+            break;
+        }
+    }
+}
+
+/**
  * @brief       Sépare les données reçues sur le port série.
  * @param data  Donnée à traiter
  */
@@ -251,57 +323,6 @@ void MainWindow::readSerialData(void)
     }
 }
 
-/**
- * @brief  Fonction de lecture du'envoie sur le port série..
- */
-void MainWindow::execTxCommand()
-{
-    if (serial->isOpen())
-    {
-        char txData[5];
-        switch (txCommande)
-        {
-        case GET_VAL_ACTU:
-            txData[0] = '<';
-            txData[1] = 0;
-            txData[2] = GET_VAL_ACTU;
-            txData[3] = '>';
-            serial->write(txData, 4);
-            break;
-        case GET_VAL_INIT:
-            txData[0] = '<';
-            txData[1] = 0;
-            txData[2] = GET_VAL_INIT;
-            txData[3] = '>';
-            serial->write(txData, 4);
-            break;
-        case GET_VAL_POT:
-            txData[0] = '<';
-            txData[1] = 0;
-            txData[2] = GET_VAL_POT;
-            txData[3] = '>';
-            serial->write(txData, 4);
-            break;
-        case SET_SLEEP_MODE:
-            txData[0] = '<';
-            txData[1] = 1;
-            txData[2] = SET_SLEEP_MODE;
-            txData[3] = valueVeilleMode;
-            txData[4] = '>';
-            serial->write(txData, 5);
-            break;
-        case SET_VAL:
-            txData[0] = '<';
-            txData[1] = 1;
-            txData[2] = SET_VAL;
-            txData[3] = intensite;
-            txData[4] = '>';
-            serial->write(txData, 5);
-            break;
-        }
-    }
-}
-
 void MainWindow::setupSerial(void)
 {
     SetupSerialDialog setupDia(serial, saveRead);
@@ -311,10 +332,13 @@ void MainWindow::setupSerial(void)
     setupDia.exec();
     if (serial->isOpen())
     {
+        statusLabel->setText("Connecté " + serial->portName()); //Indique à l'utilisateur que la connexion est réussie ainsi que le nom du port.
+        statusLabel->setToolTip(setupDia.getInfoPort());
         qDebug() << "GET_VAL_INIT";
         txCommande = GET_VAL_INIT;
         execTxCommand();
     }
+    boutonEnabler();
 }
 
 void MainWindow::on_comboBoxSleep_activated(int index)
