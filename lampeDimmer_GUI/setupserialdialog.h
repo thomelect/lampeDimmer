@@ -9,6 +9,7 @@
 #ifndef SETUPSERIALDIALOG_H
 #define SETUPSERIALDIALOG_H
 
+#include "savereadfile.h"
 #include <QDialog>
 #include <QtSerialPort/QSerialPort>
 
@@ -31,7 +32,7 @@ public:
      * @brief    Constructeur de la classe SetupSerialDialog.
      * @param s  Port série à configurer.
      */
-    explicit SetupSerialDialog(QSerialPort *s);
+    explicit SetupSerialDialog(QSerialPort *s, void *shared);
     ~SetupSerialDialog();
 
 private slots:
@@ -64,6 +65,9 @@ private slots:
 
 private:
     QSerialPort *serial;
+    SaveReadFile *saveRead;
+    QString *connectInfo;
+    QString connectInfoCom;
     Ui::SetupSerialDialog *ui;
     const uint32_t BAUD_RATE[7] = {9600, 19200, 115200, 250000, 921600, 1000000, 2000000};
 };

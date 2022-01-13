@@ -7,12 +7,19 @@
 
 #ifndef MAINWINDOW_H
 #define MAINWINDOW_H
+
+
+#include "setupserialdialog.h"
+#include "savereadfile.h"
 #include <QPixmap>
 #include <QMainWindow>
+#include <QLabel>
 #include <QtSerialPort/QSerialPort>
-#include "setupserialdialog.h"
 
 #define _MAX_RXDATASIZE_ 16
+#define DEFAULT_BAUD_RATE_1 1000000
+#define DEFAULT_PORT_DESC_1 "Périphérique série USB"
+
 QT_BEGIN_NAMESPACE
 namespace Ui
 {
@@ -65,9 +72,11 @@ private:
     uint8_t intensite;
     bool serialRxIn;
     bool boutonState;
+    int sizeTbl;
 
     QPixmap *pixmapOff();
     QIcon *ButtonIcon();
+    SaveReadFile *saveRead;
 
 public:
     MainWindow(QWidget *parent = nullptr);
@@ -119,6 +128,10 @@ private:
      * @brief  Fonction utilisée afin de gérer la fenêtre de connexion.
      */
     void setupSerial(void);
+    void ssetuppSSeriall(void);
+    QString portConfig;
+    QString *connectInfo;
+    QLabel *statusLabel;
     QSerialPort *serial;
     QTimer *timer;
     Ui::MainWindow *ui;

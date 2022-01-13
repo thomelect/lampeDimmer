@@ -12,15 +12,17 @@
 #include <QDebug>
 #include <QMenuBar>
 #include <QString>
+#include <QtSerialPort/QSerialPortInfo>
 
 using namespace std;
 
 MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent),
-                                          ui(new Ui::MainWindow)
+    ui(new Ui::MainWindow)
 {
     intensite = 0;
     serialRxIn = false;
     boutonState = true;
+    connectInfo = new QString[3];
 
     ui->setupUi(this);
     serial = new QSerialPort(this);
@@ -29,6 +31,13 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent),
     ui->pushBottonOnOff->setIcon(QIcon(":/images/off.png"));
     ui->pushBottonOnOff->setIconSize(QSize(65, 65));
 
+    statusLabel = new QLabel(this);
+    statusLabel->setText("Non connecté");
+    ui->statusBar->addPermanentWidget(statusLabel);
+
+    saveRead = new SaveReadFile("./saveData");
+    saveRead->readFromfile(connectInfo, 3);
+    ssetuppSSeriall();
     //Feuille de style des boutons de la de l'interface MainWindow.
     this->setStyleSheet("#pushBottonOnOff {"
                         "background-color: none;"
@@ -253,7 +262,7 @@ void MainWindow::sendSerialData()
 
 void MainWindow::setupSerial(void)
 {
-    SetupSerialDialog setupDia(serial);
+    SetupSerialDialog setupDia(serial, saveRead);
     setupDia.setWindowTitle("Configuration du port série");
     setupDia.setWindowFlags(Qt::WindowSystemMenuHint); // Pour retirer le ?
     setupDia.setModal(1);
@@ -263,6 +272,48 @@ void MainWindow::setupSerial(void)
         qDebug() << "GET_VAL_INIT";
         txCommande = GET_VAL_INIT;
         sendSerialData();
+    }
+}
+
+void MainWindow::ssetuppSSeriall(void)
+{
+    if (!connectInfo[2].isEmpty())
+    {
+        foreach (const QSerialPortInfo &info, QSerialPortInfo::availablePorts())
+        {
+            if (info.serialNumber() == connectInfo[2]) //Si le numéro de série lu dans le fichier correspond à cleui d'un périphérique connecté...
+            {
+                portConfig = (info.portName() + " " + info.description()); //Information utilisées pour la connexion.
+            }
+            qDebug() << portConfig;
+        }
+        if (!portConfig.isEmpty()) //Information utilisées pour la connexion sont existantes...
+        {
+            foreach (const QSerialPortInfo &info, QSerialPortInfo::availablePorts())
+            {
+                QString infoTag = info.portName() + " " + info.description();
+                if (infoTag == portConfig)
+                {
+                    serial->setPort(info);
+                    qDebug() << "try  " << portConfig; //Indique à l'utilisateur qu'une tentative de connexion est en cours.
+                    if (serial->open(QIODevice::ReadWrite))
+                    {
+                        qDebug() << "open " << portConfig; //Indique à l'utilisateur qu'une tentative de connexion est en cours.
+                        if (serial->setBaudRate(connectInfo[1].toInt()) && serial->setDataBits(QSerialPort::Data8) && serial->setParity(QSerialPort::NoParity) && serial->setStopBits(QSerialPort::OneStop) && serial->setFlowControl(QSerialPort::NoFlowControl))
+                        {
+                            statusLabel->setText("Connecté " + info.portName()); //Indique à l'utilisateur que la connexion est réussie.
+                            statusLabel->setToolTip(infoTag);
+                        }
+                    }
+                }
+            }
+        }
+            if (serial->isOpen())
+            {
+                qDebug() << "GET_VAL_INIT";
+                txCommande = GET_VAL_INIT;
+                sendSerialData();
+            }
     }
 }
 
