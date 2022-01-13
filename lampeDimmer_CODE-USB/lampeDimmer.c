@@ -248,7 +248,7 @@ void execTxCommand(void)
 		txData[0] = '<';
 		txData[1] = 2;
 		txData[2] = VAL_INIT;
-		txData[3] = valueAdc;
+		txData[3] = valueOut;
 		txData[4] = valueVeilleMode;
 		txData[5] = '>';
 		serialUSBWrite((uint8_t *)txData, 6);
