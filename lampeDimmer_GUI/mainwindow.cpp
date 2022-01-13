@@ -1,9 +1,9 @@
-/*
- * Fichier: mainwindow.cpp
- * Auteur: Thomas Desrosiers
- * Date: 2021 03 23
- * Desc.: Laboratoire #5 du cours d'intégration de systèmes.
-*/
+/**
+ * @file    mainwindow.cpp
+ * @author  Thomas Desrosiers
+ * @date    2022/01/12
+ * @brief   Programme utilisé pour la communication avec le contrôleur de la lampe.
+ */
 
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
@@ -17,7 +17,7 @@
 using namespace std;
 
 MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent),
-    ui(new Ui::MainWindow)
+                                          ui(new Ui::MainWindow)
 {
     intensite = 0;
     serialRxIn = false;
@@ -35,9 +35,9 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent),
     statusLabel->setText("Non connecté");
     ui->statusBar->addPermanentWidget(statusLabel);
 
-    saveRead = new SaveReadFile("./saveData");
-    saveRead->readFromfile(connectInfo, 3);
-    ssetuppSSeriall();
+    saveRead = new SaveReadFile("./saveData"); //Objet de la classe SaveReadFile.
+    saveRead->readFromfile(connectInfo, 3);    //Lecture des 3 premières lignes du fichier.
+    autoSetupSerial();                         //Appel de la fonction de connexion automatique.
     //Feuille de style des boutons de la de l'interface MainWindow.
     this->setStyleSheet("#pushBottonOnOff {"
                         "background-color: none;"
@@ -53,12 +53,54 @@ MainWindow::~MainWindow()
     delete ui;
 }
 
+void MainWindow::autoSetupSerial(void)
+{
+    if (!connectInfo[2].isEmpty()) //Si le numéro de série lu dans le fichier n'est pas null...
+    {
+        foreach (const QSerialPortInfo &info, QSerialPortInfo::availablePorts()) //Pour tout les ports disponibles...
+        {
+            if (info.serialNumber() == connectInfo[2]) //Si le numéro de série sauvegardé dans le fichier correspond à un des périphériques connectés...
+            {
+                portConfig = (info.portName() + " " + info.description()); //Information utilisées pour la connexion.
+            }
+            qDebug() << portConfig;
+        }
+        if (!portConfig.isEmpty()) //Si les information utilisées pour la connexion sont existantes...
+        {
+            foreach (const QSerialPortInfo &info, QSerialPortInfo::availablePorts()) //Pour tout les ports disponibles...
+            {
+                QString infoTag = info.portName() + " " + info.description();
+                if (infoTag == portConfig)
+                {
+                    serial->setPort(info);             //Assignation du port à connecter.
+                    qDebug() << "try  " << portConfig; //Indique à l'utilisateur qu'une tentative de connexion est en cours.
+                    if (serial->open(QIODevice::ReadWrite))
+                    {
+                        qDebug() << "open " << portConfig; //Indique à l'utilisateur qu'une tentative de connexion est en cours.
+                        if (serial->setBaudRate(connectInfo[1].toInt()) && serial->setDataBits(QSerialPort::Data8) && serial->setParity(QSerialPort::NoParity) && serial->setStopBits(QSerialPort::OneStop) && serial->setFlowControl(QSerialPort::NoFlowControl))
+                        {
+                            statusLabel->setText("Connecté " + info.portName()); //Indique à l'utilisateur que la connexion est réussie ainsi que le nom du port.
+                            statusLabel->setToolTip(infoTag);                    //Indique à l'utilisateur le nom du port et sa description.
+                        }
+                    }
+                }
+            }
+        }
+        if (serial->isOpen()) //Si le port est ouvert...
+        {
+            qDebug() << "GET_VAL_INIT";
+            txCommande = GET_VAL_INIT;
+            execTxCommand();
+        }
+    }
+}
+
 void MainWindow::boutonManage(int value)
 {
     ui->lbIntensiteValue->setText(QString::number(intensite)); //La valeur du slider est affichée dans le label sous le slider.
     ui->dialIntensite->setSliderPosition(intensite);           //Modifie la position du slider en fonction de la valeur obtenue par le slider.
     ui->horizontalSliderIntensite->setSliderPosition(intensite);
-    ui->statusBar->showMessage(QString::number((intensite / 2.55), 'f', 0) + '%');
+    ui->statusBar->showMessage(QString::number((intensite / 2.55), 'f', 0) + '%'); //conversion de la valeur actuelle en pourcentage.
     qDebug() << "SET_VAL : " + QString::number(intensite);
 
     QPixmap pixmapOff("/images/off.png");
@@ -212,7 +254,7 @@ void MainWindow::readSerialData(void)
 /**
  * @brief  Fonction de lecture du'envoie sur le port série..
  */
-void MainWindow::sendSerialData()
+void MainWindow::execTxCommand()
 {
     if (serial->isOpen())
     {
@@ -271,49 +313,7 @@ void MainWindow::setupSerial(void)
     {
         qDebug() << "GET_VAL_INIT";
         txCommande = GET_VAL_INIT;
-        sendSerialData();
-    }
-}
-
-void MainWindow::ssetuppSSeriall(void)
-{
-    if (!connectInfo[2].isEmpty())
-    {
-        foreach (const QSerialPortInfo &info, QSerialPortInfo::availablePorts())
-        {
-            if (info.serialNumber() == connectInfo[2]) //Si le numéro de série lu dans le fichier correspond à cleui d'un périphérique connecté...
-            {
-                portConfig = (info.portName() + " " + info.description()); //Information utilisées pour la connexion.
-            }
-            qDebug() << portConfig;
-        }
-        if (!portConfig.isEmpty()) //Information utilisées pour la connexion sont existantes...
-        {
-            foreach (const QSerialPortInfo &info, QSerialPortInfo::availablePorts())
-            {
-                QString infoTag = info.portName() + " " + info.description();
-                if (infoTag == portConfig)
-                {
-                    serial->setPort(info);
-                    qDebug() << "try  " << portConfig; //Indique à l'utilisateur qu'une tentative de connexion est en cours.
-                    if (serial->open(QIODevice::ReadWrite))
-                    {
-                        qDebug() << "open " << portConfig; //Indique à l'utilisateur qu'une tentative de connexion est en cours.
-                        if (serial->setBaudRate(connectInfo[1].toInt()) && serial->setDataBits(QSerialPort::Data8) && serial->setParity(QSerialPort::NoParity) && serial->setStopBits(QSerialPort::OneStop) && serial->setFlowControl(QSerialPort::NoFlowControl))
-                        {
-                            statusLabel->setText("Connecté " + info.portName()); //Indique à l'utilisateur que la connexion est réussie.
-                            statusLabel->setToolTip(infoTag);
-                        }
-                    }
-                }
-            }
-        }
-            if (serial->isOpen())
-            {
-                qDebug() << "GET_VAL_INIT";
-                txCommande = GET_VAL_INIT;
-                sendSerialData();
-            }
+        execTxCommand();
     }
 }
 
@@ -321,7 +321,7 @@ void MainWindow::on_comboBoxSleep_activated(int index)
 {
     valueVeilleMode = index;
     txCommande = SET_SLEEP_MODE;
-    sendSerialData();
+    execTxCommand();
 }
 
 void MainWindow::on_dialIntensite_valueChanged(void)
@@ -333,7 +333,7 @@ void MainWindow::on_dialIntensite_valueChanged(void)
         if (!serialRxIn)
         {
             txCommande = SET_VAL;
-            sendSerialData();
+            execTxCommand();
         }
     }
 }
@@ -347,7 +347,7 @@ void MainWindow::on_horizontalSliderIntensite_valueChanged(void)
         if (!serialRxIn)
         {
             txCommande = SET_VAL;
-            sendSerialData();
+            execTxCommand();
         }
     }
 }
@@ -357,7 +357,7 @@ void MainWindow::on_pushBottonOnOff_pressed()
     if (boutonState) //Met la lumière à "ON" et le bouton affiche maintenant "OFF".
     {
         txCommande = GET_VAL_POT;
-        sendSerialData();
+        execTxCommand();
         boutonState = !boutonState;
         intensite = valueAdc;
     }
@@ -367,7 +367,7 @@ void MainWindow::on_pushBottonOnOff_pressed()
         intensite = 0;
     }
     txCommande = SET_VAL;
-    sendSerialData();
+    execTxCommand();
 }
 
 void MainWindow::on_pushBottonOnOff_released()
@@ -376,6 +376,6 @@ void MainWindow::on_pushBottonOnOff_released()
     if (!serialRxIn)
     {
         txCommande = SET_VAL;
-        sendSerialData();
+        execTxCommand();
     }
 }

@@ -3,20 +3,16 @@
  * @brief      Classe qui affiche une boite de dialogue pour configurer le port série
  * @author     Base : Marc Juneau
  * @author     Adaptation : Thomas Desrosiers
- * @version    0.01
- * @date       8 février 2019
+ * @version    2.0
+ * @date       2022/01/12
  */
+
 #ifndef SETUPSERIALDIALOG_H
 #define SETUPSERIALDIALOG_H
 
 #include "savereadfile.h"
 #include <QDialog>
 #include <QtSerialPort/QSerialPort>
-
-#define DEFAULT_BAUD_RATE "1000000"
-#define DEFAULT_PORT_DESC "Périphérique série USB"
-//"USB-SERIAL CH340"
-//"Périphérique série USB"
 
 namespace Ui
 {
@@ -34,6 +30,19 @@ public:
      */
     explicit SetupSerialDialog(QSerialPort *s, void *shared);
     ~SetupSerialDialog();
+
+private:
+    /*Constantes : */
+    const uint32_t BAUD_RATE[7] = {9600, 19200, 115200, 250000, 921600, 1000000, 2000000};
+
+    /*Déclarations variables : */
+    QString *connectInfo;
+    QString connectInfoCom;
+
+    /*Déclarations objets : */
+    QSerialPort *serial;
+    SaveReadFile *saveRead;
+    Ui::SetupSerialDialog *ui;
 
 private slots:
     /**
@@ -62,14 +71,6 @@ private slots:
      *         La fenêtre est alors fermée.
      */
     void on_btOk_clicked();
-
-private:
-    QSerialPort *serial;
-    SaveReadFile *saveRead;
-    QString *connectInfo;
-    QString connectInfoCom;
-    Ui::SetupSerialDialog *ui;
-    const uint32_t BAUD_RATE[7] = {9600, 19200, 115200, 250000, 921600, 1000000, 2000000};
 };
 
 #endif // SETUPSERIALDIALOG_H

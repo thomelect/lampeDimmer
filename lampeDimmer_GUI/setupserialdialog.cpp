@@ -3,8 +3,8 @@
  * @brief      Classe qui affiche une boite de dialogue pour configurer le port série
  * @author     Base : Marc Juneau
  * @author     Adaptation : Thomas Desrosiers
- * @version    0.01
- * @date       8 février 2019
+ * @version    2.0
+ * @date       2022/01/12
  */
 
 #include "setupserialdialog.h"
@@ -13,7 +13,7 @@
 #include <QDebug>
 
 SetupSerialDialog::SetupSerialDialog(QSerialPort *s, void *shared) : QDialog(0),
-                                                       ui(new Ui::SetupSerialDialog)
+                                                                     ui(new Ui::SetupSerialDialog)
 {
     connectInfo = new QString[3];
     saveRead = (SaveReadFile *)shared;
@@ -28,13 +28,13 @@ SetupSerialDialog::SetupSerialDialog(QSerialPort *s, void *shared) : QDialog(0),
     ui->cbListBaudRate->addItem("921600");
     ui->cbListBaudRate->addItem("1000000");
     ui->cbListBaudRate->addItem("2000000");
-    if (ui->cbListBaudRate->findText(connectInfo[0], Qt::MatchExactly) != -1)
+    if (ui->cbListBaudRate->findText(connectInfo[0], Qt::MatchExactly) != -1) //Si le baudrate sauvegardé dans le fichier correspond à un des items...
     {
-        ui->cbListBaudRate->setCurrentIndex(ui->cbListBaudRate->findText(connectInfo[0], Qt::MatchExactly));
+        ui->cbListBaudRate->setCurrentIndex(ui->cbListBaudRate->findText(connectInfo[0], Qt::MatchExactly)); //Affichage de l'item de la combobox qui se trouve à l'index précisé.
     }
-    else
+    else //Sinon (Si le baudrate ne correspond à aucun de ceux des items de la combobox)...
     {
-        ui->cbListBaudRate->setCurrentIndex(0);
+        ui->cbListBaudRate->setCurrentIndex(0); //L'item à l'index 0 est affiché.
         qDebug() << ui->cbListPortSerie->currentText();
     }
     if (serial->isOpen())
@@ -61,22 +61,22 @@ void SetupSerialDialog::on_btActualiser_clicked()
     serial->close();
     ui->cbListPortSerie->setEnabled(true);
     ui->btConnexion->setEnabled(true);
-    foreach (const QSerialPortInfo &info, QSerialPortInfo::availablePorts())
+    foreach (const QSerialPortInfo &info, QSerialPortInfo::availablePorts()) //Pour tout les ports disponibles...
     {
         ui->cbListPortSerie->addItem(info.portName() + " " + info.description());
-        if (info.serialNumber() == connectInfo[2])
+        if (info.serialNumber() == connectInfo[2]) //Si le numéro de série sauvegardé dans le fichier correspond à un des périphériques connectés...
         {
-            connectInfoCom = info.portName();
+            connectInfoCom = info.portName(); //Le nom du port associé à ce numéro de série est conservé dans connectInfoCom.
         }
     }
-    if (ui->cbListPortSerie->findText(connectInfoCom, Qt::MatchExactly) != -1)
+    if (ui->cbListPortSerie->findText(connectInfoCom, Qt::MatchExactly) != -1) //Si le nom de port contenu dans connectInfoCom correspond à un des items de la combobox...
     {
-        ui->cbListPortSerie->setCurrentIndex(ui->cbListPortSerie->findText(connectInfoCom, Qt::MatchExactly));
+        ui->cbListPortSerie->setCurrentIndex(ui->cbListPortSerie->findText(connectInfoCom, Qt::MatchExactly)); //Affichage de l'item de la combobox qui se trouve à l'index précisé.
     }
-    else
+    else //Sinon (Si le nom de port contenu dans connectInfoCom ne correspond à aucun de ceux des items de la combobox)...
     {
-        ui->cbListPortSerie->setCurrentIndex(0);
-        qDebug() << ui->cbListPortSerie->currentText();
+        ui->cbListPortSerie->setCurrentIndex(0);        //L'item à l'index 0 est affiché.
+        qDebug() << ui->cbListPortSerie->currentText(); //Les informations de cet item sont affichés dans la console.
     }
 }
 
@@ -91,7 +91,7 @@ void SetupSerialDialog::on_btConnexion_clicked()
     if (ui->cbListPortSerie->count() > 0)
     {
         QString portName = ui->cbListPortSerie->itemText(ui->cbListPortSerie->currentIndex());
-        foreach (const QSerialPortInfo &info, QSerialPortInfo::availablePorts())
+        foreach (const QSerialPortInfo &info, QSerialPortInfo::availablePorts()) //Pour tout les ports disponibles...
         {
             QString infoTag = info.portName() + " " + info.description();
             if (infoTag == portName)
@@ -108,7 +108,7 @@ void SetupSerialDialog::on_btConnexion_clicked()
                         connectInfo[0] = QString::number(BAUD_RATE[ui->cbListBaudRate->currentIndex()]);
                         connectInfo[1] = info.description();
                         connectInfo[2] = info.serialNumber();
-                        saveRead->saveToFile(connectInfo, 3);
+                        saveRead->saveToFile(connectInfo, 3); //Sauvegarde du Baudrate, de la description et du numéro de série du périphérique qui vient d'être connecté, dans le fichier.
                     }
                 }
             }

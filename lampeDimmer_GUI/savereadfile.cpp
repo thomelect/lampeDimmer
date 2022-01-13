@@ -1,3 +1,10 @@
+/**
+ * @file    savereadfile.cpp
+ * @author  Thomas Desrosiers
+ * @date    2022/01/12
+ * @brief   Classe qui est utilisée pour la lecture et l'écriture dans un fichier texte.
+ */
+
 #include "savereadfile.h"
 #include <QDebug>
 #include <QFile>
@@ -12,7 +19,6 @@ SaveReadFile::SaveReadFile(QString fileName)
 
 SaveReadFile::~SaveReadFile()
 {
-
 }
 
 void SaveReadFile::saveToFile(QString *data, uint8_t size)
@@ -22,10 +28,11 @@ void SaveReadFile::saveToFile(QString *data, uint8_t size)
     file.open(QIODevice::WriteOnly | QIODevice::Text);
     QTextStream out(&file);
     out.setCodec("UTF-8");
-    for (uint8_t index = 0; index < size; index++) {
+    for (uint8_t index = 0; index < size; index++) //Tant que le nombre du données écrites est inférieur à size...
+    {
         out << data[index] << endl;
     }
-    out << QDateTime::currentDateTime().toString();
+    out << QDateTime::currentDateTime().toString(); //Affichage de la date et de l'heure lors de la dernière écriture.
     out.flush();
     file.close();
 }
@@ -36,18 +43,20 @@ void SaveReadFile::readFromfile(QString *dest, uint8_t size)
     file.setFileName(_fileName);
     if (file.exists())
     {
-        if(file.open(QIODevice::ReadOnly|QIODevice::Text))
+        if (file.open(QIODevice::ReadOnly | QIODevice::Text)) //Lecture du fichier.
         {
             qDebug() << "Fichier existant!";
-            for (uint8_t index = 0; index < size; index++) {
+            for (uint8_t index = 0; index < size; index++)
+            {
                 dest[index] = file.readLine();
                 dest[index].remove(QRegExp("\\n"));
             }
         }
         file.close();
     }
-    else {
-        if(file.open(QIODevice::WriteOnly|QIODevice::Text))
+    else //Sinon (si le fichier n'existe pas)...
+    {
+        if (file.open(QIODevice::WriteOnly | QIODevice::Text))
         {
             qDebug() << "Fichier " + _fileName + " créé!";
         }
