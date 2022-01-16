@@ -177,7 +177,7 @@ int main(void)
 					valueAdcTbl[0] = valueAdcTbl[1]; //La nouvelle valeur remplace l'ancienne.
 					valueOut = valueAdcTbl[1];
 					valueAdc = valueAdcTbl[1];
-					txCommande = VAL_ACTU;
+					txCommande = VAL_POT;
 					execTxCommand();
 				}
 			}
@@ -248,7 +248,7 @@ void execTxCommand(void)
 	case VAL_ACTU:
 		txData[0] = '<';
 		txData[1] = 1;
-		txData[2] = VAL_POT;
+		txData[2] = VAL_ACTU;
 		txData[3] = valueOut;
 		txData[4] = '>';
 		serialUSBWrite((uint8_t *)txData, 5);
