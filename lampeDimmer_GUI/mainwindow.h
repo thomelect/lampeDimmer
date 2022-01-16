@@ -47,7 +47,8 @@ private:
     {
         VAL_ACTU,
         VAL_INIT,
-        VAL_POT
+        VAL_POT,
+        VAL_MODE
     };
     /* Enums commandes transmission: */
     enum TX_COMMANDES
@@ -73,7 +74,8 @@ private:
     uint16_t rxErrorCommCnt;
     uint8_t valueAdc;
     uint8_t valueOut;
-    uint8_t valueVeilleMode;
+    uint8_t valueModeSys;
+    uint8_t veilleState;
     uint8_t intensite;
     bool serialRxIn;
     bool boutonState;
