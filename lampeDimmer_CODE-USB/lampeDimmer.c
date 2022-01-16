@@ -43,8 +43,10 @@ volatile uint8_t msFlagAdc = 0;	 //Flags qui est mis à 1 à chaques 25ms pour l
 volatile uint16_t msCntFade = 0; //Compteur utilisés pour compter 50 fois un délai de 1ms pour le fade de la sortie.
 volatile uint8_t msFlagFade = 0; //Flags qui est mis à 1 à chaques 50ms pour le fade de la sortie.
 uint16_t valueAdcTbl[2] = {0, 0};
+uint16_t valueModeSysTbl[2] = {0, 0};
 uint16_t valueOut = 0;
 uint16_t valueAdc = 0;
+uint16_t valueModeSys = 0;
 int increment = 5;
 
 /* Variables nécessaires à la communication avec l'interface: */
@@ -68,7 +70,8 @@ enum TX_COMMANDES
 {
 	VAL_ACTU,
 	VAL_INIT,
-	VAL_POT
+	VAL_POT,
+	VAL_MODE
 };
 
 /* Enum des différentes commandes utilisées en réception: */
@@ -162,6 +165,7 @@ int main(void)
 		}
 		if (SWITCH()) //Si l'interrupteur du potentiomètre est à la position "ON"...
 		{
+			valueModeSysTbl[1] = 1;
 			if (msFlagAdc)
 			{
 				msFlagAdc = 0;
@@ -185,8 +189,16 @@ int main(void)
 		else //Si l'interrupteur du potentiomètre est à la position "OFF"...
 		{
 			outputVeille();
+			valueModeSysTbl[1] = 0;
 			//txCommande = VAL_ACTU;
 			//execTxCommand();
+		}
+		if (valueModeSysTbl[1] != valueModeSysTbl[0])
+		{
+			valueModeSysTbl[0] = valueModeSysTbl[1]; //La nouvelle valeur remplace l'ancienne.
+			valueModeSys = valueModeSysTbl[1];
+			txCommande = VAL_MODE;
+			execTxCommand();
 		}
 		OUTPUT_VALUE(valueOut);
 		USB_USBTask();
@@ -242,7 +254,7 @@ void execRxCommand(void)
 
 void execTxCommand(void)
 {
-	char txData[6];
+	char txData[7];
 	switch (txCommande)
 	{
 	case VAL_ACTU:
@@ -255,18 +267,27 @@ void execTxCommand(void)
 		break;
 	case VAL_INIT:
 		txData[0] = '<';
-		txData[1] = 2;
+		txData[1] = 3;
 		txData[2] = VAL_INIT;
 		txData[3] = valueOut;
 		txData[4] = veilleState;
-		txData[5] = '>';
-		serialUSBWrite((uint8_t *)txData, 6);
+		txData[5] = valueModeSys;
+		txData[6] = '>';
+		serialUSBWrite((uint8_t *)txData, 7);
 		break;
 	case VAL_POT:
 		txData[0] = '<';
 		txData[1] = 1;
 		txData[2] = VAL_POT;
 		txData[3] = valueAdc;
+		txData[4] = '>';
+		serialUSBWrite((uint8_t *)txData, 5);
+		break;
+	case VAL_MODE:
+		txData[0] = '<';
+		txData[1] = 1;
+		txData[2] = VAL_MODE;
+		txData[3] = valueModeSys;
 		txData[4] = '>';
 		serialUSBWrite((uint8_t *)txData, 5);
 		break;
