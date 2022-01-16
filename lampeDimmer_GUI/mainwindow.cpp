@@ -29,6 +29,10 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent),
     ui->pushBottonOnOff->setIcon(QIcon(":/images/off.png"));
     ui->pushBottonOnOff->setIconSize(QSize(65, 65));
 
+    systemTray = new QSystemTrayIcon(this);
+    systemTray->setVisible(true);
+    connect(systemTray, &QSystemTrayIcon::activated, this, &MainWindow::handleClick /* assuming it's MainWindow */);
+
     settings = new QSettings("./settings.ini", QSettings::IniFormat);
     settings->beginGroup("Info");
     settings->setValue("Author", "Thomas Desrosiers");
@@ -38,7 +42,7 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent),
     statusLabel = new QLabel(this);
     ui->statusBar->addPermanentWidget(statusLabel);
 
-    autoSetupSerial();                         //Appel de la fonction de connexion automatique.
+    autoSetupSerial(); //Appel de la fonction de connexion automatique.
 
     //Feuille de style des boutons de la de l'interface MainWindow.
     this->setStyleSheet("#pushBottonOnOff {"
@@ -126,6 +130,7 @@ void MainWindow::boutonManage(int value)
     ui->dialIntensite->setSliderPosition(intensite);           //Modifie la position du slider en fonction de la valeur obtenue par le slider.
     ui->horizontalSliderIntensite->setSliderPosition(intensite);
     ui->statusBar->showMessage(QString::number((intensite / 2.55), 'f', 0) + '%'); //conversion de la valeur actuelle en pourcentage.
+    systemTray->setToolTip(QString::number((intensite / 2.55), 'f', 0) + '%');
     qDebug() << "SET_VAL : " + QString::number(intensite);
 
     QPixmap pixmapOff("/images/off.png");
@@ -135,12 +140,16 @@ void MainWindow::boutonManage(int value)
         ui->pushBottonOnOff->setIcon(QIcon(":/images/on.png"));
         ui->pushBottonOnOff->setIconSize(QSize(65, 65));
         boutonState = 0;
+        QIcon icon("on.png");
+        systemTray->setIcon(icon); // On assigne une image à notre icône
     }
     else
     {
         ui->pushBottonOnOff->setIcon(QIcon(":/images/off.png"));
         ui->pushBottonOnOff->setIconSize(QSize(65, 65));
         boutonState = 1;
+        QIcon icon("off.png");
+        systemTray->setIcon(icon); // On assigne une image à notre icône
     }
 }
 
@@ -406,4 +415,36 @@ void MainWindow::on_pushBottonOnOff_released()
         txCommande = SET_VAL;
         execTxCommand();
     }
+}
+
+void MainWindow::handleClick(QSystemTrayIcon::ActivationReason reason)
+{
+
+    switch (reason)
+    {
+    case QSystemTrayIcon::Unknown:
+        qDebug() << "Unknown";
+        break;
+    case QSystemTrayIcon::Context:
+        qDebug() << "Context - Right Click";
+        intensite = 0;
+        break;
+    case QSystemTrayIcon::DoubleClick:
+        qDebug() << "DoubleClick";
+        break;
+    case QSystemTrayIcon::Trigger:
+        qDebug() << "Trigger - Left Click";
+
+        intensite = valueAdc;
+        break;
+    case QSystemTrayIcon::MiddleClick:
+        qDebug() << "MiddleClick";
+        txCommande = GET_VAL_POT;
+        execTxCommand();
+        break;
+    }
+
+    txCommande = SET_VAL;
+    execTxCommand();
+    boutonManage(intensite);
 }

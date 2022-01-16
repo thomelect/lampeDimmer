@@ -13,7 +13,7 @@
 #include <QDebug>
 
 SetupSerialDialog::SetupSerialDialog(QSerialPort *s) : QDialog(0),
-                                                                     ui(new Ui::SetupSerialDialog)
+                                                       ui(new Ui::SetupSerialDialog)
 {
     connectInfo = new QString[3];
 

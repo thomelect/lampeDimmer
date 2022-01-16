@@ -14,6 +14,7 @@
 #include <QLabel>
 #include <QtSerialPort/QSerialPort>
 #include <QSettings>
+#include <QSystemTrayIcon>
 
 #define _MAX_RXDATASIZE_ 16
 
@@ -87,6 +88,7 @@ private:
     QPixmap *pixmapOff();
     QIcon *ButtonIcon();
     QSettings *settings;
+    QSystemTrayIcon *systemTray;
     Ui::MainWindow *ui;
 
 private slots:
@@ -95,6 +97,8 @@ private slots:
      * @brief  Fonction de lecture du port série..
      */
     void readSerialData(void);
+
+    void handleClick(QSystemTrayIcon::ActivationReason reason);
 
     /**
      * @brief        Fonction appelée lorsque l'utilisateur choisi une option dans la liste.
