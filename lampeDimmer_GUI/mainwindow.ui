@@ -215,6 +215,11 @@
     </property>
     <item>
      <property name="text">
+      <string>NONE</string>
+     </property>
+    </item>
+    <item>
+     <property name="text">
       <string>OFF</string>
      </property>
     </item>
