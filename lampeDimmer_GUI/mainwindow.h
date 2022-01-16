@@ -9,11 +9,11 @@
 #define MAINWINDOW_H
 
 #include "setupserialdialog.h"
-#include "savereadfile.h"
 #include <QPixmap>
 #include <QMainWindow>
 #include <QLabel>
 #include <QtSerialPort/QSerialPort>
+#include <QSettings>
 
 #define _MAX_RXDATASIZE_ 16
 
@@ -86,7 +86,7 @@ private:
     QAction *setupSerialAct;
     QPixmap *pixmapOff();
     QIcon *ButtonIcon();
-    SaveReadFile *saveRead; //Déclaration d'un objet de la classe SaveReadFile.
+    QSettings *settings;
     Ui::MainWindow *ui;
 
 private slots:
@@ -140,6 +140,17 @@ private:
     void autoSetupSerial(void);
 
     /**
+     * @brief  Fonction qui sert à activer / désactiver les boutons en fonction d'une connexion ou non à un port série.
+     */
+    void boutonEnabler();
+
+    /**
+     * @brief       Fonction qui modifie la variable boutonState et l'affichage sur le bouton en fonction de la valeur des sliders.
+     * @param data  Valeurs des sliders.
+     */
+    void boutonManage(int value);
+
+    /**
      * @brief  Fonction de traitement des données et commandes reçues.
      */
     void execRxCommand(void);
@@ -158,16 +169,5 @@ private:
      * @param data  Octet reçu par la fonction usartRemRxData.
      */
     void parseRXData(uint8_t data);
-
-    /**
-     * @brief  Fonction qui sert à activer / désactiver les boutons en fonction d'une connexion ou non à un port série.
-     */
-    void boutonEnabler();
-
-    /**
-     * @brief       Fonction qui modifie la variable boutonState et l'affichage sur le bouton en fonction de la valeur des sliders.
-     * @param data  Valeurs des sliders.
-     */
-    void boutonManage(int value);
 };
 #endif // MAINWINDOW_H
