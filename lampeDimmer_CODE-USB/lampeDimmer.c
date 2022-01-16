@@ -185,8 +185,8 @@ int main(void)
 		else //Si l'interrupteur du potentiomètre est à la position "OFF"...
 		{
 			outputVeille();
-			txCommande = VAL_ACTU;
-			execTxCommand();
+			//txCommande = VAL_ACTU;
+			//execTxCommand();
 		}
 		OUTPUT_VALUE(valueOut);
 		USB_USBTask();
