@@ -102,41 +102,55 @@ void MainWindow::autoSetupSerial(void)
 
 void MainWindow::boutonEnabler()
 {
-    if (serial->isOpen())
+    if (serial->isOpen()) //Si le port série est ouvert...
     {
-        ui->comboBoxSleep->setDisabled(false);
+        ui->comboBoxSleep->setEnabled(true); //Les éléments du GUI sont activés.
         ui->dialIntensite->setEnabled(true);
         ui->pushBottonOnOff->setEnabled(true);
         ui->horizontalSliderIntensite->setEnabled(true);
     }
-    else
+    else //Sinon (si le port série n'est pas ouvert)...
     {
-        statusLabel->setText("Non connecté");
+        statusLabel->setText("Non connecté"); //Les éléments du GUI sont désactivés et le système affiche "Non connecté".
         statusLabel->setToolTip("");
         ui->comboBoxSleep->setDisabled(true);
         ui->dialIntensite->setDisabled(true);
         ui->pushBottonOnOff->setDisabled(true);
         ui->horizontalSliderIntensite->setDisabled(true);
     }
+    if (!valueModeSys) //Si le système est en mode veille...
+    {
+        ui->dialIntensite->setDisabled(true); //Les éléments du GUI (sauf le comboBox) sont désactivés.
+        ui->pushBottonOnOff->setDisabled(true);
+        ui->horizontalSliderIntensite->setDisabled(true);
+        ui->statusBar->showMessage("VEILLE | " + ui->comboBoxSleep->currentText()); //conversion de la valeur actuelle en pourcentage.
+    }
+    else //Sinon (si le système n'est pas en mode veille)...
+    {
+        ui->dialIntensite->setEnabled(true); //Les éléments du GUI sont activés.
+        ui->pushBottonOnOff->setEnabled(true);
+        ui->horizontalSliderIntensite->setEnabled(true);
+    }
 }
 
 void MainWindow::boutonManage(int value)
 {
-    ui->lbIntensiteValue->setText(QString::number(intensite)); //La valeur du slider est affichée dans le label sous le slider.
-    ui->dialIntensite->setSliderPosition(intensite);           //Modifie la position du slider en fonction de la valeur obtenue par le slider.
-    ui->horizontalSliderIntensite->setSliderPosition(intensite);
-    ui->statusBar->showMessage(QString::number((intensite / 2.55), 'f', 0) + '%'); //conversion de la valeur actuelle en pourcentage.
-    qDebug() << "SET_VAL : " + QString::number(intensite);
+    ui->lbIntensiteValue->setText(QString::number(value)); //La valeur du slider est affichée dans le label sous le slider.
+    ui->dialIntensite->setSliderPosition(value);           //Modifie la position du slider en fonction de la valeur obtenue par le slider.
+    ui->horizontalSliderIntensite->setSliderPosition(value);
+    ui->statusBar->showMessage(QString::number((value / 2.55), 'f', 0) + '%'); //conversion de la valeur actuelle en pourcentage.
+    ui->comboBoxSleep->setCurrentIndex(veilleState);
+    qDebug() << "SET_VAL : " << QString::number(value);
 
     QPixmap pixmapOff("/images/off.png");
     QIcon ButtonIcon(pixmapOff);
-    if (value)
+    if (value) //Si la valeur est plus grande que 0...
     {
         ui->pushBottonOnOff->setIcon(QIcon(":/images/on.png"));
         ui->pushBottonOnOff->setIconSize(QSize(65, 65));
         boutonState = 0;
     }
-    else
+    else //Sinon (si la valeur est égale à 0)...
     {
         ui->pushBottonOnOff->setIcon(QIcon(":/images/off.png"));
         ui->pushBottonOnOff->setIconSize(QSize(65, 65));
@@ -164,35 +178,35 @@ void MainWindow::execRxCommand(void)
         valueOut = rxData[0];
 
         /*// DEBUG //*/
-        qDebug() << "VAL_ACTU : " + QString::number(valueOut);
+        qDebug() << "VAL_ACTU : " << QString::number(valueOut);
         break;
     case VAL_INIT:
         /*// ACQUISITION //*/
         valueOut = rxData[0];
-        valueVeilleMode = rxData[1];
+        veilleState = rxData[1];
+        valueModeSys = rxData[2];
 
-        /*// DEBUG //*/
-        qDebug() << "VAL_ACTU : " + QString::number(valueOut);
-        qDebug() << "SLEEP_MODE : " + ui->comboBoxSleep->currentText();
-
-        /*// CHANGEMENTS GUI //*/
-        ui->horizontalSliderIntensite->setSliderPosition(valueOut); //Modifie la position du slider en fonction de la valeur obtenue par le dial.
-        ui->dialIntensite->setSliderPosition(valueOut);             //Modifie la position du slider en fonction de la valeur obtenue par le slider.
-        ui->lbIntensiteValue->setText(QString::number(valueOut));
-        ui->comboBoxSleep->setCurrentIndex(valueVeilleMode);
-
-        if (!valueVeilleMode)
+        if (!veilleState) //Si le mode de veille actuel est "NONE"...
         {
-            valueVeilleMode = settings->value("veille/mode").toInt();
-            ui->comboBoxSleep->setCurrentIndex(valueVeilleMode);
-            txCommande = SET_SLEEP_MODE;
+            veilleState = settings->value("veille/mode").toInt(); //Récupération du mode veille sauvegardé dans le fichier .ini.
+            ui->comboBoxSleep->setCurrentIndex(veilleState);      //Mise à jour du comboBox
+            txCommande = SET_SLEEP_MODE;                          //Envoi du mode veille au Arduino.
             execTxCommand();
         }
-        else
+        else //Sinon (si le mode de veille actuel est autre que "NONE")...
         {
-            settings->setValue("veille/mode", QString::number(valueVeilleMode));
+            settings->setValue("veille/mode", QString::number(veilleState)); //Les valeurs sauvegardés son actualisés.
             settings->setValue("veille/Description", ui->comboBoxSleep->currentText());
         }
+
+        /*// CHANGEMENTS GUI //*/
+        boutonManage(valueOut);
+        boutonEnabler();
+
+        /*// DEBUG //*/
+        qDebug() << "VAL_ACTU : " << QString::number(valueOut);
+        qDebug() << "SLEEP_MODE : " << ui->comboBoxSleep->currentText();
+        qDebug() << "SYS_MODE : " << (valueModeSys ? "NORMAL" : "VEILLE");
 
         /*// FLAG DE RÉCEPTION //*/
         serialRxIn = false;
@@ -201,13 +215,24 @@ void MainWindow::execRxCommand(void)
         /*// ACQUISITION //*/
         valueAdc = rxData[0];
 
+        /*// CHANGEMENTS GUI //*/
+        boutonManage(valueAdc);
+
         /*// DEBUG //*/
-        qDebug() << "VAL_POT : " + QString::number(valueAdc);
+        qDebug() << "VAL_POT : " << QString::number(valueAdc);
+
+        /*// FLAG DE RÉCEPTION //*/
+        serialRxIn = false;
+        break;
+    case VAL_MODE:
+        /*// ACQUISITION //*/
+        valueModeSys = rxData[0];
 
         /*// CHANGEMENTS GUI //*/
-        ui->horizontalSliderIntensite->setSliderPosition(valueAdc); //Modifie la position du slider en fonction de la valeur obtenue par le dial.
-        ui->dialIntensite->setSliderPosition(valueAdc);             //Modifie la position du slider en fonction de la valeur obtenue par le slider.
-        ui->lbIntensiteValue->setText(QString::number(valueAdc));
+        boutonEnabler();
+
+        /*// DEBUG //*/
+        qDebug() << "VAL_MODE : " + QString::number(valueModeSys);
 
         /*// FLAG DE RÉCEPTION //*/
         serialRxIn = false;
@@ -250,7 +275,7 @@ void MainWindow::execTxCommand()
             txData[0] = '<';
             txData[1] = 1;
             txData[2] = SET_SLEEP_MODE;
-            txData[3] = valueVeilleMode;
+            txData[3] = veilleState;
             txData[4] = '>';
             serial->write(txData, 5);
             break;
@@ -304,7 +329,7 @@ void MainWindow::parseRXData(uint8_t data)
         break;
     case RXDATA:
         rxData[rxDataCnt++] = data;
-        qDebug() << " ----------------- RXDATA : " + QString::number(data);
+        qDebug() << " ----------------- RXDATA : " << QString::number(data);
         if (rxDataCnt == rxDataSize)
             rxState = VALIDATE;
         break;
@@ -360,9 +385,10 @@ void MainWindow::setupSerial(void)
 
 void MainWindow::on_comboBoxSleep_activated(int index)
 {
-    valueVeilleMode = index;
+    veilleState = index;
     settings->setValue("veille/mode", QString::number(index));
     settings->setValue("veille/Description", ui->comboBoxSleep->currentText());
+    boutonEnabler();
     txCommande = SET_SLEEP_MODE;
     execTxCommand();
 }
