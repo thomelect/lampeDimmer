@@ -104,7 +104,7 @@ void MainWindow::boutonEnabler()
 {
     if (serial->isOpen())
     {
-        ui->comboBoxSleep->setDisabled(false);
+        ui->comboBoxSleep->setEnabled(true);
         ui->dialIntensite->setEnabled(true);
         ui->pushBottonOnOff->setEnabled(true);
         ui->horizontalSliderIntensite->setEnabled(true);
@@ -117,6 +117,18 @@ void MainWindow::boutonEnabler()
         ui->dialIntensite->setDisabled(true);
         ui->pushBottonOnOff->setDisabled(true);
         ui->horizontalSliderIntensite->setDisabled(true);
+    }
+    if (!valueModeSystem)
+    {
+        ui->dialIntensite->setDisabled(true);
+        ui->pushBottonOnOff->setDisabled(true);
+        ui->horizontalSliderIntensite->setDisabled(true);
+    }
+    else
+    {
+        ui->dialIntensite->setEnabled(true);
+        ui->pushBottonOnOff->setEnabled(true);
+        ui->horizontalSliderIntensite->setEnabled(true);
     }
 }
 
@@ -169,7 +181,8 @@ void MainWindow::execRxCommand(void)
     case VAL_INIT:
         /*// ACQUISITION //*/
         valueOut = rxData[0];
-        valueVeilleMode = rxData[1];
+        valueModeVeille = rxData[1];
+        valueModeSystem = rxData[2];
 
         /*// DEBUG //*/
         qDebug() << "VAL_ACTU : " + QString::number(valueOut);
@@ -179,18 +192,18 @@ void MainWindow::execRxCommand(void)
         ui->horizontalSliderIntensite->setSliderPosition(valueOut); //Modifie la position du slider en fonction de la valeur obtenue par le dial.
         ui->dialIntensite->setSliderPosition(valueOut);             //Modifie la position du slider en fonction de la valeur obtenue par le slider.
         ui->lbIntensiteValue->setText(QString::number(valueOut));
-        ui->comboBoxSleep->setCurrentIndex(valueVeilleMode);
+        ui->comboBoxSleep->setCurrentIndex(valueModeVeille);
 
-        if (!valueVeilleMode)
+        if (!valueModeVeille)
         {
-            valueVeilleMode = settings->value("veille/mode").toInt();
-            ui->comboBoxSleep->setCurrentIndex(valueVeilleMode);
+            valueModeVeille = settings->value("veille/mode").toInt();
+            ui->comboBoxSleep->setCurrentIndex(valueModeVeille);
             txCommande = SET_SLEEP_MODE;
             execTxCommand();
         }
         else
         {
-            settings->setValue("veille/mode", QString::number(valueVeilleMode));
+            settings->setValue("veille/mode", QString::number(valueModeVeille));
             settings->setValue("veille/Description", ui->comboBoxSleep->currentText());
         }
 
@@ -208,6 +221,19 @@ void MainWindow::execRxCommand(void)
         ui->horizontalSliderIntensite->setSliderPosition(valueAdc); //Modifie la position du slider en fonction de la valeur obtenue par le dial.
         ui->dialIntensite->setSliderPosition(valueAdc);             //Modifie la position du slider en fonction de la valeur obtenue par le slider.
         ui->lbIntensiteValue->setText(QString::number(valueAdc));
+
+        /*// FLAG DE RÉCEPTION //*/
+        serialRxIn = false;
+        break;
+    case VAL_MODE:
+        /*// ACQUISITION //*/
+        valueModeSystem = rxData[0];
+
+        /*// DEBUG //*/
+        qDebug() << "VAL_MODE : " + QString::number(valueModeSystem);
+
+        /*// CHANGEMENTS GUI //*/
+        boutonEnabler();
 
         /*// FLAG DE RÉCEPTION //*/
         serialRxIn = false;
@@ -250,7 +276,7 @@ void MainWindow::execTxCommand()
             txData[0] = '<';
             txData[1] = 1;
             txData[2] = SET_SLEEP_MODE;
-            txData[3] = valueVeilleMode;
+            txData[3] = valueModeVeille;
             txData[4] = '>';
             serial->write(txData, 5);
             break;
@@ -360,7 +386,7 @@ void MainWindow::setupSerial(void)
 
 void MainWindow::on_comboBoxSleep_activated(int index)
 {
-    valueVeilleMode = index;
+    valueModeVeille = index;
     settings->setValue("veille/mode", QString::number(index));
     settings->setValue("veille/Description", ui->comboBoxSleep->currentText());
     txCommande = SET_SLEEP_MODE;
