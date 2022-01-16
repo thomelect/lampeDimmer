@@ -45,7 +45,6 @@ volatile uint8_t msFlagFade = 0; //Flags qui est mis à 1 à chaques 50ms pour l
 uint16_t valueAdcTbl[2] = {0, 0};
 uint16_t valueOut = 0;
 uint16_t valueAdc = 0;
-uint8_t valueVeilleMode = 0;
 int increment = 5;
 
 /* Variables nécessaires à la communication avec l'interface: */
@@ -82,10 +81,20 @@ enum RX_COMMANDES
 	SET_VAL
 };
 
+enum VEILLE_STATE
+{
+	VEILLE_NONE,
+	VEILLE_OFF,
+	VEILLE_ON,
+	VEILLE_BREATHING,
+	VEILLE_VEILLE
+};
+
 /* Déclaration des enums: */
 enum RX_STATES rxState;
 enum TX_COMMANDES txCommande;
 enum RX_COMMANDES rxCommande;
+enum VEILLE_STATE veilleState;
 
 /* Prototypes des fonctions locales: */
 void hardwareInit(void);
@@ -115,7 +124,7 @@ void miscInit(void);
  *@brief		Fonction qui traite la valeur de sortie en fonction du mode veille actuel.
  *@param value  Mode veille.
  */
-void outputVeille(uint8_t value);
+void outputVeille(void);
 
 /**
  * @brief		Fonction qui remplis la structure de donnés avec les paramètres correspondants qui lui sont envoyés en paramètre par la fonction usartRemRxData. Le switch case commence à l'état WAIT qui attend la réception de "<". RXDATA place alors les donnés reçus dans l'union de structure jusqu'à ce que la dernière donnée (ici, la longueur de la trame à été spécifié manuellement à 7 puisque nous n'envoyons pas l'octet qui contient la longueur de la trame. Finalement, VALIDATE s'assure que la trame se termine par ">"
@@ -175,7 +184,7 @@ int main(void)
 		}
 		else //Si l'interrupteur du potentiomètre est à la position "OFF"...
 		{
-			outputVeille(valueVeilleMode);
+			outputVeille();
 			txCommande = VAL_ACTU;
 			execTxCommand();
 		}
@@ -220,7 +229,7 @@ void execRxCommand(void)
 		execTxCommand();
 		break;
 	case SET_SLEEP_MODE:
-		valueVeilleMode = rxData[0];
+		veilleState = rxData[0];
 		break;
 	case SET_VAL:	  //Réception depuis l'interface de la valeur de la sortie.
 		if (SWITCH()) //Si l'interrupteur du potentiomètre est à la position "ON"...
@@ -248,8 +257,8 @@ void execTxCommand(void)
 		txData[0] = '<';
 		txData[1] = 2;
 		txData[2] = VAL_INIT;
-		txData[3] = valueOut;
-		txData[4] = valueVeilleMode;
+		txData[3] = valueAdc;
+		txData[4] = veilleState;
 		txData[5] = '>';
 		serialUSBWrite((uint8_t *)txData, 6);
 		break;
@@ -283,17 +292,20 @@ void hardwareInit(void)
 	USB_Init();
 }
 
-void outputVeille(uint8_t value)
+void outputVeille(void)
 {
-	switch (value)
+	switch (veilleState)
 	{
-	case 0:
+	case VEILLE_NONE:
+
+		break;
+	case VEILLE_OFF:
 		valueOut = 0;
 		break;
-	case 1:
+	case VEILLE_ON:
 		valueOut = 255;
 		break;
-	case 2:
+	case VEILLE_BREATHING:
 		if (valueOut <= 1) //Lorsque oc4aValue à atteint son minimum.
 		{
 			increment = INCREMENT_STEP;
@@ -308,7 +320,7 @@ void outputVeille(uint8_t value)
 			valueOut += increment;
 		}
 		break;
-	case 3:
+	case VEILLE_VEILLE:
 		valueOut = 1;
 		break;
 	}
