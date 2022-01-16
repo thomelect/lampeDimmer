@@ -181,6 +181,19 @@ void MainWindow::execRxCommand(void)
         ui->lbIntensiteValue->setText(QString::number(valueOut));
         ui->comboBoxSleep->setCurrentIndex(valueVeilleMode);
 
+        if (!valueVeilleMode)
+        {
+            valueVeilleMode = settings->value("veille/mode").toInt();
+            ui->comboBoxSleep->setCurrentIndex(valueVeilleMode);
+            txCommande = SET_SLEEP_MODE;
+            execTxCommand();
+        }
+        else
+        {
+            settings->setValue("veille/mode", QString::number(valueVeilleMode));
+            settings->setValue("veille/Description", ui->comboBoxSleep->currentText());
+        }
+
         /*// FLAG DE RÉCEPTION //*/
         serialRxIn = false;
         break;
@@ -348,6 +361,8 @@ void MainWindow::setupSerial(void)
 void MainWindow::on_comboBoxSleep_activated(int index)
 {
     valueVeilleMode = index;
+    settings->setValue("veille/mode", QString::number(index));
+    settings->setValue("veille/Description", ui->comboBoxSleep->currentText());
     txCommande = SET_SLEEP_MODE;
     execTxCommand();
 }
