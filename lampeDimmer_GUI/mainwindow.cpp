@@ -8,7 +8,6 @@
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
 #include "setupserialdialog.h"
-#include <QTimer>
 #include <QDebug>
 #include <QMenuBar>
 #include <QString>
@@ -22,7 +21,6 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent),
     intensite = 0;
     serialRxIn = false;
     boutonState = true;
-    connectInfo = new QString[3];
 
     ui->setupUi(this);
     serial = new QSerialPort(this);
@@ -31,12 +29,16 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent),
     ui->pushBottonOnOff->setIcon(QIcon(":/images/off.png"));
     ui->pushBottonOnOff->setIconSize(QSize(65, 65));
 
+    settings = new QSettings("./settings.ini", QSettings::IniFormat);
+    settings->beginGroup("Info");
+    settings->setValue("Author", "Thomas Desrosiers");
+    settings->setValue("App", "LampeDimmer");
+    settings->endGroup();
+
     statusLabel = new QLabel(this);
     ui->statusBar->addPermanentWidget(statusLabel);
 
-    saveRead = new SaveReadFile("./saveData"); //Objet de la classe SaveReadFile.
-    saveRead->readFromfile(connectInfo, 3);    //Lecture des 3 premières lignes du fichier.
-    autoSetupSerial();                         //Appel de la fonction de connexion automatique.
+    autoSetupSerial(); //Appel de la fonction de connexion automatique.
 
     //Feuille de style des boutons de la de l'interface MainWindow.
     this->setStyleSheet("#pushBottonOnOff {"
@@ -55,11 +57,12 @@ MainWindow::~MainWindow()
 
 void MainWindow::autoSetupSerial(void)
 {
-    if (!connectInfo[2].isEmpty()) //Si le numéro de série lu dans le fichier n'est pas null...
+    settings->beginGroup("Serial");
+    if (settings->contains("SerialNumber")) //Si le numéro de série lu dans le fichier n'est pas null...
     {
         foreach (const QSerialPortInfo &info, QSerialPortInfo::availablePorts()) //Pour tout les ports disponibles...
         {
-            if (info.serialNumber() == connectInfo[2]) //Si le numéro de série sauvegardé dans le fichier correspond à un des périphériques connectés...
+            if (info.serialNumber() == settings->value("SerialNumber")) //Si le numéro de série sauvegardé dans le fichier correspond à un des périphériques connectés...
             {
                 portConfig = (info.portName() + " " + info.description()); //Information utilisées pour la connexion.
             }
@@ -77,7 +80,7 @@ void MainWindow::autoSetupSerial(void)
                     if (serial->open(QIODevice::ReadWrite))
                     {
                         qDebug() << "open " << portConfig; //Indique à l'utilisateur qu'une tentative de connexion est en cours.
-                        if (serial->setBaudRate(connectInfo[1].toInt()) && serial->setDataBits(QSerialPort::Data8) && serial->setParity(QSerialPort::NoParity) && serial->setStopBits(QSerialPort::OneStop) && serial->setFlowControl(QSerialPort::NoFlowControl))
+                        if (serial->setBaudRate(settings->value("BaudRate").toInt()) && serial->setDataBits(QSerialPort::Data8) && serial->setParity(QSerialPort::NoParity) && serial->setStopBits(QSerialPort::OneStop) && serial->setFlowControl(QSerialPort::NoFlowControl))
                         {
                             statusLabel->setText("Connecté " + info.portName()); //Indique à l'utilisateur que la connexion est réussie ainsi que le nom du port.
                             statusLabel->setToolTip(infoTag);                    //Indique à l'utilisateur le nom du port et sa description.
@@ -94,6 +97,7 @@ void MainWindow::autoSetupSerial(void)
         }
         boutonEnabler();
     }
+    settings->endGroup();
 }
 
 void MainWindow::boutonEnabler()
@@ -325,7 +329,7 @@ void MainWindow::readSerialData(void)
 
 void MainWindow::setupSerial(void)
 {
-    SetupSerialDialog setupDia(serial, saveRead);
+    SetupSerialDialog setupDia(serial);
     setupDia.setWindowTitle("Configuration du port série");
     setupDia.setWindowFlags(Qt::WindowSystemMenuHint); // Pour retirer le ?
     setupDia.setModal(1);
