@@ -43,6 +43,7 @@ volatile uint8_t msFlagAdc = 0;	 //Flags qui est mis à 1 à chaques 25ms pour l
 volatile uint16_t msCntFade = 0; //Compteur utilisés pour compter 50 fois un délai de 1ms pour le fade de la sortie.
 volatile uint8_t msFlagFade = 0; //Flags qui est mis à 1 à chaques 50ms pour le fade de la sortie.
 uint16_t valueAdcTbl[2] = {0, 0};
+uint16_t valueModeTbl[2] = {0, 0};
 uint16_t valueOut = 0;
 uint16_t valueAdc = 0;
 int increment = 5;
@@ -68,7 +69,8 @@ enum TX_COMMANDES
 {
 	VAL_ACTU,
 	VAL_INIT,
-	VAL_POT
+	VAL_POT,
+	VAL_MODE
 };
 
 /* Enum des différentes commandes utilisées en réception: */
@@ -162,6 +164,7 @@ int main(void)
 		}
 		if (SWITCH()) //Si l'interrupteur du potentiomètre est à la position "ON"...
 		{
+			valueModeTbl[1] = 1;
 			if (msFlagAdc)
 			{
 				msFlagAdc = 0;
@@ -185,8 +188,15 @@ int main(void)
 		else //Si l'interrupteur du potentiomètre est à la position "OFF"...
 		{
 			outputVeille();
+			valueModeTbl[1] = 0;
 			//txCommande = VAL_ACTU;
 			//execTxCommand();
+		}
+		if (valueModeTbl[1] != valueModeTbl[0])
+		{
+			valueModeTbl[0] = valueModeTbl[1]; //La nouvelle valeur remplace l'ancienne.
+			txCommande = VAL_MODE;
+			execTxCommand();
 		}
 		OUTPUT_VALUE(valueOut);
 		USB_USBTask();
@@ -267,6 +277,14 @@ void execTxCommand(void)
 		txData[1] = 1;
 		txData[2] = VAL_POT;
 		txData[3] = valueAdc;
+		txData[4] = '>';
+		serialUSBWrite((uint8_t *)txData, 5);
+		break;
+	case VAL_MODE:
+		txData[0] = '<';
+		txData[1] = 1;
+		txData[2] = VAL_MODE;
+		txData[3] = valueModeTbl[0];
 		txData[4] = '>';
 		serialUSBWrite((uint8_t *)txData, 5);
 		break;
