@@ -74,8 +74,8 @@ private:
     uint16_t rxErrorCommCnt;
     uint8_t valueAdc;
     uint8_t valueOut;
-    uint8_t valueModeSystem;
-    uint8_t valueModeVeille;
+    uint8_t valueModeSys;
+    uint8_t veilleState;
     uint8_t intensite;
     bool serialRxIn;
     bool boutonState;
