@@ -10,9 +10,9 @@
 #ifndef SETUPSERIALDIALOG_H
 #define SETUPSERIALDIALOG_H
 
-#include "savereadfile.h"
 #include <QDialog>
 #include <QtSerialPort/QSerialPort>
+#include <QSettings>
 
 namespace Ui
 {
@@ -28,7 +28,7 @@ public:
      * @brief    Constructeur de la classe SetupSerialDialog.
      * @param s  Port série à configurer.
      */
-    explicit SetupSerialDialog(QSerialPort *s, void *shared);
+    explicit SetupSerialDialog(QSerialPort *s);
     ~SetupSerialDialog();
 
     /**
@@ -48,7 +48,7 @@ private:
 
     /*Déclarations objets : */
     QSerialPort *serial;
-    SaveReadFile *saveRead;
+    QSettings *settings;
     Ui::SetupSerialDialog *ui;
 
 private slots:
