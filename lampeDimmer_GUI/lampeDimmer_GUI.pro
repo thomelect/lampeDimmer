@@ -19,11 +19,9 @@ DEFINES += QT_DEPRECATED_WARNINGS
 
 SOURCES += main.cpp \
     mainwindow.cpp \
-    savereadfile.cpp \
     setupserialdialog.cpp
 
 HEADERS += mainwindow.h \
-    savereadfile.h \
     setupserialdialog.h
 
 FORMS += mainwindow.ui \
