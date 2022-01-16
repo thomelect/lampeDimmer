@@ -128,6 +128,7 @@ public:
         lb_0_dial->setText(QApplication::translate("MainWindow", "0", Q_NULLPTR));
         comboBoxSleep->clear();
         comboBoxSleep->insertItems(0, QStringList()
+         << QApplication::translate("MainWindow", "NONE", Q_NULLPTR)
          << QApplication::translate("MainWindow", "OFF", Q_NULLPTR)
          << QApplication::translate("MainWindow", "ON", Q_NULLPTR)
          << QApplication::translate("MainWindow", "BREATHING", Q_NULLPTR)
