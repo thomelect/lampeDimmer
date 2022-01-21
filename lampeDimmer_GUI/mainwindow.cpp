@@ -193,8 +193,9 @@ void MainWindow::execRxCommand(void)
     case VAL_INIT:
         /*// ACQUISITION //*/
         valueOut = rxData[0];
-        veilleState = rxData[1];
-        valueModeSys = rxData[2];
+        valueAdc = rxData[1];
+        veilleState = rxData[2];
+        valueModeSys = rxData[3];
 
         if (!veilleState) //Si le mode de veille actuel est "NONE"...
         {

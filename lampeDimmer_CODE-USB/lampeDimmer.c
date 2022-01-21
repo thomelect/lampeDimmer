@@ -190,8 +190,6 @@ int main(void)
 		{
 			outputVeille();
 			valueModeSysTbl[1] = 0;
-			//txCommande = VAL_ACTU;
-			//execTxCommand();
 		}
 		if (valueModeSysTbl[1] != valueModeSysTbl[0])
 		{
@@ -254,7 +252,7 @@ void execRxCommand(void)
 
 void execTxCommand(void)
 {
-	char txData[7];
+	char txData[8];
 	switch (txCommande)
 	{
 	case VAL_ACTU:
@@ -267,13 +265,14 @@ void execTxCommand(void)
 		break;
 	case VAL_INIT:
 		txData[0] = '<';
-		txData[1] = 3;
+		txData[1] = 4;
 		txData[2] = VAL_INIT;
 		txData[3] = valueOut;
-		txData[4] = veilleState;
-		txData[5] = valueModeSys;
-		txData[6] = '>';
-		serialUSBWrite((uint8_t *)txData, 7);
+		txData[4] = valueAdc;
+		txData[5] = veilleState;
+		txData[6] = valueModeSys;
+		txData[7] = '>';
+		serialUSBWrite((uint8_t *)txData, 8);
 		break;
 	case VAL_POT:
 		txData[0] = '<';
