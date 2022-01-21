@@ -201,6 +201,10 @@ void MainWindow::execRxCommand(void)
         veilleState = rxData[2];
         valueModeSys = rxData[3];
 
+        /*// CHANGEMENTS GUI //*/
+        boutonManage(valueOut);
+        boutonEnabler();
+
         if (!veilleState) //Si le mode de veille actuel est "NONE"...
         {
             veilleState = settings->value("Veille/Mode").toInt(); //Récupération du mode veille sauvegardé dans le fichier .ini.
@@ -213,10 +217,6 @@ void MainWindow::execRxCommand(void)
             settings->setValue("Veille/Mode", QString::number(veilleState)); //Les valeurs sauvegardés son actualisés.
             settings->setValue("Veille/Description", ui->comboBoxSleep->currentText());
         }
-
-        /*// CHANGEMENTS GUI //*/
-        boutonManage(valueOut);
-        boutonEnabler();
 
         /*// DEBUG //*/
         qDebug() << "VAL_ACTU : " << QString::number(valueOut);
@@ -416,8 +416,12 @@ void MainWindow::setupSerial(void)
 void MainWindow::on_comboBoxSleep_activated(int index)
 {
     veilleState = index;
-    settings->setValue("Veille/Mode", QString::number(index));
-    settings->setValue("Veille/Description", ui->comboBoxSleep->currentText());
+    if (!serialRxIn)
+    {
+        settings->setValue("Veille/Mode", QString::number(index));
+        settings->setValue("Veille/Description", ui->comboBoxSleep->currentText());
+    }
+
     boutonEnabler();
     if (ui->comboBoxSleep->currentIndex() == (ui->comboBoxSleep->findText("CUSTOM", Qt::MatchExactly)))
     {
