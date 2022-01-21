@@ -14,6 +14,8 @@
 #include <QLabel>
 #include <QtSerialPort/QSerialPort>
 #include <QSettings>
+#include <QTimer>
+#include <QDateTime>
 
 #define _MAX_RXDATASIZE_ 16
 
@@ -79,12 +81,15 @@ private:
     uint8_t intensite;
     bool serialRxIn;
     bool boutonState;
-    int sizeTbl;
+    bool recepAvailable;
+    bool sliderModif;
+    bool dialModif;
 
     /* Déclarations classes: */
     QLabel *statusLabel;
     QSerialPort *serial;
     QMenu *toolsMenu;
+    QTimer *timer;
     QAction *setupSerialAct;
     QPixmap *pixmapOff();
     QIcon *ButtonIcon();
@@ -99,20 +104,15 @@ private slots:
     void readSerialData(void);
 
     /**
+     * @brief  Fonction appelée à caque fois que le décompte du timer arrive à 0.
+     */
+    void recepTimer(void);
+
+    /**
      * @brief        Fonction appelée lorsque l'utilisateur choisi une option dans la liste.
      * @param index  Index des options de la liste.
      */
     void on_comboBoxSleep_activated(int index);
-
-    /**
-     * @brief  Fonction appelée lorsque la valeur du "potentiomètre" est changée.
-     */
-    void on_dialIntensite_valueChanged(void);
-
-    /**
-     * @brief  Fonction appelée lorsque la valeur du "slider" est changée.
-     */
-    void on_horizontalSliderIntensite_valueChanged(void);
 
     /**
      * @brief  Fonction appelée lorsque le bouton on/off est appuyé.
@@ -123,6 +123,16 @@ private slots:
      * @brief  Fonction appelée lorsque le bouton on/off est relachée.
      */
     void on_pushBottonOnOff_released();
+
+    /**
+     * @brief  Fonction appelée lorsque la valeur du slider est changée.
+     */
+    void on_horizontalSliderIntensite_valueChanged();
+
+    /**
+     * @brief  Fonction appelée lorsque la valeur du dial est changée.
+     */
+    void on_dialIntensite_valueChanged();
 
 private:
     /**
