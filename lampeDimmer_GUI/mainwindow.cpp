@@ -203,15 +203,15 @@ void MainWindow::execRxCommand(void)
 
         if (!veilleState) //Si le mode de veille actuel est "NONE"...
         {
-            veilleState = settings->value("veille/mode").toInt(); //Récupération du mode veille sauvegardé dans le fichier .ini.
+            veilleState = settings->value("Veille/Mode").toInt(); //Récupération du mode veille sauvegardé dans le fichier .ini.
             ui->comboBoxSleep->setCurrentIndex(veilleState);      //Mise à jour du comboBox
             txCommande = SET_SLEEP_MODE;                          //Envoi du mode veille au Arduino.
             execTxCommand();
         }
         else //Sinon (si le mode de veille actuel est autre que "NONE")...
         {
-            settings->setValue("veille/mode", QString::number(veilleState)); //Les valeurs sauvegardés son actualisés.
-            settings->setValue("veille/Description", ui->comboBoxSleep->currentText());
+            settings->setValue("Veille/Mode", QString::number(veilleState)); //Les valeurs sauvegardés son actualisés.
+            settings->setValue("Veille/Description", ui->comboBoxSleep->currentText());
         }
 
         /*// CHANGEMENTS GUI //*/
@@ -262,7 +262,7 @@ void MainWindow::execTxCommand()
 {
     if (serial->isOpen())
     {
-        char txData[5];
+        char txData[6];
         switch (txCommande)
         {
         case GET_VAL_ACTU:
@@ -288,11 +288,12 @@ void MainWindow::execTxCommand()
             break;
         case SET_SLEEP_MODE:
             txData[0] = '<';
-            txData[1] = 1;
+            txData[1] = 2;
             txData[2] = SET_SLEEP_MODE;
             txData[3] = veilleState;
-            txData[4] = '>';
-            serial->write(txData, 5);
+            txData[4] = customVal;
+            txData[5] = '>';
+            serial->write(txData, 6);
             break;
         case SET_VAL:
             txData[0] = '<';
@@ -415,13 +416,20 @@ void MainWindow::setupSerial(void)
 void MainWindow::on_comboBoxSleep_activated(int index)
 {
     veilleState = index;
-    settings->setValue("veille/mode", QString::number(index));
-    settings->setValue("veille/Description", ui->comboBoxSleep->currentText());
+    settings->setValue("Veille/Mode", QString::number(index));
+    settings->setValue("Veille/Description", ui->comboBoxSleep->currentText());
     boutonEnabler();
-    if (ui->comboBoxSleep->findText("CUSTOM", Qt::MatchExactly))
+    if (ui->comboBoxSleep->currentIndex() == (ui->comboBoxSleep->findText("CUSTOM", Qt::MatchExactly)))
     {
         ui->spinBox->show();
         ui->spinBox->setStyleSheet("#spinBox { background-color: #9FD4A3; }");
+    }
+    else
+    {
+        if (settings->contains("Veille/ValueOut"))
+        {
+            settings->remove("Veille/ValueOut");
+        }
     }
     txCommande = SET_SLEEP_MODE;
     execTxCommand();
@@ -494,7 +502,7 @@ void MainWindow::on_horizontalSliderIntensite_valueChanged()
     }
 }
 
-void MainWindow::on_spinBox_valueChanged(int arg1)
+void MainWindow::on_spinBox_valueChanged(void)
 {
     timerSpin->start(1000);
     countDown = 0;
@@ -528,6 +536,10 @@ void MainWindow::updateCountDown()
     {
         timerSpin->stop();
         ui->spinBox->hide();
-        ui->comboBoxSleep->setItemText(ui->comboBoxSleep->currentIndex(), ("CUSTOM | " + QString::number(ui->spinBox->value())));
+        customVal = ui->spinBox->value();
+        ui->comboBoxSleep->setItemText(ui->comboBoxSleep->currentIndex(), ("CUSTOM | " + QString::number(customVal)));
+        settings->setValue("Veille/ValueOut", customVal);
+        txCommande = SET_SLEEP_MODE;
+        execTxCommand();
     }
 }

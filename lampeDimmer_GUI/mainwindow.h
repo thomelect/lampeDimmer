@@ -80,6 +80,7 @@ private:
     uint8_t veilleState;
     uint8_t intensite;
     uint8_t countDown;
+    uint8_t customVal;
     bool serialRxIn;
     bool boutonState;
     bool recepAvailable;
@@ -136,7 +137,7 @@ private slots:
      */
     void on_dialIntensite_valueChanged();
 
-    void on_spinBox_valueChanged(int arg1);
+    void on_spinBox_valueChanged(void);
 
     void updateCountDown(void);
 
