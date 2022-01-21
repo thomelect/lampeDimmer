@@ -37,7 +37,7 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent),
     settings->setValue("App", "LampeDimmer");
     settings->endGroup();
 
-    ui->spinBox->hide();
+    ui->spinBoxCustom->hide();
     timerSpin = new QTimer();
     connect(timerSpin, SIGNAL(timeout()), this, SLOT(updateCountDown()));
 
@@ -423,10 +423,10 @@ void MainWindow::on_comboBoxSleep_activated(int index)
     }
 
     boutonEnabler();
-    if (ui->comboBoxSleep->currentIndex() == (ui->comboBoxSleep->findText("CUSTOM", Qt::MatchExactly)))
+    if (ui->comboBoxSleep->currentIndex() == (ui->comboBoxSleep->findText("CUSTOM", Qt::MatchStartsWith)))
     {
-        ui->spinBox->show();
-        ui->spinBox->setStyleSheet("#spinBox { background-color: #9FD4A3; }");
+        ui->spinBoxCustom->show();
+        ui->spinBoxCustom->setStyleSheet("#spinBoxCustom { background-color: #9FD4A3; }");
     }
     else
     {
@@ -506,17 +506,21 @@ void MainWindow::on_horizontalSliderIntensite_valueChanged()
     }
 }
 
-void MainWindow::on_spinBox_valueChanged(void)
+void MainWindow::on_spinBoxCustom_valueChanged(int arg)
 {
     timerSpin->start(1000);
     countDown = 0;
-    ui->spinBox->setStyleSheet("#spinBox { background-color: #9FD4A3; }");
+    ui->spinBoxCustom->setStyleSheet("#spinBoxCustom { background-color: #9FD4A3; }");
+    customVal = arg;
+    ui->comboBoxSleep->setToolTip("CUSTOM → " + QString::number(customVal));
+    ui->comboBoxSleep->setItemText(ui->comboBoxSleep->currentIndex() ,"CUSTOM → " + QString::number(customVal));
+    settings->setValue("Veille/ValueOut", customVal);
 }
 
 void MainWindow::updateCountDown()
 {
-    QString myColor = "blue";
-    QString styleSheet = "#spinBox { background-color: %1 ; }";
+    QString myColor = "#9FD4A3";
+    QString styleSheet = "#spinBoxCustom { background-color: %1 ; }";
     switch (countDown) {
     case 0:
         myColor = "#AEDCAE";
@@ -535,13 +539,13 @@ void MainWindow::updateCountDown()
         break;
     }
     qDebug() << countDown++;
-    ui->spinBox->setStyleSheet(styleSheet.arg(myColor));
+    ui->spinBoxCustom->setStyleSheet(styleSheet.arg(myColor));
     if (countDown >= 5)
     {
         timerSpin->stop();
-        ui->spinBox->hide();
-        customVal = ui->spinBox->value();
-        ui->comboBoxSleep->setItemText(ui->comboBoxSleep->currentIndex(), ("CUSTOM | " + QString::number(customVal)));
+        ui->spinBoxCustom->hide();
+        customVal = ui->spinBoxCustom->value();
+        ui->comboBoxSleep->setItemText(ui->comboBoxSleep->currentIndex(), ("CUSTOM"));
         settings->setValue("Veille/ValueOut", customVal);
         txCommande = SET_SLEEP_MODE;
         execTxCommand();

@@ -39,7 +39,7 @@ public:
     QLabel *lb_255_dial;
     QLabel *lb_0_dial;
     QComboBox *comboBoxSleep;
-    QSpinBox *spinBox;
+    QSpinBox *spinBoxCustom;
     QStatusBar *statusBar;
 
     void setupUi(QMainWindow *MainWindow)
@@ -109,11 +109,11 @@ public:
         comboBoxSleep->setSizeAdjustPolicy(QComboBox::AdjustToContentsOnFirstShow);
         comboBoxSleep->setDuplicatesEnabled(false);
         comboBoxSleep->setFrame(true);
-        spinBox = new QSpinBox(centralwidget);
-        spinBox->setObjectName(QStringLiteral("spinBox"));
-        spinBox->setGeometry(QRect(40, 10, 42, 22));
-        spinBox->setStyleSheet(QStringLiteral(""));
-        spinBox->setMaximum(255);
+        spinBoxCustom = new QSpinBox(centralwidget);
+        spinBoxCustom->setObjectName(QStringLiteral("spinBoxCustom"));
+        spinBoxCustom->setGeometry(QRect(40, 10, 42, 22));
+        spinBoxCustom->setStyleSheet(QStringLiteral(""));
+        spinBoxCustom->setMaximum(255);
         MainWindow->setCentralWidget(centralwidget);
         statusBar = new QStatusBar(MainWindow);
         statusBar->setObjectName(QStringLiteral("statusBar"));

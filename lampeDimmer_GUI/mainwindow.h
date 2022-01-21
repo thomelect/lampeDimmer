@@ -137,7 +137,7 @@ private slots:
      */
     void on_dialIntensite_valueChanged();
 
-    void on_spinBox_valueChanged(void);
+    void on_spinBoxCustom_valueChanged(int arg);
 
     void updateCountDown(void);
 
