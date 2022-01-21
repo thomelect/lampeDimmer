@@ -82,8 +82,8 @@ private:
     bool serialRxIn;
     bool boutonState;
     bool recepAvailable;
-    uint32_t test;
-    int sizeTbl;
+    bool sliderModif;
+    bool dialModif;
 
     /* Déclarations classes: */
     QLabel *statusLabel;
@@ -91,7 +91,6 @@ private:
     QMenu *toolsMenu;
     QTimer *timer;
     QAction *setupSerialAct;
-    QByteArray readdAll;
     QPixmap *pixmapOff();
     QIcon *ButtonIcon();
     QSettings *settings;
@@ -104,6 +103,9 @@ private slots:
      */
     void readSerialData(void);
 
+    /**
+     * @brief  Fonction appelée à caque fois que le décompte du timer arrive à 0.
+     */
     void recepTimer(void);
 
     /**
@@ -123,24 +125,14 @@ private slots:
     void on_pushBottonOnOff_released();
 
     /**
-     * @brief  Fonction appelée lorsque le dial est bougé.
+     * @brief  Fonction appelée lorsque la valeur du slider est changée.
      */
-    void on_dialIntensite_sliderMoved(int position);
+    void on_horizontalSliderIntensite_valueChanged();
 
     /**
-     * @brief  Fonction appelée lorsque le dial est appuyé.
+     * @brief  Fonction appelée lorsque la valeur du dial est changée.
      */
-    void on_dialIntensite_sliderPressed();
-
-    /**
-     * @brief  Fonction appelée lorsque le slider est bougé.
-     */
-    void on_horizontalSliderIntensite_sliderMoved(int position);
-
-    /**
-     * @brief  Fonction appelée lorsque le slider est appuyé.
-     */
-    void on_horizontalSliderIntensite_sliderPressed();
+    void on_dialIntensite_valueChanged();
 
 private:
     /**

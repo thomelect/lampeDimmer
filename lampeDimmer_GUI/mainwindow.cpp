@@ -21,6 +21,8 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent),
     serialRxIn = false;
     boutonState = true;
     recepAvailable = false;
+    sliderModif = true;
+    dialModif = true;
 
     ui->setupUi(this);
     serial = new QSerialPort(this);
@@ -37,7 +39,7 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent),
 
     timer = new QTimer();
     connect(timer, SIGNAL(timeout()), this, SLOT(recepTimer()));
-    timer->start(50);
+    timer->start(10);
 
     statusLabel = new QLabel(this);
     ui->statusBar->addPermanentWidget(statusLabel);
@@ -139,6 +141,8 @@ void MainWindow::boutonEnabler()
 
 void MainWindow::boutonManage(int value)
 {
+    sliderModif = false;
+    dialModif = false;
     ui->lbIntensiteValue->setText(QString::number(value)); //La valeur du slider est affichée dans le label sous le slider.
     ui->dialIntensite->setSliderPosition(value);           //Modifie la position du slider en fonction de la valeur obtenue par le slider.
     ui->horizontalSliderIntensite->setSliderPosition(value);
@@ -160,6 +164,8 @@ void MainWindow::boutonManage(int value)
         ui->pushBottonOnOff->setIconSize(QSize(65, 65));
         boutonState = 1;
     }
+    sliderModif = true;
+    dialModif = true;
 }
 
 void MainWindow::createMenus(void)
@@ -342,8 +348,6 @@ void MainWindow::parseRXData(uint8_t data)
         if (data == '>')
         {
             serialRxIn = true;
-            qDebug() << "                           " << test++ << endl;
-            //serial->clear();
             execRxCommand();
         }
         else
@@ -362,15 +366,7 @@ void MainWindow::parseRXData(uint8_t data)
 void MainWindow::readSerialData(void)
 {
     QByteArray tmpRx;
-    //        if (serial->bytesAvailable())
-    //        {
-    //            readdAll.append(serial->readAll());
-    //            if (readdAll.size())
-    //            {
-    //                for (uint16_t i = 0; i < readdAll.size(); i++)
-    //                    parseRXData(readdAll.at(i));
-    //            }
-    //        }
+
     if (serial->bytesAvailable())
     {
         if (recepAvailable)
@@ -382,7 +378,10 @@ void MainWindow::readSerialData(void)
                 parseRXData(tmpRx[i]);
         }
         else
+        {
             serial->clear();
+            tmpRx.clear();
+        }
     }
     else
     {
@@ -451,58 +450,36 @@ void MainWindow::recepTimer(void)
     recepAvailable = true;
 }
 
-void MainWindow::on_dialIntensite_sliderMoved(int position)
+void MainWindow::on_dialIntensite_valueChanged()
 {
-    if (!ui->pushBottonOnOff->isChecked())
+    if (dialModif)
     {
-        intensite = ui->dialIntensite->value();
-        boutonManage(intensite);
-        if (!serialRxIn)
+        if (!ui->pushBottonOnOff->isChecked())
         {
-            txCommande = SET_VAL;
-            execTxCommand();
+            intensite = ui->dialIntensite->value();
+            boutonManage(intensite);
+            if (!serialRxIn)
+            {
+                txCommande = SET_VAL;
+                execTxCommand();
+            }
         }
     }
 }
 
-void MainWindow::on_dialIntensite_sliderPressed()
+void MainWindow::on_horizontalSliderIntensite_valueChanged()
 {
-    if (!ui->pushBottonOnOff->isChecked())
+    if (sliderModif)
     {
-        intensite = ui->dialIntensite->value();
-        boutonManage(intensite);
-        if (!serialRxIn)
+        if (!ui->pushBottonOnOff->isChecked())
         {
-            txCommande = SET_VAL;
-            execTxCommand();
-        }
-    }
-}
-
-void MainWindow::on_horizontalSliderIntensite_sliderMoved(int position)
-{
-    if (!ui->pushBottonOnOff->isChecked())
-    {
-        intensite = ui->horizontalSliderIntensite->value(); //On récupère la valeur du slider.
-        boutonManage(intensite);
-        if (!serialRxIn)
-        {
-            txCommande = SET_VAL;
-            execTxCommand();
-        }
-    }
-}
-
-void MainWindow::on_horizontalSliderIntensite_sliderPressed()
-{
-    if (!ui->pushBottonOnOff->isChecked())
-    {
-        intensite = ui->horizontalSliderIntensite->value(); //On récupère la valeur du slider.
-        boutonManage(intensite);
-        if (!serialRxIn)
-        {
-            txCommande = SET_VAL;
-            execTxCommand();
+            intensite = ui->horizontalSliderIntensite->value(); //On récupère la valeur du slider.
+            boutonManage(intensite);
+            if (!serialRxIn)
+            {
+                txCommande = SET_VAL;
+                execTxCommand();
+            }
         }
     }
 }
