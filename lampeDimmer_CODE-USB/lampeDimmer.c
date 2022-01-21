@@ -45,6 +45,7 @@ volatile uint8_t msFlagFade = 0; //Flags qui est mis à 1 à chaques 50ms pour l
 uint16_t valueAdcTbl[2] = {0, 0};
 uint16_t valueModeSysTbl[2] = {0, 0};
 uint16_t valueOut = 0;
+uint16_t valueOutVeille = 0;
 uint16_t valueAdc = 0;
 uint16_t valueModeSys = 0;
 int increment = 5;
@@ -90,7 +91,8 @@ enum VEILLE_STATE
 	VEILLE_OFF,
 	VEILLE_ON,
 	VEILLE_BREATHING,
-	VEILLE_VEILLE
+	VEILLE_VEILLE,
+	VEILLE_CUSTOM
 };
 
 /* Déclaration des enums: */
@@ -240,6 +242,7 @@ void execRxCommand(void)
 		break;
 	case SET_SLEEP_MODE:
 		veilleState = rxData[0];
+		valueOutVeille = rxData[1];
 		break;
 	case SET_VAL:	  //Réception depuis l'interface de la valeur de la sortie.
 		if (SWITCH()) //Si l'interrupteur du potentiomètre est à la position "ON"...
@@ -342,6 +345,9 @@ void outputVeille(void)
 		break;
 	case VEILLE_VEILLE:
 		valueOut = 1;
+		break;
+	case VEILLE_CUSTOM:
+		valueOut = valueOutVeille;
 		break;
 	}
 }
