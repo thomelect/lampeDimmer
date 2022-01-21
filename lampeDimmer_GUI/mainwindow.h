@@ -79,6 +79,7 @@ private:
     bool valueModeSys;
     uint8_t veilleState;
     uint8_t intensite;
+    uint8_t countDown;
     bool serialRxIn;
     bool boutonState;
     bool recepAvailable;
@@ -90,6 +91,7 @@ private:
     QSerialPort *serial;
     QMenu *toolsMenu;
     QTimer *timer;
+    QTimer *timerSpin;
     QAction *setupSerialAct;
     QPixmap *pixmapOff();
     QIcon *ButtonIcon();
@@ -133,6 +135,10 @@ private slots:
      * @brief  Fonction appelée lorsque la valeur du dial est changée.
      */
     void on_dialIntensite_valueChanged();
+
+    void on_spinBox_valueChanged(int arg1);
+
+    void updateCountDown(void);
 
 private:
     /**

@@ -20,6 +20,7 @@
 #include <QtWidgets/QMainWindow>
 #include <QtWidgets/QPushButton>
 #include <QtWidgets/QSlider>
+#include <QtWidgets/QSpinBox>
 #include <QtWidgets/QStatusBar>
 #include <QtWidgets/QWidget>
 
@@ -38,6 +39,7 @@ public:
     QLabel *lb_255_dial;
     QLabel *lb_0_dial;
     QComboBox *comboBoxSleep;
+    QSpinBox *spinBox;
     QStatusBar *statusBar;
 
     void setupUi(QMainWindow *MainWindow)
@@ -107,6 +109,11 @@ public:
         comboBoxSleep->setSizeAdjustPolicy(QComboBox::AdjustToContentsOnFirstShow);
         comboBoxSleep->setDuplicatesEnabled(false);
         comboBoxSleep->setFrame(true);
+        spinBox = new QSpinBox(centralwidget);
+        spinBox->setObjectName(QStringLiteral("spinBox"));
+        spinBox->setGeometry(QRect(40, 10, 42, 22));
+        spinBox->setStyleSheet(QStringLiteral(""));
+        spinBox->setMaximum(255);
         MainWindow->setCentralWidget(centralwidget);
         statusBar = new QStatusBar(MainWindow);
         statusBar->setObjectName(QStringLiteral("statusBar"));
@@ -133,6 +140,7 @@ public:
          << QApplication::translate("MainWindow", "ON", Q_NULLPTR)
          << QApplication::translate("MainWindow", "BREATHING", Q_NULLPTR)
          << QApplication::translate("MainWindow", "VEILLEUSE", Q_NULLPTR)
+         << QApplication::translate("MainWindow", "CUSTOM", Q_NULLPTR)
         );
     } // retranslateUi
 

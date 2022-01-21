@@ -37,6 +37,10 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent),
     settings->setValue("App", "LampeDimmer");
     settings->endGroup();
 
+    ui->spinBox->hide();
+    timerSpin = new QTimer();
+    connect(timerSpin, SIGNAL(timeout()), this, SLOT(updateCountDown()));
+
     timer = new QTimer();
     connect(timer, SIGNAL(timeout()), this, SLOT(recepTimer()));
     timer->start(10);
@@ -414,6 +418,11 @@ void MainWindow::on_comboBoxSleep_activated(int index)
     settings->setValue("veille/mode", QString::number(index));
     settings->setValue("veille/Description", ui->comboBoxSleep->currentText());
     boutonEnabler();
+    if (ui->comboBoxSleep->findText("CUSTOM", Qt::MatchExactly))
+    {
+        ui->spinBox->show();
+        ui->spinBox->setStyleSheet("#spinBox { background-color: #9FD4A3; }");
+    }
     txCommande = SET_SLEEP_MODE;
     execTxCommand();
 }
@@ -482,5 +491,43 @@ void MainWindow::on_horizontalSliderIntensite_valueChanged()
                 execTxCommand();
             }
         }
+    }
+}
+
+void MainWindow::on_spinBox_valueChanged(int arg1)
+{
+    timerSpin->start(1000);
+    countDown = 0;
+    ui->spinBox->setStyleSheet("#spinBox { background-color: #9FD4A3; }");
+}
+
+void MainWindow::updateCountDown()
+{
+    QString myColor = "blue";
+    QString styleSheet = "#spinBox { background-color: %1 ; }";
+    switch (countDown) {
+    case 0:
+        myColor = "#AEDCAE";
+        break;
+    case 1:
+        myColor = "#CDEBC5";
+        break;
+    case 2:
+        myColor = "#DDF2D1";
+        break;
+    case 3:
+        myColor = "#ECFADC";
+        break;
+    case 4:
+        myColor = "#FFFFFF";
+        break;
+    }
+    qDebug() << countDown++;
+    ui->spinBox->setStyleSheet(styleSheet.arg(myColor));
+    if (countDown >= 5)
+    {
+        timerSpin->stop();
+        ui->spinBox->hide();
+        ui->comboBoxSleep->setItemText(ui->comboBoxSleep->currentIndex(), ("CUSTOM | " + QString::number(ui->spinBox->value())));
     }
 }
