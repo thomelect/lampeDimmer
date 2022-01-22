@@ -61,10 +61,20 @@ private:
         SET_SLEEP_MODE,
         SET_VAL
     };
+
+    enum VEILLE_STATE
+    {
+        VEILLE_NONE,
+        VEILLE_OFF,
+        VEILLE_ON,
+        VEILLE_BREATHING,
+        VEILLE_VEILLE
+    };
     /* Déclaration enums: */
     RX_STATES rxState;
     RX_COMMANDES rxCommande;
     TX_COMMANDES txCommande;
+    VEILLE_STATE veilleState;
 
     /* Déclarations variables: */
     QByteArray tmpRxData;
@@ -77,7 +87,6 @@ private:
     uint8_t valueAdc;
     uint8_t valueOut;
     bool valueModeSys;
-    uint8_t veilleState;
     uint8_t intensite;
     bool serialRxIn;
     bool boutonState;
