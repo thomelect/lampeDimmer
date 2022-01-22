@@ -141,13 +141,28 @@ void MainWindow::boutonEnabler()
 
 void MainWindow::boutonManage(int value)
 {
-    sliderModif = false;
-    dialModif = false;
-    ui->lbIntensiteValue->setText(QString::number(value)); //La valeur du slider est affichée dans le label sous le slider.
-    ui->dialIntensite->setSliderPosition(value);           //Modifie la position du slider en fonction de la valeur obtenue par le slider.
-    ui->horizontalSliderIntensite->setSliderPosition(value);
-    ui->statusBar->showMessage(QString::number((value / 2.55), 'f', 0) + '%'); //conversion de la valeur actuelle en pourcentage.
+    sliderModif = false; //Indique que la position du slider est modifiée par la fonction boutonManage.
+    dialModif = false;   //Indique que la position du dial est modifiée par la fonction boutonManage.
+
     ui->comboBoxSleep->setCurrentIndex(veilleState);
+
+    if (!valueModeSys) //Si le système est en mode veille...
+    {
+        ui->lbIntensiteValue->setText(QString::number(0)); //La valeur du slider est affichée dans le label sous le slider.
+        ui->dialIntensite->setSliderPosition(0);           //Modifie la position du slider en fonction de la valeur obtenue par le slider.
+        ui->horizontalSliderIntensite->setSliderPosition(0);
+        ui->statusBar->showMessage(QString::number(0)); //conversion de la valeur actuelle en pourcentage.
+        ui->comboBoxSleep->setCurrentIndex(veilleState);
+    }
+    else //Sinon (si le système n'est pas en mode veille)...
+    {
+        ui->lbIntensiteValue->setText(QString::number(value)); //La valeur du slider est affichée dans le label sous le slider.
+        ui->dialIntensite->setSliderPosition(value);           //Modifie la position du slider en fonction de la valeur obtenue par le slider.
+        ui->horizontalSliderIntensite->setSliderPosition(value);
+        ui->statusBar->showMessage(QString::number((value / 2.55), 'f', 0) + '%'); //conversion de la valeur actuelle en pourcentage.
+        ui->comboBoxSleep->setCurrentIndex(veilleState);
+    }
+
     qDebug() << "SET_VAL : " << QString::number(value);
 
     QPixmap pixmapOff("/images/off.png");
@@ -164,8 +179,8 @@ void MainWindow::boutonManage(int value)
         ui->pushBottonOnOff->setIconSize(QSize(65, 65));
         boutonState = 1;
     }
-    sliderModif = true;
-    dialModif = true;
+    sliderModif = true; //Indique que la position du slider est prête à être modifiée.
+    dialModif = true;   //Indique que la position du dial est prête à être modifiée.
 }
 
 void MainWindow::createMenus(void)
@@ -194,14 +209,18 @@ void MainWindow::execRxCommand(void)
         /*// ACQUISITION //*/
         valueOut = rxData[0];
         valueAdc = rxData[1];
-        veilleState = rxData[2];
+        veilleState = (VEILLE_STATE)rxData[2];
         valueModeSys = rxData[3];
 
-        if (!veilleState) //Si le mode de veille actuel est "NONE"...
+        /*// CHANGEMENTS GUI //*/
+        boutonManage(valueOut);
+        boutonEnabler();
+
+        if (veilleState == VEILLE_NONE) //Si le mode de veille actuel est "NONE"...
         {
-            veilleState = settings->value("veille/mode").toInt(); //Récupération du mode veille sauvegardé dans le fichier .ini.
-            ui->comboBoxSleep->setCurrentIndex(veilleState);      //Mise à jour du comboBox
-            txCommande = SET_SLEEP_MODE;                          //Envoi du mode veille au Arduino.
+            veilleState = (VEILLE_STATE)settings->value("veille/mode").toInt(); //Récupération du mode veille sauvegardé dans le fichier .ini.
+            ui->comboBoxSleep->setCurrentIndex(veilleState);                    //Mise à jour du comboBox
+            txCommande = SET_SLEEP_MODE;                                        //Envoi du mode veille au Arduino.
             execTxCommand();
         }
         else //Sinon (si le mode de veille actuel est autre que "NONE")...
@@ -210,14 +229,11 @@ void MainWindow::execRxCommand(void)
             settings->setValue("veille/Description", ui->comboBoxSleep->currentText());
         }
 
-        /*// CHANGEMENTS GUI //*/
-        boutonManage(valueOut);
-        boutonEnabler();
-
         /*// DEBUG //*/
-        qDebug() << "VAL_ACTU : " << QString::number(valueOut);
-        qDebug() << "SLEEP_MODE : " << ui->comboBoxSleep->currentText();
-        qDebug() << "SYS_MODE : " << (valueModeSys ? "NORMAL" : "VEILLE");
+        qDebug() << " - OUT_INI :    " << valueOut;
+        qDebug() << " - ADC_INI :    " << valueAdc;
+        qDebug() << " - VEILLE_INI : " << veilleState;
+        qDebug() << " - SYS_INI :    " << valueModeSys;
 
         /*// FLAG DE RÉCEPTION //*/
         serialRxIn = false;
@@ -401,7 +417,6 @@ void MainWindow::setupSerial(void)
     {
         statusLabel->setText("Connecté " + serial->portName()); //Indique à l'utilisateur que la connexion est réussie ainsi que le nom du port.
         statusLabel->setToolTip(setupDia.getInfoPort());
-        qDebug() << "GET_VAL_INIT";
         txCommande = GET_VAL_INIT;
         execTxCommand();
     }
@@ -410,7 +425,7 @@ void MainWindow::setupSerial(void)
 
 void MainWindow::on_comboBoxSleep_activated(int index)
 {
-    veilleState = index;
+    veilleState = (VEILLE_STATE)index;
     settings->setValue("veille/mode", QString::number(index));
     settings->setValue("veille/Description", ui->comboBoxSleep->currentText());
     boutonEnabler();
@@ -453,7 +468,8 @@ void MainWindow::recepTimer(void)
 
 void MainWindow::on_dialIntensite_valueChanged()
 {
-    if (dialModif)
+    /* Cette condition permet de différencier un changement de la valeur du dial par l'utilisateur du modification en fonction des valeurs reçues par le potentiomètre */
+    if (dialModif) //Si dialModif est vrai (si la position du slider n'est pas modifier actuellement)...
     {
         if (!ui->pushBottonOnOff->isChecked())
         {
@@ -470,7 +486,8 @@ void MainWindow::on_dialIntensite_valueChanged()
 
 void MainWindow::on_horizontalSliderIntensite_valueChanged()
 {
-    if (sliderModif)
+    /* Cette condition permet de différencier un changement de la valeur du slider par l'utilisateur du modification en fonction des valeurs reçues par le potentiomètre */
+    if (sliderModif) //Si sliderModif est vrai (si la position du slider n'est pas modifier actuellement)...
     {
         if (!ui->pushBottonOnOff->isChecked())
         {
