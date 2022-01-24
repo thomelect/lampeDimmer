@@ -36,6 +36,10 @@ SetupSerialDialog::SetupSerialDialog(QSerialPort *s) : QDialog(0),
     {
         ui->cbListBaudRate->setCurrentIndex(ui->cbListBaudRate->findText(settings->value("Serial/BaudRate").toString(), Qt::MatchExactly)); //Affichage de l'item de la combobox qui se trouve à l'index précisé.
     }
+    else if (ui->cbListBaudRate->findText(DEFAULT_BAUD_RATE, Qt::MatchExactly) != -1) //Sinon, si une correspondance est trouvé avec le define...
+    {
+        ui->cbListBaudRate->setCurrentIndex(ui->cbListBaudRate->findText(DEFAULT_BAUD_RATE, Qt::MatchExactly)); //Affichage de l'item de la combobox qui se trouve à l'index précisé.
+    }
     else //Sinon (Si le baudrate ne correspond à aucun de ceux des items de la combobox)...
     {
         ui->cbListBaudRate->setCurrentIndex(0); //L'item à l'index 0 est affiché.
@@ -74,6 +78,10 @@ void SetupSerialDialog::on_btActualiser_clicked()
     {
         ui->cbListPortSerie->addItem(info.portName() + " " + info.description());
         if (info.serialNumber() == settings->value("Serial/SerialNumber")) //Si le numéro de série sauvegardé dans le fichier correspond à un des périphériques connectés...
+        {
+            connectInfoCom = info.portName(); //Le nom du port associé à ce numéro de série est conservé dans connectInfoCom.
+        }
+        else if (info.description() == DEFAULT_PORT_DESC) //Sinon, si une correspondance est trouvé avec le define...
         {
             connectInfoCom = info.portName(); //Le nom du port associé à ce numéro de série est conservé dans connectInfoCom.
         }
