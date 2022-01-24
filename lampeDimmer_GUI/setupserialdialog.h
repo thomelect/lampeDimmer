@@ -14,6 +14,9 @@
 #include <QtSerialPort/QSerialPort>
 #include <QSettings>
 
+#define DEFAULT_BAUD_RATE "1000000"
+#define DEFAULT_PORT_DESC "Périphérique série USB"
+
 namespace Ui
 {
     class SetupSerialDialog;
