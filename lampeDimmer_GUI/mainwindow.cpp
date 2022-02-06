@@ -209,7 +209,7 @@ void MainWindow::execRxCommand(void)
         /*// ACQUISITION //*/
         valueOut = rxData[0];
         valueAdc = rxData[1];
-        veilleState = (VEILLE_STATE)rxData[2];
+        veilleState = VEILLE_STATE(rxData[2]);
         valueModeSys = rxData[3];
 
         /*// CHANGEMENTS GUI //*/
@@ -218,7 +218,7 @@ void MainWindow::execRxCommand(void)
 
         if (veilleState == VEILLE_NONE) //Si le mode de veille actuel est "NONE"...
         {
-            veilleState = (VEILLE_STATE)settings->value("veille/mode").toInt(); //Récupération du mode veille sauvegardé dans le fichier .ini.
+            veilleState = VEILLE_STATE(settings->value("veille/mode").toInt()); //Récupération du mode veille sauvegardé dans le fichier .ini.
             ui->comboBoxSleep->setCurrentIndex(veilleState);                    //Mise à jour du comboBox
             txCommande = SET_SLEEP_MODE;                                        //Envoi du mode veille au Arduino.
             execTxCommand();
@@ -310,7 +310,7 @@ void MainWindow::execTxCommand()
             txData[0] = '<';
             txData[1] = 1;
             txData[2] = SET_VAL;
-            txData[3] = intensite;
+            txData[3] = char(intensite);
             txData[4] = '>';
             serial->write(txData, 5);
             break;
@@ -335,7 +335,7 @@ void MainWindow::parseRXData(uint8_t data)
         break;
     case RXSIZE:
         rxDataSize = data;
-        if (rxDataSize >= _MAX_RXDATASIZE_)
+        if (rxDataSize >= MAX_RXDATASIZE)
         {
             qDebug() << " \n\r Erreur de trame : Size trop grand. \n\r";
             rxState = WAIT;
@@ -346,7 +346,7 @@ void MainWindow::parseRXData(uint8_t data)
         }
         break;
     case RXCOMMANDE:
-        rxCommande = (RX_COMMANDES)data;
+        rxCommande = RX_COMMANDES(data);
         if (rxDataSize)
         {
             rxState = RXDATA;
@@ -389,10 +389,10 @@ void MainWindow::readSerialData(void)
         if (recepAvailable)
         {
             recepAvailable = false;
-            tmpRx.resize(serial->bytesAvailable());
+            tmpRx.resize(int(serial->bytesAvailable()));
             serial->read(tmpRx.data(), tmpRx.size());
             for (uint16_t i = 0; i < tmpRx.size(); i++)
-                parseRXData(tmpRx[i]);
+                parseRXData(uint8_t(tmpRx[i]));
         }
         else
         {
@@ -425,7 +425,7 @@ void MainWindow::setupSerial(void)
 
 void MainWindow::on_comboBoxSleep_activated(int index)
 {
-    veilleState = (VEILLE_STATE)index;
+    veilleState = VEILLE_STATE(index);
     settings->setValue("veille/mode", QString::number(index));
     settings->setValue("veille/Description", ui->comboBoxSleep->currentText());
     boutonEnabler();
