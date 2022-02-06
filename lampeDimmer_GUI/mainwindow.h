@@ -17,7 +17,7 @@
 #include <QTimer>
 #include <QDateTime>
 
-#define _MAX_RXDATASIZE_ 16
+#define MAX_RXDATASIZE 16
 
 QT_BEGIN_NAMESPACE
 namespace Ui
@@ -82,12 +82,12 @@ private:
     QString *connectInfo;
     uint8_t rxDataSize;
     uint8_t rxDataCnt;
-    uint8_t rxData[_MAX_RXDATASIZE_];
+    uint8_t rxData[MAX_RXDATASIZE];
     uint16_t rxErrorCommCnt;
     uint8_t valueAdc;
     uint8_t valueOut;
     bool valueModeSys;
-    uint8_t intensite;
+    int intensite;
     bool serialRxIn;
     bool boutonState;
     bool recepAvailable;
