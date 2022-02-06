@@ -16,6 +16,7 @@
 
 void myMessageOutput(QtMsgType type, const QMessageLogContext &context, const QString &msg)
 {
+    Q_UNUSED(context);
     QString txt;
     switch (type)
     {
@@ -38,10 +39,10 @@ void myMessageOutput(QtMsgType type, const QMessageLogContext &context, const QS
     QString formattedDateTime = QDateTime::currentDateTime().toString("yyyy-MM-dd hh:mm:ss"); //Date et heure actuelle dans le format: AAAA-MM-JJ HH:MM:SS.
     QString fileName = "log";
 
-    QFileInfo fileInfo((QFileInfo)fileName); //Récupération des infos du fichier.
+    QFileInfo fileInfo(fileName); //Récupération des infos du fichier.
     QFile file(fileName);
 
-    if (fileInfo.created().date().daysTo(QDate::currentDate()) > MAX_DAY_LOG) //Si la différence entre la date de création et la date actuelle est suppérieure à MAX_DAY_LOG...
+    if (fileInfo.birthTime().date().daysTo(QDate::currentDate()) > MAX_DAY_LOG) //Si la différence entre la date de création et la date actuelle est suppérieure à MAX_DAY_LOG...
         file.remove();                                                        //Le fichier est supprimé.
     file.setFileName(fileName);
     file.open(QIODevice::WriteOnly | QIODevice::Append); //Le fichier est ouvert. Si le fichier n'existe pas, il est créé.
