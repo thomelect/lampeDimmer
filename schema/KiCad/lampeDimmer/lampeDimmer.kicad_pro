@@ -353,7 +353,7 @@
     "classes": [
       {
         "bus_width": 12.0,
-        "clearance": 0.381,
+        "clearance": 0.254,
         "diff_pair_gap": 0.25,
         "diff_pair_via_gap": 0.25,
         "diff_pair_width": 0.2,
@@ -363,14 +363,14 @@
         "name": "Default",
         "pcb_color": "rgba(0, 0, 0, 0.000)",
         "schematic_color": "rgba(0, 0, 0, 0.000)",
-        "track_width": 0.381,
+        "track_width": 0.508,
         "via_diameter": 1.2,
         "via_drill": 0.6,
         "wire_width": 6.0
       },
       {
         "bus_width": 12.0,
-        "clearance": 0.381,
+        "clearance": 0.508,
         "diff_pair_gap": 0.25,
         "diff_pair_via_gap": 0.25,
         "diff_pair_width": 0.2,
@@ -379,19 +379,18 @@
         "microvia_drill": 0.1,
         "name": "Alimentation",
         "nets": [
-          "+5V",
-          "GND"
+          "+5V"
         ],
         "pcb_color": "rgba(0, 0, 0, 0.000)",
         "schematic_color": "rgba(0, 0, 0, 0.000)",
-        "track_width": 0.508,
+        "track_width": 0.635,
         "via_diameter": 1.2,
         "via_drill": 0.6,
         "wire_width": 6.0
       },
       {
         "bus_width": 12.0,
-        "clearance": 0.381,
+        "clearance": 0.508,
         "diff_pair_gap": 0.25,
         "diff_pair_via_gap": 0.25,
         "diff_pair_width": 0.2,
@@ -405,7 +404,7 @@
         ],
         "pcb_color": "rgba(0, 0, 0, 0.000)",
         "schematic_color": "rgba(0, 0, 0, 0.000)",
-        "track_width": 0.762,
+        "track_width": 1.143,
         "via_diameter": 1.2,
         "via_drill": 0.6,
         "wire_width": 6.0
