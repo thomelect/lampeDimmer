@@ -7,7 +7,7 @@
   (title_block
     (title "Projet Lampe Dimmer")
     (date "2022-02-12")
-    (rev "v2.0.0")
+    (rev "v2.3.0")
   )
 
   (lib_symbols
@@ -998,7 +998,6 @@
       )
     )
   )
-
 
   (junction (at 256.54 102.87) (diameter 0) (color 0 0 0 0)
     (uuid 1e29b57f-14e3-4515-9b1e-cfaa5d9bd058)
