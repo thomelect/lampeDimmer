@@ -5,13 +5,13 @@
       "Application": "Pcbnew",
       "Version": "(6.0.0)"
     },
-    "CreationDate": "2022-02-26T09:50:55-05:00"
+    "CreationDate": "2022-03-05T13:57:21-05:00"
   },
   "GeneralSpecs": {
     "ProjectId": {
       "Name": "lampeDimmer",
       "GUID": "6c616d70-6544-4696-9d6d-65722e6b6963",
-      "Revision": "v2.0.0"
+      "Revision": "v2.3.0"
     },
     "Size": {
       "X": 76.6675,
