@@ -28,8 +28,8 @@
 /* Macros: */
 #define OUTPUT_VALUE(val) (OCR4A = val) //Valeur PWM output R.
 #define OUTPUT_INIT() DDRC |= (1 << 7)	//Init output R.
-#define SWITCH_INIT() PORTB |= (1 << 1) //Bouton sur PD1.
-#define SWITCH() ((PINB & (1 << 1)) == 0)
+#define SWITCH_INIT() PORTB |= (1 << 3) //Bouton sur PD1.
+#define SWITCH() ((PINB & (1 << 3)) == 0)
 
 /* Defines: */
 #define TIMER_CNT_CYCLE_ADC 25	//Nombre de cycle comptés en interruption.
