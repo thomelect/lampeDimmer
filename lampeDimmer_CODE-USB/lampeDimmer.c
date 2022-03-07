@@ -27,7 +27,9 @@
 
 /* Macros: */
 #define OUTPUT_VALUE(val) (OCR4A = val) //Valeur PWM output R.
-#define OUTPUT_INIT() DDRC |= (1 << 7)	//Init output R.
+#define OUTPUT_VALUE_1(val) (OCR4B = val) //Valeur PWM output R.
+#define OUTPUT_INIT() DDRC |= (1 << 7)	//Init MAIN output.
+#define OUTPUT_INIT_1() DDRB |= (1 << 6)	//Init DEL output.
 #define SWITCH_INIT() PORTB |= (1 << 3) //Bouton sur PD1.
 #define SWITCH() ((PINB & (1 << 3)) == 0)
 
@@ -119,11 +121,6 @@ void execRxCommand(void);
 void execTxCommand(void);
 
 /**
- * @brief  Fonction d'initialisation des différents I/O et fonctions.
-*/
-void miscInit(void);
-
-/**
  *@brief		Fonction qui traite la valeur de sortie en fonction du mode veille actuel.
  *@param value  Mode veille.
  */
@@ -199,6 +196,7 @@ int main(void)
 			execTxCommand();
 		}
 		OUTPUT_VALUE(valueOut);
+		OUTPUT_VALUE_1(valueOut);
 		USB_USBTask();
 	}
 }
@@ -307,6 +305,7 @@ void hardwareInit(void)
 	timer0Init(); //Initialisation de timer 0.
 	timer4Init(); //Initialisation de timer 4.
 	OUTPUT_INIT();
+	OUTPUT_INIT_1();
 	SWITCH_INIT();
 
 	USB_Init();
@@ -417,10 +416,12 @@ void timer4Init(void)
 	//TCCR4C: COM4A1S COM4A0S COM4B1S COMAB0S COM4D1 COM4D0 FOC4D PWM4D
 	//TCCR4D: FPIE4 FPEN4 FPNC4 FPES4 FPAC4 FPF4 WGM41 WGM40
 	//TCCR4E: TLOCK4 ENHC4 OC4OE5 OC4OE4 OC4OE3 OC4OE2 OC4OE1 OC4OE0
-	TCCR4A = 0b10000010; //PWM output OC4A.
+	//TCCR4A = 0b10000010; //PWM output OC4A.
+	TCCR4A = 0b10100011; //PWM output OC4A & OC4B.
 	TCCR4B = 0b00000100; //Prescaler de 4.
 	OCR4C = 255 - 1;	 //62.5ns * 4 * 255 = 127.5us.
 	OUTPUT_VALUE(0);	 //Valeur de la sortie.
+	OUTPUT_VALUE_1(0);
 }
 
 /************************************************************************/
