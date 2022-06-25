@@ -43,12 +43,9 @@ volatile uint8_t msFlagAdc = 0;	 //Flags qui est mis à 1 à chaques 25ms pour l
 volatile uint16_t msCntFade = 0; //Compteur utilisés pour compter 50 fois un délai de 1ms pour le fade de la sortie.
 volatile uint8_t msFlagFade = 0; //Flags qui est mis à 1 à chaques 50ms pour le fade de la sortie.
 uint16_t valueAdcTbl[2] = {0, 0};
-uint16_t valueModeSysTbl[2] = {0, 0};
 uint16_t valueOut = 0;
-uint16_t valueOutVeille = 0;
 uint16_t valueAdc = 0;
-uint16_t valueModeSys = 0;
-int customVeilleVal = 0;
+uint8_t valueVeilleMode = 0;
 int increment = 5;
 
 /* Variables nécessaires à la communication avec l'interface: */
@@ -72,8 +69,7 @@ enum TX_COMMANDES
 {
 	VAL_ACTU,
 	VAL_INIT,
-	VAL_POT,
-	VAL_MODE
+	VAL_POT
 };
 
 /* Enum des différentes commandes utilisées en réception: */
@@ -86,21 +82,10 @@ enum RX_COMMANDES
 	SET_VAL
 };
 
-enum VEILLE_STATE
-{
-	VEILLE_NONE,
-	VEILLE_OFF,
-	VEILLE_ON,
-	VEILLE_BREATHING,
-	VEILLE_VEILLE,
-	VEILLE_CUSTOM
-};
-
 /* Déclaration des enums: */
 enum RX_STATES rxState;
 enum TX_COMMANDES txCommande;
 enum RX_COMMANDES rxCommande;
-enum VEILLE_STATE veilleState;
 
 /* Prototypes des fonctions locales: */
 void hardwareInit(void);
@@ -122,10 +107,15 @@ void execRxCommand(void);
 void execTxCommand(void);
 
 /**
+ * @brief  Fonction d'initialisation des différents I/O et fonctions.
+*/
+void miscInit(void);
+
+/**
  *@brief		Fonction qui traite la valeur de sortie en fonction du mode veille actuel.
  *@param value  Mode veille.
  */
-void outputVeille(void);
+void outputVeille(uint8_t value);
 
 /**
  * @brief		Fonction qui remplis la structure de donnés avec les paramètres correspondants qui lui sont envoyés en paramètre par la fonction usartRemRxData. Le switch case commence à l'état WAIT qui attend la réception de "<". RXDATA place alors les donnés reçus dans l'union de structure jusqu'à ce que la dernière donnée (ici, la longueur de la trame à été spécifié manuellement à 7 puisque nous n'envoyons pas l'octet qui contient la longueur de la trame. Finalement, VALIDATE s'assure que la trame se termine par ">"
@@ -163,7 +153,6 @@ int main(void)
 		}
 		if (SWITCH()) //Si l'interrupteur du potentiomètre est à la position "ON"...
 		{
-			valueModeSysTbl[1] = 1;
 			if (msFlagAdc)
 			{
 				msFlagAdc = 0;
@@ -179,21 +168,15 @@ int main(void)
 					valueAdcTbl[0] = valueAdcTbl[1]; //La nouvelle valeur remplace l'ancienne.
 					valueOut = valueAdcTbl[1];
 					valueAdc = valueAdcTbl[1];
-					txCommande = VAL_POT;
+					txCommande = VAL_ACTU;
 					execTxCommand();
 				}
 			}
 		}
 		else //Si l'interrupteur du potentiomètre est à la position "OFF"...
 		{
-			outputVeille();
-			valueModeSysTbl[1] = 0;
-		}
-		if (valueModeSysTbl[1] != valueModeSysTbl[0])
-		{
-			valueModeSysTbl[0] = valueModeSysTbl[1]; //La nouvelle valeur remplace l'ancienne.
-			valueModeSys = valueModeSysTbl[1];
-			txCommande = VAL_MODE;
+			outputVeille(valueVeilleMode);
+			txCommande = VAL_ACTU;
 			execTxCommand();
 		}
 		OUTPUT_VALUE(valueOut);
@@ -237,8 +220,7 @@ void execRxCommand(void)
 		execTxCommand();
 		break;
 	case SET_SLEEP_MODE:
-		veilleState = rxData[0];
-		customVeilleVal = rxData[1];
+		valueVeilleMode = rxData[0];
 		break;
 	case SET_VAL:	  //Réception depuis l'interface de la valeur de la sortie.
 		if (SWITCH()) //Si l'interrupteur du potentiomètre est à la position "ON"...
@@ -251,41 +233,31 @@ void execRxCommand(void)
 
 void execTxCommand(void)
 {
-	char txData[8];
+	char txData[6];
 	switch (txCommande)
 	{
 	case VAL_ACTU:
 		txData[0] = '<';
 		txData[1] = 1;
-		txData[2] = VAL_ACTU;
+		txData[2] = VAL_POT;
 		txData[3] = valueOut;
 		txData[4] = '>';
 		serialUSBWrite((uint8_t *)txData, 5);
 		break;
 	case VAL_INIT:
 		txData[0] = '<';
-		txData[1] = 4;
+		txData[1] = 2;
 		txData[2] = VAL_INIT;
-		txData[3] = valueOut;
-		txData[4] = valueAdc;
-		txData[5] = veilleState;
-		txData[6] = valueModeSys;
-		txData[7] = '>';
-		serialUSBWrite((uint8_t *)txData, 8);
+		txData[3] = valueAdc;
+		txData[4] = valueVeilleMode;
+		txData[5] = '>';
+		serialUSBWrite((uint8_t *)txData, 6);
 		break;
 	case VAL_POT:
 		txData[0] = '<';
 		txData[1] = 1;
 		txData[2] = VAL_POT;
 		txData[3] = valueAdc;
-		txData[4] = '>';
-		serialUSBWrite((uint8_t *)txData, 5);
-		break;
-	case VAL_MODE:
-		txData[0] = '<';
-		txData[1] = 1;
-		txData[2] = VAL_MODE;
-		txData[3] = valueModeSys;
 		txData[4] = '>';
 		serialUSBWrite((uint8_t *)txData, 5);
 		break;
@@ -311,20 +283,17 @@ void hardwareInit(void)
 	USB_Init();
 }
 
-void outputVeille(void)
+void outputVeille(uint8_t value)
 {
-	switch (veilleState)
+	switch (value)
 	{
-	case VEILLE_NONE:
-
-		break;
-	case VEILLE_OFF:
+	case 0:
 		valueOut = 0;
 		break;
-	case VEILLE_ON:
+	case 1:
 		valueOut = 255;
 		break;
-	case VEILLE_BREATHING:
+	case 2:
 		if (valueOut <= 1) //Lorsque oc4aValue à atteint son minimum.
 		{
 			increment = INCREMENT_STEP;
@@ -339,11 +308,8 @@ void outputVeille(void)
 			valueOut += increment;
 		}
 		break;
-	case VEILLE_VEILLE:
+	case 3:
 		valueOut = 1;
-		break;
-	case VEILLE_CUSTOM:
-		valueOut = customVeilleVal;
 		break;
 	}
 }
