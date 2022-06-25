@@ -218,15 +218,15 @@ void MainWindow::execRxCommand(void)
 
         if (veilleState == VEILLE_NONE) //Si le mode de veille actuel est "NONE"...
         {
-            veilleState = VEILLE_STATE(settings->value("veille/mode").toInt()); //Récupération du mode veille sauvegardé dans le fichier .ini.
+            veilleState = VEILLE_STATE(settings->value("Veille/Mode").toInt()); //Récupération du mode veille sauvegardé dans le fichier .ini.
             ui->comboBoxSleep->setCurrentIndex(veilleState);                    //Mise à jour du comboBox
             txCommande = SET_SLEEP_MODE;                                        //Envoi du mode veille au Arduino.
             execTxCommand();
         }
         else //Sinon (si le mode de veille actuel est autre que "NONE")...
         {
-            settings->setValue("veille/mode", QString::number(veilleState)); //Les valeurs sauvegardés son actualisés.
-            settings->setValue("veille/Description", ui->comboBoxSleep->currentText());
+            settings->setValue("Veille/Mode", QString::number(veilleState)); //Les valeurs sauvegardés son actualisés.
+            settings->setValue("Veille/Description", ui->comboBoxSleep->currentText());
         }
 
         /*// DEBUG //*/
@@ -426,8 +426,8 @@ void MainWindow::setupSerial(void)
 void MainWindow::on_comboBoxSleep_activated(int index)
 {
     veilleState = VEILLE_STATE(index);
-    settings->setValue("veille/mode", QString::number(index));
-    settings->setValue("veille/Description", ui->comboBoxSleep->currentText());
+    settings->setValue("Veille/Mode", QString::number(index));
+    settings->setValue("Veille/Description", ui->comboBoxSleep->currentText());
     boutonEnabler();
     txCommande = SET_SLEEP_MODE;
     execTxCommand();
