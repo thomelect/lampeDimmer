@@ -222,15 +222,15 @@ void MainWindow::execRxCommand(void)
 
         if (veilleState == VEILLE_NONE) //Si le mode de veille actuel est "NONE"...
         {
-            veilleState = VEILLE_STATE(settings->value("Veille/Mode").toInt()); //Récupération du mode veille sauvegardé dans le fichier .ini.
+            veilleState = VEILLE_STATE(settings->value("veille/mode").toInt()); //Récupération du mode veille sauvegardé dans le fichier .ini.
             ui->comboBoxSleep->setCurrentIndex(veilleState);                    //Mise à jour du comboBox
             txCommande = SET_SLEEP_MODE;                                        //Envoi du mode veille au Arduino.
             execTxCommand();
         }
         else //Sinon (si le mode de veille actuel est autre que "NONE")...
         {
-            settings->setValue("Veille/Mode", QString::number(veilleState)); //Les valeurs sauvegardés son actualisés.
-            settings->setValue("Veille/Description", ui->comboBoxSleep->currentText());
+            settings->setValue("veille/mode", QString::number(veilleState)); //Les valeurs sauvegardés son actualisés.
+            settings->setValue("veille/Description", ui->comboBoxSleep->currentText());
         }
 
         /*// DEBUG //*/
@@ -315,7 +315,7 @@ void MainWindow::execTxCommand()
             txData[0] = '<';
             txData[1] = 1;
             txData[2] = SET_VAL;
-            txData[3] = char(intensite);
+            txData[3] = intensite;
             txData[4] = '>';
             serial->write(txData, 5);
             break;
@@ -351,7 +351,7 @@ void MainWindow::parseRXData(uint8_t data)
         }
         break;
     case RXCOMMANDE:
-        rxCommande = RX_COMMANDES(data);
+        rxCommande = (RX_COMMANDES)data;
         if (rxDataSize)
         {
             rxState = RXDATA;
@@ -394,10 +394,10 @@ void MainWindow::readSerialData(void)
         if (recepAvailable)
         {
             recepAvailable = false;
-            tmpRx.resize(int(serial->bytesAvailable()));
+            tmpRx.resize(serial->bytesAvailable());
             serial->read(tmpRx.data(), tmpRx.size());
             for (uint16_t i = 0; i < tmpRx.size(); i++)
-                parseRXData(uint8_t(tmpRx[i]));
+                parseRXData(tmpRx[i]);
         }
         else
         {
@@ -432,8 +432,8 @@ void MainWindow::setupSerial(void)
 void MainWindow::on_comboBoxSleep_activated(int index)
 {
     veilleState = VEILLE_STATE(index);
-    settings->setValue("Veille/Mode", QString::number(index));
-    settings->setValue("Veille/Description", ui->comboBoxSleep->currentText());
+    settings->setValue("veille/mode", QString::number(index));
+    settings->setValue("veille/Description", ui->comboBoxSleep->currentText());
 
     boutonEnabler();
     if (ui->comboBoxSleep->currentIndex() == (ui->comboBoxSleep->findText("CUSTOM", Qt::MatchStartsWith)))

@@ -87,6 +87,7 @@ private:
     uint8_t valueAdc;
     uint8_t valueOut;
     bool valueModeSys;
+    uint8_t veilleState;
     uint8_t intensite;
     uint8_t countDown;
     uint8_t customVal;
