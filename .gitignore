@@ -1,3 +1,7 @@
+#/******
+ #* QT *
+ #******/
+
 # C++ objects and libs
 *.slo
 *.lo
@@ -53,7 +57,9 @@ compile_commands.json
 
 *_qmlcache.qrc
 
-#----------------------------------------------------------------
+#/***************
+# * ATMELSTUDIO *
+# ***************/
 
 ## Ignore Atmel Studio temporary files and build results
 # https://www.microchip.com/mplab/avr-support/atmel-studio-7
@@ -80,3 +86,36 @@ compile_commands.json
 
 # User Specific Files
 *.atsuo
+
+#/*********
+# * KICAD *
+# *********/
+
+# Fichiers temporaires.
+*.000
+*.bak
+*.bck
+*.kicad_pcb-bak
+*.kicad_sch-bak
+*.kicad_prl
+*.sch-bak
+*~
+_autosave-*
+*.tmp
+*-save.pro
+*-save.kicad_pcb
+fp-info-cache
+
+# Fichiers de netlist (exported from Eeschema).
+*.net
+
+# Fichiers d'autoroutage (exporté depuis Pcbnew).
+*.dsn
+*.ses
+
+# Fichier de BOM exportés.
+*.xml
+*.csv
+
+# Dossier de backups KiCad.
+*-backups
