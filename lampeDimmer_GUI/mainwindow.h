@@ -80,6 +80,7 @@ private:
     QByteArray tmpRxData;
     QString portConfig;
     QString *connectInfo;
+    QString infoTag;
     uint8_t rxDataSize;
     uint8_t rxDataCnt;
     uint8_t rxData[MAX_RXDATASIZE];
@@ -96,6 +97,8 @@ private:
 
     /* Déclarations classes: */
     QLabel *statusLabel;
+    QLabel *statusLabel2;
+    QLabel *statusLabel3;
     QSerialPort *serial;
     QMenu *toolsMenu;
     QTimer *timer;

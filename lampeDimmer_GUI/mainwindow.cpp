@@ -41,8 +41,15 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent),
     connect(timer, SIGNAL(timeout()), this, SLOT(recepTimer()));
     timer->start(10);
 
+    statusLabel2 = new QLabel(this);
     statusLabel = new QLabel(this);
-    ui->statusBar->addPermanentWidget(statusLabel);
+    statusLabel3 = new QLabel(this);
+    ui->statusBar->addPermanentWidget(statusLabel2,0);
+    ui->statusBar->addPermanentWidget(statusLabel,1);
+    ui->statusBar->addPermanentWidget(statusLabel3,0);
+    statusLabel2->setAlignment(Qt::AlignVCenter);
+    statusLabel->setAlignment(Qt::AlignRight);
+    statusLabel3->setText("23℃");
 
     autoSetupSerial(); //Appel de la fonction de connexion automatique.
 
@@ -78,7 +85,7 @@ void MainWindow::autoSetupSerial(void)
         {
             foreach (const QSerialPortInfo &info, QSerialPortInfo::availablePorts()) //Pour tout les ports disponibles...
             {
-                QString infoTag = info.portName() + " " + info.description();
+                infoTag = info.portName() + " " + info.description();
                 if (infoTag == portConfig)
                 {
                     serial->setPort(info);             //Assignation du port à connecter.
@@ -117,8 +124,8 @@ void MainWindow::boutonEnabler()
     }
     else //Sinon (si le port série n'est pas ouvert)...
     {
-        statusLabel->setText("Non connecté"); //Les éléments du GUI sont désactivés et le système affiche "Non connecté".
-        statusLabel->setToolTip("");
+        //statusLabel->setText("Non connecté"); //Les éléments du GUI sont désactivés et le système affiche "Non connecté".
+        //statusLabel->setToolTip("");
         ui->comboBoxSleep->setDisabled(true);
         ui->dialIntensite->setDisabled(true);
         ui->pushBottonOnOff->setDisabled(true);
@@ -129,13 +136,14 @@ void MainWindow::boutonEnabler()
         ui->dialIntensite->setDisabled(true); //Les éléments du GUI (sauf le comboBox) sont désactivés.
         ui->pushBottonOnOff->setDisabled(true);
         ui->horizontalSliderIntensite->setDisabled(true);
-        ui->statusBar->showMessage("VEILLE | " + ui->comboBoxSleep->currentText()); //conversion de la valeur actuelle en pourcentage.
+        statusLabel2->setToolTip(" VEILLE | " + ui->comboBoxSleep->currentText()); //conversion de la valeur actuelle en pourcentage.
     }
     else //Sinon (si le système n'est pas en mode veille)...
     {
         ui->dialIntensite->setEnabled(true); //Les éléments du GUI sont activés.
         ui->pushBottonOnOff->setEnabled(true);
         ui->horizontalSliderIntensite->setEnabled(true);
+
     }
 }
 
