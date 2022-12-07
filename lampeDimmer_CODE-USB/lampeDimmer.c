@@ -4,15 +4,15 @@
  * @author     Base : Marc Juneau
  * @author     Adaptation : Thomas Desrosiers
  * @version    2.0
- * @date       8 Janvier 2021
+ * @date       07 décembre 2022
  *
  * @mainpage	lampeDimmer
- * @author     Base : Marc Juneau
- * @author     Adaptation : Thomas Desrosiers
- *	@section	MainSection1 Description
+ * @author     	Base : Marc Juneau
+ * @author     	Adaptation : Thomas Desrosiers
+ * @section		MainSection1 Description
  *				Programme de gestion de la communication par USB.
- *	@li			Ce programme démontre le fonctionnement minimale d'un lien série USB.
- *	@li			Il utilise la bibliothèque LUFA pour un périphérique CDC
+ * @li			Ce programme démontre le fonctionnement minimale d'un lien série USB.
+ * @li			Il utilise la bibliothèque LUFA pour un périphérique CDC
  */
 
 #include <avr/io.h>
@@ -81,15 +81,6 @@ enum RX_STATES
 	VALIDATE
 };
 
-/* Enum des différentes commandes utilisées en transmission: */
-enum TX_COMMANDES
-{
-	VAL_ACTU,
-	VAL_INIT,
-	VAL_POT,
-	VAL_MODE
-};
-
 /* Enum des différentes commandes utilisées en réception: */
 enum RX_COMMANDES
 {
@@ -98,6 +89,15 @@ enum RX_COMMANDES
 	GET_VAL_POT,
 	SET_SLEEP_MODE,
 	SET_VAL
+};
+
+/* Enum des différentes commandes utilisées en transmission: */
+enum TX_COMMANDES
+{
+	VAL_ACTU,
+	VAL_INIT,
+	VAL_POT,
+	VAL_MODE
 };
 
 enum VEILLE_STATE
