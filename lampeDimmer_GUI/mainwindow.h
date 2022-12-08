@@ -18,6 +18,7 @@
 #include <QDateTime>
 
 #define MAX_RXDATASIZE 16
+#define REFRESH_TEMPERATURE 1 //Valeur en seconde
 
 QT_BEGIN_NAMESPACE
 namespace Ui
@@ -58,6 +59,7 @@ private:
         GET_VAL_ACTU,
         GET_VAL_INIT,
         GET_VAL_POT,
+        GET_VAL_TEMP,
         SET_SLEEP_MODE,
         SET_VAL
     };
@@ -99,6 +101,7 @@ private:
     QSerialPort *serial;
     QMenu *toolsMenu;
     QTimer *timer;
+    QTimer *timerTemperature;
     QAction *setupSerialAct;
     QPixmap *pixmapOff();
     QIcon *ButtonIcon();
@@ -197,5 +200,12 @@ private:
      * @param data  Octet reçu par la fonction usartRemRxData.
      */
     void parseRXData(uint8_t data);
+
+    /**
+     * @brief  Fonction qui est appelée par un timer (timerTemperature).
+     *         Lorsque appelée, cette fonction définis la valeur de txCommande à GET_VAL_TEMP et appel ensuite la fonction execTxCommand().
+     *         Une demande d'acquisition de la valeur de température sera donc envoyée au contrôleur.
+     */
+    void temperatureAck(void);
 };
 #endif // MAINWINDOW_H

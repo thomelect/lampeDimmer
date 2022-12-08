@@ -40,6 +40,10 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent),
     timer = new QTimer();                                           //Timer utilisé pour le lecture du port série.
     connect(timer, SIGNAL(timeout()), this, SLOT(recepTimer()));    //Connexion du timer avec la fonction recepTimer.
     timer->start(10);
+    
+    timerTemperature = new QTimer();                                    //Timer utilisé pour l'envoie de requête de la valeur de la température.
+    connect(timer, SIGNAL(timeout()), this, SLOT(temperatureAck()));    //Connexion du timer avec la fonction temperatureAck.
+    timer->start(REFRESH_TEMPERATURE * 1000);                           //QTimer est en ms et la valeur de REFRESH_TEMPERATURE est des secondes : (X * 1000 = X ms).
 
     statusLabel = new QLabel(this);
     ui->statusBar->addPermanentWidget(statusLabel);
@@ -298,6 +302,13 @@ void MainWindow::execTxCommand()
             txData[3] = '>';
             serial->write(txData, 4);
             break;
+        case GET_VAL_TEMP:
+            txData[0] = '<';
+            txData[1] = 0;
+            txData[2] = GET_VAL_TEMP;
+            txData[3] = '>';
+            serial->write(txData, 4);
+            break;
         case SET_SLEEP_MODE:
             txData[0] = '<';
             txData[1] = 1;
@@ -461,6 +472,15 @@ void MainWindow::on_pushBottonOnOff_released()
 void MainWindow::recepTimer(void)
 {
     recepAvailable = true;
+}
+
+void MainWindow::temperatureAck(void)
+{
+    if (!serialRxIn)
+    {
+        txCommande = GET_VAL_TEMP;
+        execTxCommand();
+    }
 }
 
 void MainWindow::on_dialIntensite_valueChanged()
