@@ -13,6 +13,7 @@
 
 #define MAX_DAY_LOG 0
 #define DEBUG_LOG 1
+#define WINDOW_NORMAL 0
 
 void myMessageOutput(QtMsgType type, const QMessageLogContext &context, const QString &msg)
 {
@@ -54,8 +55,14 @@ void myMessageOutput(QtMsgType type, const QMessageLogContext &context, const QS
 int main(int argc, char *argv[])
 {
     QApplication a(argc, argv);
+#if !WINDOW_NORMAL
+    a.setQuitOnLastWindowClosed(false); //L'application n'est pas "arrêtée" si la fenêtre est fermée.
+#endif
     MainWindow w;
-    w.show();
+#if WINDOW_NORMAL
+    w.show(); //Si non utilisé, la fenêtre n'est pas affiché au démarrage de l'application
+#endif
+
 #if DEBUG_LOG //Si DEBUG_LOG est égal à 0, les débug se font dans la console.
     qInstallMessageHandler(myMessageOutput);
 #endif

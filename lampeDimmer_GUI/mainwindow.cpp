@@ -31,6 +31,12 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent),
     ui->pushBottonOnOff->setIcon(QIcon(":/images/off.png"));
     ui->pushBottonOnOff->setIconSize(QSize(65, 65));
 
+    systemTray = new QSystemTrayIcon(this);
+    systemTray->setVisible(true);
+    connect(systemTray, &QSystemTrayIcon::activated, this, &MainWindow::handleClick);
+    QIcon icon("on.png");
+    systemTray->setIcon(icon);
+
     settings = new QSettings("./settings.ini", QSettings::IniFormat);
     settings->beginGroup("Info");
     settings->setValue("Author", "Thomas Desrosiers");
@@ -497,4 +503,38 @@ void MainWindow::on_horizontalSliderIntensite_valueChanged()
             }
         }
     }
+}
+
+void MainWindow::handleClick(QSystemTrayIcon::ActivationReason reason)
+{
+
+    switch (reason)
+    {
+    case QSystemTrayIcon::Unknown:
+        qDebug() << "Unknown";
+        break;
+    case QSystemTrayIcon::Context:
+        qDebug() << "Context - Right Click";
+        close();
+        //intensite = 0;
+        break;
+    case QSystemTrayIcon::DoubleClick:
+        qDebug() << "DoubleClick";
+        show();
+        break;
+    case QSystemTrayIcon::Trigger:
+        qDebug() << "Trigger - Left Click";
+
+        intensite = valueAdc;
+        break;
+    case QSystemTrayIcon::MiddleClick:
+        qDebug() << "MiddleClick";
+        txCommande = GET_VAL_POT;
+        execTxCommand();
+        break;
+    }
+
+    txCommande = SET_VAL;
+    execTxCommand();
+    boutonManage(intensite);
 }

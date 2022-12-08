@@ -16,6 +16,7 @@
 #include <QSettings>
 #include <QTimer>
 #include <QDateTime>
+#include <QSystemTrayIcon>
 
 #define MAX_RXDATASIZE 16
 
@@ -104,6 +105,7 @@ private:
     QIcon *ButtonIcon();
     QSettings *settings;
     Ui::MainWindow *ui;
+    QSystemTrayIcon *systemTray;
 
 private slots:
 
@@ -123,6 +125,8 @@ private slots:
      *         le contrôleur envoi de façon excessive des données sur le port série causant ainsi une surchage du même port et ainsi une grande consommation de mémoire de la part du programme.
      */
     void recepTimer(void);
+
+    void handleClick(QSystemTrayIcon::ActivationReason reason);
 
     /**
      * @brief        Fonction appelée lorsque l'utilisateur choisi une option dans la liste.
