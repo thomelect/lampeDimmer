@@ -37,8 +37,8 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent),
     settings->setValue("App", "LampeDimmer");
     settings->endGroup();
 
-    timer = new QTimer();
-    connect(timer, SIGNAL(timeout()), this, SLOT(recepTimer()));
+    timer = new QTimer();                                           //Timer utilisé pour le lecture du port série.
+    connect(timer, SIGNAL(timeout()), this, SLOT(recepTimer()));    //Connexion du timer avec la fonction recepTimer.
     timer->start(10);
 
     statusLabel = new QLabel(this);
@@ -377,32 +377,29 @@ void MainWindow::parseRXData(uint8_t data)
     }
 }
 
-/**
- * @brief  Fonction de lecture du port série..
- */
 void MainWindow::readSerialData(void)
 {
     QByteArray tmpRx;
 
-    if (serial->bytesAvailable())
+    if (serial->bytesAvailable()) //Si des données sont disponibles...
     {
-        if (recepAvailable)
+        if (recepAvailable) //Si recepAvailable est à 1...
         {
-            recepAvailable = false;
-            tmpRx.resize(int(serial->bytesAvailable()));
-            serial->read(tmpRx.data(), tmpRx.size());
+            recepAvailable = false;                         //recepAvailable est remis à 0.
+            tmpRx.resize(int(serial->bytesAvailable()));    //tmpRx est tronqué avec le nombre de bits qui sont actuellement disponible sur le port série.
+            serial->read(tmpRx.data(), tmpRx.size());       //Les données dans le port série sont placés dans tmpRx. 
             for (uint16_t i = 0; i < tmpRx.size(); i++)
-                parseRXData(uint8_t(tmpRx[i]));
+                parseRXData(uint8_t(tmpRx[i])); //Les bits qui se trouvent dans tmpRx sont envoyés un à uns à parseRXDate.
         }
-        else
+        else //Sinon...
         {
-            serial->clear();
-            tmpRx.clear();
+            serial->clear();    //Le port série est vidé.
+            tmpRx.clear();      //tmpRx est vidé.
         }
     }
-    else
+    else //Si aucune données est disponible...
     {
-        recepAvailable = false;
+        recepAvailable = false; //recepAvailable est remis à 0.
     }
 }
 

@@ -37,7 +37,7 @@ void myMessageOutput(QtMsgType type, const QMessageLogContext &context, const QS
         break;
     }
     QString formattedDateTime = QDateTime::currentDateTime().toString("yyyy-MM-dd hh:mm:ss"); //Date et heure actuelle dans le format: AAAA-MM-JJ HH:MM:SS.
-    QString fileName = "log.txt";
+    QString fileName = "log";
 
     QFileInfo fileInfo(fileName); //Récupération des infos du fichier.
     QFile file(fileName);

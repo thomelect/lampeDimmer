@@ -114,6 +114,13 @@ private slots:
 
     /**
      * @brief  Fonction appelée à caque fois que le décompte du timer arrive à 0.
+     *         Elle est utilisée afin de mettre à 1 la variable recepAvailable et ainsi, dans la fonction readSerialData,
+     *         si serial->bytesAvailable() est vrai, le tableau de données (le buffer) "tmpRx" est tronqué au nombre de bits disponibles
+     *         les données dans le port série sont placés dans tmpRx, et le port série est vidé. 
+     *         Ainsi, on évite d'avoir une file d'attente dans le port série et deffectuer le lecture de façon excessive. 
+     * 
+     *         Ceci découle d'un problème ou lorsque le potentiomètre physique se situe entre 2 valeurs,
+     *         le contrôleur envoi de façon excessive des données sur le port série causant ainsi une surchage du même port et ainsi une grande consommation de mémoire de la part du programme.
      */
     void recepTimer(void);
 
