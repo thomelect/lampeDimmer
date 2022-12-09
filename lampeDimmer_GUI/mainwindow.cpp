@@ -36,6 +36,7 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent),
     connect(systemTray, &QSystemTrayIcon::activated, this, &MainWindow::handleClick);
     QIcon icon("on.png");
     systemTray->setIcon(icon);
+    systemTray->setToolTip("TEST");
 
     settings = new QSettings("./settings.ini", QSettings::IniFormat);
     settings->beginGroup("Info");
@@ -515,7 +516,7 @@ void MainWindow::handleClick(QSystemTrayIcon::ActivationReason reason)
         break;
     case QSystemTrayIcon::Context:
         qDebug() << "Context - Right Click";
-        close();
+        exit(1);
         //intensite = 0;
         break;
     case QSystemTrayIcon::DoubleClick:
