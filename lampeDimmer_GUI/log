@@ -1,0 +1,11 @@
+Debug: try   "COM35 Périphérique série USB" -> 2022-12-09 17:27:31
+Debug: open  "COM35 Périphérique série USB" -> 2022-12-09 17:27:31
+Debug:  ----------------- RXDATA :  "0" -> 2022-12-09 17:27:32
+Debug:  ----------------- RXDATA :  "0" -> 2022-12-09 17:27:32
+Debug:  ----------------- RXDATA :  "0" -> 2022-12-09 17:27:32
+Debug:  ----------------- RXDATA :  "0" -> 2022-12-09 17:27:32
+Debug: SET_VAL :  "0" -> 2022-12-09 17:27:32
+Debug:  - OUT_INI :     0 -> 2022-12-09 17:27:32
+Debug:  - ADC_INI :     0 -> 2022-12-09 17:27:32
+Debug:  - VEILLE_INI :  2 -> 2022-12-09 17:27:32
+Debug:  - SYS_INI :     false -> 2022-12-09 17:27:32

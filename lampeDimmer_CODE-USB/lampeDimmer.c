@@ -24,6 +24,7 @@
 #include <sources/LUFA/Drivers/USB/USB.h>
 #include "adcBasic.h"
 #include "Descriptors.h"
+#include "temp.h"
 
 
 /**********
@@ -44,6 +45,7 @@
 #define TIMER_CNT_CYCLE_FADE 50 // Nombre de cycle comptés en interruption.
 #define INCREMENT_STEP 1		// Incrément pour le fadding.
 #define _MAX_RXDATASIZE_ 16
+#define TIMER_CNT_CYCLE_TEMP 250 // Nombre de cycle comptés en interruption.
 
 
 /*************
@@ -53,6 +55,10 @@ volatile uint16_t msCntAdc = 0;	 // Compteur utilisés pour compter 25 fois un d
 volatile uint8_t msFlagAdc = 0;	 // Flags qui est mis à 1 à chaques 25ms pour la mesure de l'ADC.
 volatile uint16_t msCntFade = 0; // Compteur utilisés pour compter 50 fois un délai de 1ms pour le fade de la sortie.
 volatile uint8_t msFlagFade = 0; // Flags qui est mis à 1 à chaques 50ms pour le fade de la sortie.
+volatile uint8_t flagRefreshMesureTmp = 0;
+volatile uint8_t cntRefreshMesureTmp = 0;
+volatile uint8_t cntRefreshMesureTmp2 = 0;
+uint8_t temperatureFiltered = 0;
 uint16_t valueAdcTbl[2] = {0, 0};
 uint16_t valueModeSysTbl[2] = {0, 0};
 uint16_t valueOut = 0;
@@ -87,6 +93,7 @@ enum RX_COMMANDES
 	GET_VAL_ACTU,
 	GET_VAL_INIT,
 	GET_VAL_POT,
+	GET_VAL_TEMP,
 	SET_SLEEP_MODE,
 	SET_VAL
 };
@@ -97,7 +104,8 @@ enum TX_COMMANDES
 	VAL_ACTU,
 	VAL_INIT,
 	VAL_POT,
-	VAL_MODE
+	VAL_MODE,
+    VAL_TEMP
 };
 
 enum VEILLE_STATE
@@ -216,6 +224,11 @@ int main(void)
 			txCommande = VAL_MODE;
 			execTxCommand();
 		}
+		if (flagRefreshMesureTmp)
+		{
+			flagRefreshMesureTmp = 0;
+			temperatureFiltered = (uint8_t)tempHandler();
+		}
 		OUTPUT_VALUE(valueOut);
 		OUTPUT_VALUE_1(valueOut);
 		USB_USBTask();
@@ -233,6 +246,19 @@ ISR(TIMER0_COMPA_vect)
 {
 	msCntAdc++;
 	msCntFade++;
+	cntRefreshMesureTmp++;
+	if (cntRefreshMesureTmp >= TIMER_CNT_CYCLE_TEMP)
+	{
+		cntRefreshMesureTmp -= TIMER_CNT_CYCLE_TEMP;
+		cntRefreshMesureTmp++;
+		if (cntRefreshMesureTmp >= 2)
+		{
+			cntRefreshMesureTmp -= 2;
+			flagRefreshMesureTmp = 1;
+		}
+		
+	}
+	
 	if (msCntAdc >= TIMER_CNT_CYCLE_ADC)
 	{
 		msCntAdc -= TIMER_CNT_CYCLE_ADC;
@@ -263,6 +289,10 @@ void execRxCommand(void)
 		break;
 	case GET_VAL_POT: //État non utilisé
 		txCommande = VAL_POT;
+		execTxCommand();
+		break;
+	case GET_VAL_TEMP: //État non utilisé
+		txCommande = VAL_TEMP;
 		execTxCommand();
 		break;
 	case SET_SLEEP_MODE:
@@ -317,6 +347,14 @@ void execTxCommand(void)
 		txData[4] = '>';
 		serialUSBWrite((uint8_t *)txData, 5);
 		break;
+	case VAL_TEMP:
+		txData[0] = '<';
+		txData[1] = 1;
+		txData[2] = VAL_TEMP;
+		txData[3] = temperatureFiltered;
+		txData[4] = '>';
+		serialUSBWrite((uint8_t *)txData, 5);
+		break;
 	}
 }
 
@@ -333,6 +371,7 @@ void hardwareInit(void)
 	adcInit();	  // Appel de la fonction d'initialisation du ADC.
 	timer0Init(); // Initialisation de timer 0.
 	timer4Init(); // Initialisation de timer 4.
+	tempInit();
 	OUTPUT_INIT();
 	OUTPUT_INIT_1();
 	SWITCH_INIT();
