@@ -43,8 +43,8 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent),
     timer->start(10);
     
     timerTemperature = new QTimer();                                    //Timer utilisé pour l'envoie de requête de la valeur de la température.
-    connect(timer, SIGNAL(timeout()), this, SLOT(temperatureAck()));    //Connexion du timer avec la fonction temperatureAck.
-    timer->start(REFRESH_TEMPERATURE * 1000);                           //QTimer est en ms et la valeur de REFRESH_TEMPERATURE est des secondes : (X * 1000 = X ms).
+    connect(timerTemperature, SIGNAL(timeout()), this, SLOT(temperatureAck()));    //Connexion du timer avec la fonction temperatureAck.
+    timerTemperature->start(REFRESH_TEMPERATURE * 1);                           //QTimer est en ms et la valeur de REFRESH_TEMPERATURE est des secondes : (X * 1000 = X ms).
 
     statusLabel = new QLabel(this);
     ui->statusBar->addPermanentWidget(statusLabel);
@@ -490,6 +490,7 @@ void MainWindow::recepTimer(void)
 
 void MainWindow::temperatureAck(void)
 {
+    qDebug() << "temperatureAck ";
     if (!serialRxIn)
     {
         txCommande = GET_VAL_TEMP;

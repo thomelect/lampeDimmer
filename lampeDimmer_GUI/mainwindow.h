@@ -114,6 +114,7 @@ private slots:
 
     /**
      * @brief  Fonction de lecture du port série..
+     *
      */
     void readSerialData(void);
 
@@ -128,6 +129,13 @@ private slots:
      *         le contrôleur envoi de façon excessive des données sur le port série causant ainsi une surchage du même port et ainsi une grande consommation de mémoire de la part du programme.
      */
     void recepTimer(void);
+
+    /**
+     * @brief  Fonction qui est appelée par un timer (timerTemperature).
+     *         Lorsque appelée, cette fonction définis la valeur de txCommande à GET_VAL_TEMP et appel ensuite la fonction execTxCommand().
+     *         Une demande d'acquisition de la valeur de température sera donc envoyée au contrôleur.
+     */
+    void temperatureAck(void);
 
     /**
      * @brief        Fonction appelée lorsque l'utilisateur choisi une option dans la liste.
@@ -202,12 +210,5 @@ private:
      * @param data  Octet reçu par la fonction usartRemRxData.
      */
     void parseRXData(uint8_t data);
-
-    /**
-     * @brief  Fonction qui est appelée par un timer (timerTemperature).
-     *         Lorsque appelée, cette fonction définis la valeur de txCommande à GET_VAL_TEMP et appel ensuite la fonction execTxCommand().
-     *         Une demande d'acquisition de la valeur de température sera donc envoyée au contrôleur.
-     */
-    void temperatureAck(void);
 };
 #endif // MAINWINDOW_H
