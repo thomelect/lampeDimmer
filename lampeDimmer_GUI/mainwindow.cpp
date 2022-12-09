@@ -18,6 +18,7 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent),
                                           ui(new Ui::MainWindow)
 {
     intensite = 0;
+    valueTemp = 0;
     serialRxIn = false;
     boutonState = true;
     recepAvailable = false;
@@ -264,6 +265,19 @@ void MainWindow::execRxCommand(void)
 
         /*// DEBUG //*/
         qDebug() << "VAL_MODE : " + QString::number(valueModeSys);
+
+        /*// FLAG DE RÉCEPTION //*/
+        serialRxIn = false;
+        break;
+    case VAL_TEMP:
+        /*// ACQUISITION //*/
+        valueTemp = rxData[0];
+
+        /*// CHANGEMENTS GUI //*/
+        //boutonEnabler();
+
+        /*// DEBUG //*/
+        qDebug() << "VAL_TEMP : " + QString::number(valueTemp);
 
         /*// FLAG DE RÉCEPTION //*/
         serialRxIn = false;
