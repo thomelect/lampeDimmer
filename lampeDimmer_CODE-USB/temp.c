@@ -6,7 +6,7 @@
  */ 
 #include <avr/io.h>
 #include "temp.h"
-#include "adcBasic.h"
+#include "adcBasic2.h"
 
 uint16_t _adcValTemp = 0;
 float _adcValTemp1 = 0;
@@ -65,7 +65,7 @@ float filtreFenetre(float tempRaw)
 
 float tempHandler(void)
 {
-	_adcValTemp = adcRead(); // Lecture du canal 1 du ADC.
+	_adcValTemp = adcGetValue2(1); // Lecture du canal 1 du ADC.
 	_adcValTemp1 = (float)((_adcValTemp * 2560L) / 1024);
 	_adcValTemp2 = (_adcValTemp1 / 28.45925926);
 	_adcValTemp2 = (float)((_adcValTemp2 - 23.96617647) * 9.066666667);

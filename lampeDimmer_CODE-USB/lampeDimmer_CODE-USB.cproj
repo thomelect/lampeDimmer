@@ -159,6 +159,12 @@
     <Compile Include="adcBasic.h">
       <SubType>compile</SubType>
     </Compile>
+    <Compile Include="adcBasic2.c">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="adcBasic2.h">
+      <SubType>compile</SubType>
+    </Compile>
     <Compile Include="Descriptors.c">
       <SubType>compile</SubType>
     </Compile>

@@ -197,7 +197,7 @@ int main(void)
 				msFlagAdc = 0;
 				for (uint8_t i = 0; i < 100; i++) // Une valeur moyenne sur un echantillon de 100 mesures est calculé afin d'éviter d'être entre deux valeurs.
 				{
-					valueAdcTbl[1] += adcRead8();
+					valueAdcTbl[1] += adcRead82(0);
 				}
 				valueAdcTbl[1] /= 100;
 				if (valueAdcTbl[1] >= 255) // Si valueOut dépasse 255..
@@ -368,7 +368,7 @@ void hardwareInit(void)
 	DDRD |= (1 << 4);
 	clock_prescale_set(clock_div_1);
 
-	adcInit();	  // Appel de la fonction d'initialisation du ADC.
+	adcInit2();	  // Appel de la fonction d'initialisation du ADC.
 	timer0Init(); // Initialisation de timer 0.
 	timer4Init(); // Initialisation de timer 4.
 	tempInit();
