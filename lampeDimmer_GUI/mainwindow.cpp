@@ -186,9 +186,11 @@ void MainWindow::boutonManage(int value)
 void MainWindow::createMenus(void)
 {
     setupSerialAct = new QAction(tr("&Configuration du port série"), this);
+    setupPref = new QAction(tr("&Préférences"), this);
     connect(setupSerialAct, &QAction::triggered, this, &MainWindow::setupSerial);
     toolsMenu = menuBar()->addMenu(tr("&Outils"));
     toolsMenu->addAction(setupSerialAct);
+    toolsMenu->addAction(setupPref);
 }
 
 /**

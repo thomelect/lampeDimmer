@@ -100,6 +100,7 @@ private:
     QMenu *toolsMenu;
     QTimer *timer;
     QAction *setupSerialAct;
+    QAction *setupPref;
     QPixmap *pixmapOff();
     QIcon *ButtonIcon();
     QSettings *settings;
