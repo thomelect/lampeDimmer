@@ -247,13 +247,13 @@ ISR(TIMER0_COMPA_vect)
 	msCntAdc++;
 	msCntFade++;
 	cntRefreshMesureTmp++;
-	if (cntRefreshMesureTmp >= TIMER_CNT_CYCLE_TEMP)
+	if (cntRefreshMesureTmp >= 5)
 	{
 		cntRefreshMesureTmp -= TIMER_CNT_CYCLE_TEMP;
-		cntRefreshMesureTmp++;
-		if (cntRefreshMesureTmp >= 2)
+		cntRefreshMesureTmp2++;
+		if (cntRefreshMesureTmp2 >= 2)
 		{
-			cntRefreshMesureTmp -= 2;
+			cntRefreshMesureTmp2 -= 2;
 			flagRefreshMesureTmp = 1;
 		}
 		
