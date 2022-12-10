@@ -275,7 +275,7 @@ void MainWindow::execRxCommand(void)
 
         /*// CHANGEMENTS GUI //*/
         //boutonEnabler();
-
+        ui->lbTemperature->setText(QString::number(valueTemp) + "°C");
         /*// DEBUG //*/
         qDebug() << "VAL_TEMP : " + QString::number(valueTemp);
 
@@ -490,7 +490,6 @@ void MainWindow::recepTimer(void)
 
 void MainWindow::temperatureAck(void)
 {
-    qDebug() << "temperatureAck ";
     if (!serialRxIn)
     {
         txCommande = GET_VAL_TEMP;

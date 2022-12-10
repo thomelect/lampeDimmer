@@ -35,6 +35,7 @@ public:
     QLabel *lb_255_dial;
     QLabel *lb_0_dial;
     QComboBox *comboBoxSleep;
+    QLabel *lbTemperature;
     QStatusBar *statusBar;
 
     void setupUi(QMainWindow *MainWindow)
@@ -109,6 +110,14 @@ public:
         comboBoxSleep->setSizeAdjustPolicy(QComboBox::AdjustToContentsOnFirstShow);
         comboBoxSleep->setDuplicatesEnabled(false);
         comboBoxSleep->setFrame(true);
+        lbTemperature = new QLabel(centralwidget);
+        lbTemperature->setObjectName(QString::fromUtf8("lbTemperature"));
+        lbTemperature->setGeometry(QRect(20, 20, 31, 22));
+        QFont font1;
+        font1.setFamily(QString::fromUtf8("Calibri"));
+        font1.setPointSize(12);
+        lbTemperature->setFont(font1);
+        lbTemperature->setAlignment(Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter);
         MainWindow->setCentralWidget(centralwidget);
         statusBar = new QStatusBar(MainWindow);
         statusBar->setObjectName(QString::fromUtf8("statusBar"));
@@ -134,6 +143,7 @@ public:
         comboBoxSleep->setItemText(3, QApplication::translate("MainWindow", "BREATHING", nullptr));
         comboBoxSleep->setItemText(4, QApplication::translate("MainWindow", "VEILLEUSE", nullptr));
 
+        lbTemperature->setText(QApplication::translate("MainWindow", "0 \302\260C", nullptr));
     } // retranslateUi
 
 };
