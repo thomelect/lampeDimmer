@@ -32,10 +32,10 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent),
     ui->pushBottonOnOff->setIconSize(QSize(65, 65));
 
     systemTray = new QSystemTrayIcon(this);
-    systemTray->setVisible(true);
-    connect(systemTray, &QSystemTrayIcon::activated, this, &MainWindow::handleClick);
     QIcon icon("on.png");
     systemTray->setIcon(icon);
+    systemTray->setVisible(true);
+    connect(systemTray, &QSystemTrayIcon::activated, this, &MainWindow::handleClick);
     systemTray->setToolTip("TEST");
 
     settings = new QSettings("./settings.ini", QSettings::IniFormat);
@@ -190,13 +190,15 @@ void MainWindow::boutonManage(int value)
 
 void MainWindow::createMenus(void)
 {
-    setupSerialAct = new QAction(tr("&Configuration du port série"), this);
-    quitterAct = new QAction(tr("Quitter"), this);
-    connect(setupSerialAct, &QAction::triggered, this, &MainWindow::setupSerial);
+    fichierMenu = menuBar()->addMenu(tr("&Fichier"));
+    quitterAct = new QAction(tr("&Quitter"), this);
     connect(quitterAct, &QAction::triggered, this, &MainWindow::quitter);
+    fichierMenu->addAction(quitterAct);
+
     toolsMenu = menuBar()->addMenu(tr("&Outils"));
+    setupSerialAct = new QAction(tr("&Configuration du port série"), this);
     toolsMenu->addAction(setupSerialAct);
-    toolsMenu->addAction(quitterAct);
+    connect(setupSerialAct, &QAction::triggered, this, &MainWindow::setupSerial);
 }
 
 /**

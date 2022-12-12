@@ -99,6 +99,7 @@ private:
     QLabel *statusLabel;
     QSerialPort *serial;
     QMenu *toolsMenu;
+    QMenu *fichierMenu;
     QTimer *timer;
     QAction *setupSerialAct;
     QAction *quitterAct;
