@@ -172,8 +172,6 @@ void MainWindow::boutonManage(int value)
 
     qDebug() << "SET_VAL : " << QString::number(value);
 
-    QPixmap pixmapOff("/images/off.png");
-    QIcon ButtonIcon(pixmapOff);
     if (value) //Si la valeur est plus grande que 0...
     {
         ui->pushBottonOnOff->setIcon(QIcon(":/images/on.png"));
@@ -193,9 +191,12 @@ void MainWindow::boutonManage(int value)
 void MainWindow::createMenus(void)
 {
     setupSerialAct = new QAction(tr("&Configuration du port série"), this);
+    quitterAct = new QAction(tr("Quitter"), this);
     connect(setupSerialAct, &QAction::triggered, this, &MainWindow::setupSerial);
+    connect(quitterAct, &QAction::triggered, this, &MainWindow::quitter);
     toolsMenu = menuBar()->addMenu(tr("&Outils"));
     toolsMenu->addAction(setupSerialAct);
+    toolsMenu->addAction(quitterAct);
 }
 
 /**
@@ -382,6 +383,11 @@ void MainWindow::parseRXData(uint8_t data)
         }
         break;
     }
+}
+
+void MainWindow::quitter(void)
+{
+    exit(1);
 }
 
 void MainWindow::readSerialData(void)

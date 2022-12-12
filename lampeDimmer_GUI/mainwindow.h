@@ -101,6 +101,7 @@ private:
     QMenu *toolsMenu;
     QTimer *timer;
     QAction *setupSerialAct;
+    QAction *quitterAct;
     QPixmap *pixmapOff();
     QIcon *ButtonIcon();
     QSettings *settings;
@@ -159,6 +160,11 @@ private:
      * @brief  Fonction utilisée afin de créer le menu "Outils".
      */
     void createMenus(void);
+
+    /**
+     * @brief  Fonction utilisée afin de gérer la fenêtre de connexion.
+     */
+    void quitter(void);
 
     /**
      * @brief  Fonction utilisée afin de gérer la fenêtre de connexion.
