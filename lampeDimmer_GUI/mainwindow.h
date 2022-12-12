@@ -9,6 +9,7 @@
 #define MAINWINDOW_H
 
 #include "setupserialdialog.h"
+#include "setuppreferencedialog.h"
 #include <QPixmap>
 #include <QMainWindow>
 #include <QLabel>
@@ -98,10 +99,11 @@ private:
     /* Déclarations classes: */
     QLabel *statusLabel;
     QSerialPort *serial;
-    QMenu *toolsMenu;
+    QMenu *outilsMenu;
     QMenu *fichierMenu;
     QTimer *timer;
     QAction *setupSerialAct;
+    QAction *setupPrefAct;
     QAction *quitterAct;
     QPixmap *pixmapOff();
     QIcon *ButtonIcon();
@@ -162,15 +164,14 @@ private:
      */
     void createMenus(void);
 
-    /**
-     * @brief  Fonction utilisée afin de gérer la fenêtre de connexion.
-     */
     void quitter(void);
 
     /**
      * @brief  Fonction utilisée afin de gérer la fenêtre de connexion.
      */
     void setupSerial(void);
+
+    void setupPreference(void);
 
 private:
     /**

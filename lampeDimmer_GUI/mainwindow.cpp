@@ -191,14 +191,17 @@ void MainWindow::boutonManage(int value)
 void MainWindow::createMenus(void)
 {
     fichierMenu = menuBar()->addMenu(tr("&Fichier"));
+    setupPrefAct = new QAction(tr("&Préférences"), this);
     quitterAct = new QAction(tr("&Quitter"), this);
+    connect(setupPrefAct, &QAction::triggered, this, &MainWindow::setupPreference);
     connect(quitterAct, &QAction::triggered, this, &MainWindow::quitter);
+    fichierMenu->addAction(setupPrefAct);
     fichierMenu->addAction(quitterAct);
 
-    toolsMenu = menuBar()->addMenu(tr("&Outils"));
+    outilsMenu = menuBar()->addMenu(tr("&Outils"));
     setupSerialAct = new QAction(tr("&Configuration du port série"), this);
-    toolsMenu->addAction(setupSerialAct);
     connect(setupSerialAct, &QAction::triggered, this, &MainWindow::setupSerial);
+    outilsMenu->addAction(setupSerialAct);
 }
 
 /**
@@ -433,6 +436,15 @@ void MainWindow::setupSerial(void)
         execTxCommand();
     }
     boutonEnabler();
+}
+
+void MainWindow::setupPreference(void)
+{
+    SetupPreferenceDialog setupDia;
+    setupDia.setWindowTitle("Préférences");
+    setupDia.setWindowFlags(Qt::WindowSystemMenuHint); // Pour retirer le ?
+    setupDia.setModal(1);
+    setupDia.exec();
 }
 
 void MainWindow::on_comboBoxSleep_activated(int index)
