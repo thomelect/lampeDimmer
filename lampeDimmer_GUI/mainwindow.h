@@ -98,10 +98,12 @@ private:
     /* Déclarations classes: */
     QLabel *statusLabel;
     QSerialPort *serial;
-    QMenu *toolsMenu;
+    QMenu *outilsMenu;
+    QMenu *fichierMenu;
     QTimer *timer;
     QAction *setupSerialAct;
-    QAction *setupPref;
+    QAction *setupPrefAct;
+    QAction *quitterAct;
     QPixmap *pixmapOff();
     QIcon *ButtonIcon();
     QSettings *settings;
@@ -150,6 +152,8 @@ private:
      * @brief  Fonction utilisée afin de créer le menu "Outils".
      */
     void createMenus(void);
+
+    void quitter(void);
 
     /**
      * @brief  Fonction utilisée afin de gérer la fenêtre de connexion.

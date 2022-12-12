@@ -13,7 +13,7 @@
   <property name="windowTitle">
    <string>Dialog</string>
   </property>
-  <widget class="QPushButton" name="btOk">
+  <widget class="QPushButton" name="btEnregistre">
    <property name="geometry">
     <rect>
      <x>310</x>
@@ -23,7 +23,7 @@
     </rect>
    </property>
    <property name="text">
-    <string>Confirmer</string>
+    <string>Enregistrer</string>
    </property>
   </widget>
   <widget class="QPushButton" name="btAnnuler">

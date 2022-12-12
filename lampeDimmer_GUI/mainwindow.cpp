@@ -185,13 +185,18 @@ void MainWindow::boutonManage(int value)
 
 void MainWindow::createMenus(void)
 {
+    fichierMenu = menuBar()->addMenu(tr("&Fichier"));
+    setupPrefAct = new QAction(tr("&Préférences"), this);
+    quitterAct = new QAction(tr("&Quitter"), this);
+    connect(setupPrefAct, &QAction::triggered, this, &MainWindow::setupPreference);
+    connect(quitterAct, &QAction::triggered, this, &MainWindow::quitter);
+    fichierMenu->addAction(setupPrefAct);
+    fichierMenu->addAction(quitterAct);
+
+    outilsMenu = menuBar()->addMenu(tr("&Outils"));
     setupSerialAct = new QAction(tr("&Configuration du port série"), this);
-    setupPref = new QAction(tr("&Préférences"), this);
     connect(setupSerialAct, &QAction::triggered, this, &MainWindow::setupSerial);
-    connect(setupPref, &QAction::triggered, this, &MainWindow::setupPreference);
-    toolsMenu = menuBar()->addMenu(tr("&Outils"));
-    toolsMenu->addAction(setupSerialAct);
-    toolsMenu->addAction(setupPref);
+    outilsMenu->addAction(setupSerialAct);
 }
 
 /**
@@ -378,6 +383,11 @@ void MainWindow::parseRXData(uint8_t data)
         }
         break;
     }
+}
+
+void MainWindow::quitter(void)
+{
+    exit(1);
 }
 
 /**

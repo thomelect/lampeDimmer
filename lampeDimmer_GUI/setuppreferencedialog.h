@@ -21,7 +21,7 @@ public:
 private slots:
     void on_btAnnuler_clicked();
 
-    void on_btOk_clicked();
+    void on_btEnregistre_clicked();
 
 private:
 
