@@ -188,6 +188,7 @@ void MainWindow::createMenus(void)
     setupSerialAct = new QAction(tr("&Configuration du port série"), this);
     setupPref = new QAction(tr("&Préférences"), this);
     connect(setupSerialAct, &QAction::triggered, this, &MainWindow::setupSerial);
+    connect(setupPref, &QAction::triggered, this, &MainWindow::setupPreference);
     toolsMenu = menuBar()->addMenu(tr("&Outils"));
     toolsMenu->addAction(setupSerialAct);
     toolsMenu->addAction(setupPref);
@@ -423,6 +424,15 @@ void MainWindow::setupSerial(void)
         execTxCommand();
     }
     boutonEnabler();
+}
+
+void MainWindow::setupPreference(void)
+{
+    SetupPreferenceDialog setupDia;
+    setupDia.setWindowTitle("Préférences");
+    setupDia.setWindowFlags(Qt::WindowSystemMenuHint); // Pour retirer le ?
+    setupDia.setModal(1);
+    setupDia.exec();
 }
 
 void MainWindow::on_comboBoxSleep_activated(int index)

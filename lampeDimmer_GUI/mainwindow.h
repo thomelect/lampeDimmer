@@ -9,6 +9,7 @@
 #define MAINWINDOW_H
 
 #include "setupserialdialog.h"
+#include "setuppreferencedialog.h"
 #include <QPixmap>
 #include <QMainWindow>
 #include <QLabel>
@@ -154,6 +155,8 @@ private:
      * @brief  Fonction utilisée afin de gérer la fenêtre de connexion.
      */
     void setupSerial(void);
+
+    void setupPreference(void);
 
 private:
     /**
