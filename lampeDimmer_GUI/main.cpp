@@ -55,6 +55,8 @@ void myMessageOutput(QtMsgType type, const QMessageLogContext &context, const QS
 
 int main(int argc, char *argv[])
 {
+    int currentExitCode = 0;
+    do{
     QApplication a(argc, argv);
     QSettings settingsPref("./preferences.ini", QSettings::IniFormat);
     if (settingsPref.value("Options/option_2").toBool()) //Rester ouvert en arrière plan n'est pas coché.
@@ -67,5 +69,7 @@ int main(int argc, char *argv[])
 #if DEBUG_LOG //Si DEBUG_LOG est égal à 0, les débug se font dans la console.
     qInstallMessageHandler(myMessageOutput);
 #endif
-    return a.exec();
+        currentExitCode = a.exec();
+    } while (currentExitCode == MainWindow::EXIT_CODE_REBOOT);
+    return currentExitCode;
 }

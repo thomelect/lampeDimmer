@@ -14,6 +14,8 @@
 
 using namespace std;
 
+int const MainWindow::EXIT_CODE_REBOOT = 1;
+
 MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent),
                                           ui(new Ui::MainWindow)
 {
@@ -421,6 +423,12 @@ void MainWindow::readSerialData(void)
     }
 }
 
+void MainWindow::reboot(void)
+{
+    qDebug() << "Performing application reboot...";
+    qApp->exit(MainWindow::EXIT_CODE_REBOOT);
+}
+
 void MainWindow::setupSerial(void)
 {
     SetupSerialDialog setupDia(serial);
@@ -558,4 +566,9 @@ void MainWindow::handleClick(QSystemTrayIcon::ActivationReason reason)
     txCommande = SET_VAL;
     execTxCommand();
     boutonManage(intensite);
+}
+
+void MainWindow::on_pbReboot_clicked()
+{
+    reboot();
 }

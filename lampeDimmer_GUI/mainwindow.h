@@ -18,6 +18,7 @@
 #include <QTimer>
 #include <QDateTime>
 #include <QSystemTrayIcon>
+#include <QAction>
 
 #define MAX_RXDATASIZE 16
 
@@ -105,6 +106,7 @@ private:
     QAction *setupSerialAct;
     QAction *setupPrefAct;
     QAction *quitterAct;
+    QAction *actionReboot;
     QPixmap *pixmapOff();
     QIcon *ButtonIcon();
     QSettings *settings;
@@ -112,7 +114,6 @@ private:
     Ui::MainWindow *ui;
 
 private slots:
-
     /**
      * @brief  Fonction de lecture du port série..
      */
@@ -157,6 +158,8 @@ private slots:
      * @brief  Fonction appelée lorsque la valeur du dial est changée.
      */
     void on_dialIntensite_valueChanged();
+
+    void on_pbReboot_clicked();
 
 private:
     /**
@@ -209,5 +212,11 @@ private:
      * @param data  Octet reçu par la fonction usartRemRxData.
      */
     void parseRXData(uint8_t data);
+
+    void reboot(void);
+
+public:
+    static int const EXIT_CODE_REBOOT;
+
 };
 #endif // MAINWINDOW_H
