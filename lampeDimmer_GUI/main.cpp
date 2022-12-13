@@ -9,6 +9,7 @@
 #include <QFile>
 #include <QTextStream>
 #include <QApplication>
+#include <QSettings>
 #include <QDir>
 
 #define MAX_DAY_LOG 0
@@ -55,13 +56,13 @@ void myMessageOutput(QtMsgType type, const QMessageLogContext &context, const QS
 int main(int argc, char *argv[])
 {
     QApplication a(argc, argv);
-#if !WINDOW_NORMAL
-    a.setQuitOnLastWindowClosed(false); //L'application n'est pas "arrêtée" si la fenêtre est fermée.
-#endif
+    QSettings settingsPref("./preferences.ini", QSettings::IniFormat);
+    if (settingsPref.value("Options/option_2").toBool()) //Rester ouvert en arrière plan n'est pas coché.
+        a.setQuitOnLastWindowClosed(false); //L'application n'est pas "arrêtée" si la fenêtre est fermée.
+
     MainWindow w;
-#if WINDOW_NORMAL
-    w.show(); //Si non utilisé, la fenêtre n'est pas affiché au démarrage de l'application
-#endif
+    if (!settingsPref.value("Options/option_1").toBool()) //Ouvrir en arrière plan n'est pas coché.
+        w.show(); //Si non utilisé, la fenêtre n'est pas affiché au démarrage de l'application
 
 #if DEBUG_LOG //Si DEBUG_LOG est égal à 0, les débug se font dans la console.
     qInstallMessageHandler(myMessageOutput);

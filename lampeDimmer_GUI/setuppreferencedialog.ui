@@ -52,14 +52,14 @@
     <item>
      <widget class="QCheckBox" name="cbOption_1">
       <property name="text">
-       <string>Option #1</string>
+       <string>Ouvrir en arrière plan</string>
       </property>
      </widget>
     </item>
     <item>
      <widget class="QCheckBox" name="cbOption_2">
       <property name="text">
-       <string>Option #2</string>
+       <string>Rester ouvert en arrière plan lors de la fermeture</string>
       </property>
      </widget>
     </item>

@@ -108,8 +108,8 @@ private:
     QPixmap *pixmapOff();
     QIcon *ButtonIcon();
     QSettings *settings;
-    Ui::MainWindow *ui;
     QSystemTrayIcon *systemTray;
+    Ui::MainWindow *ui;
 
 private slots:
 
