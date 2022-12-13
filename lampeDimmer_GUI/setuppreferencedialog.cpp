@@ -14,30 +14,45 @@ SetupPreferenceDialog::SetupPreferenceDialog(QDialog *parent) : QDialog(parent),
     ui->cbList_1->addItem("F");
     ui->cbList_1->addItem("G");
 
-    ui->cbList_2->addItem("A");
-    ui->cbList_2->addItem("B");
-    ui->cbList_2->addItem("C");
-    ui->cbList_2->addItem("D");
-    ui->cbList_2->addItem("E");
-    ui->cbList_2->addItem("F");
-    ui->cbList_2->addItem("G");
+    ui->cbList_2->addItem("OUI");
+    ui->cbList_2->addItem("NON");
+    ui->cbList_2->addItem("PEUT-ÊTRE");
+
     ui->btAnnuler->setText("Annuler");
     ui->btEnregistre->setText("Enregistrer");
     /*-----------------------------------------------*/
     settingsPref = new QSettings("./preferences.ini", QSettings::IniFormat);
+
     settingsPref->beginGroup("Options");
     ui->cbOption_1->setChecked(settingsPref->value("option_1").toBool());
     ui->cbOption_2->setChecked(settingsPref->value("option_2").toBool());
     ui->cbOption_3->setChecked(settingsPref->value("option_3").toBool());
     ui->cbOption_4->setChecked(settingsPref->value("option_4").toBool());
     ui->cbList_1->setCurrentIndex(settingsPref->value("optionMulti_1").toInt());
-    ui->cbList_2->setCurrentIndex(settingsPref->value("optionMulti_2").toInt());
     settingsPref->endGroup();
+
+    boutonManage();
 }
 
 SetupPreferenceDialog::~SetupPreferenceDialog()
 {
     delete ui;
+}
+
+void SetupPreferenceDialog::boutonManage(void)
+{
+
+    if (ui->cbOption_4->isChecked())
+    {
+        ui->cbList_2->setEnabled(1);
+        ui->cbList_2->setCurrentIndex(settingsPref->value("Options/optionMulti_2").toInt());
+    }
+    else
+    {
+        ui->cbList_2->setEnabled(0);
+        ui->cbList_2->setCurrentIndex(ui->cbList_2->findText("NON", Qt::MatchExactly));
+    }
+
 }
 
 void SetupPreferenceDialog::on_btAnnuler_clicked()
@@ -58,3 +73,9 @@ void SetupPreferenceDialog::on_btEnregistre_clicked()
 
     this->close();
 }
+
+void SetupPreferenceDialog::on_cbOption_4_clicked()
+{
+    boutonManage();
+}
+
