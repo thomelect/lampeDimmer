@@ -53,11 +53,16 @@ void myMessageOutput(QtMsgType type, const QMessageLogContext &context, const QS
 
 int main(int argc, char *argv[])
 {
-    QApplication a(argc, argv);
-    MainWindow w;
-    w.show();
-#if DEBUG_LOG //Si DEBUG_LOG est égal à 0, les débug se font dans la console.
-    qInstallMessageHandler(myMessageOutput);
+    int currentExitCode = 0;
+    do
+    {
+        QApplication a(argc, argv);
+        MainWindow w;
+        w.show();
+#if DEBUG_LOG // Si DEBUG_LOG est égal à 0, les débug se font dans la console.
+        qInstallMessageHandler(myMessageOutput);
 #endif
-    return a.exec();
+        currentExitCode = a.exec();
+    } while (currentExitCode == MainWindow::EXIT_CODE_REBOOT);
+    return currentExitCode;
 }
