@@ -12,7 +12,7 @@
 #include <QDir>
 
 #define MAX_DAY_LOG 0
-#define DEBUG_LOG 1
+#define DEBUG_LOG 0
 
 void myMessageOutput(QtMsgType type, const QMessageLogContext &context, const QString &msg)
 {

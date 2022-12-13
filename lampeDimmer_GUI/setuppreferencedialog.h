@@ -26,7 +26,7 @@ private slots:
 private:
 
     /*Déclarations objets : */
-    QSettings *settings;
+    QSettings *settingsPref;
     Ui::SetupPreferenceDialog *ui;
 };
 
