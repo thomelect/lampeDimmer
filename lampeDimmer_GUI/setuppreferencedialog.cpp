@@ -6,17 +6,9 @@ SetupPreferenceDialog::SetupPreferenceDialog(QDialog *parent) : QDialog(parent),
 {
     ui->setupUi(this);
 
-    ui->cbList_1->addItem("A");
-    ui->cbList_1->addItem("B");
-    ui->cbList_1->addItem("C");
-    ui->cbList_1->addItem("D");
-    ui->cbList_1->addItem("E");
-    ui->cbList_1->addItem("F");
-    ui->cbList_1->addItem("G");
-
-    ui->cbList_2->addItem("OUI");
-    ui->cbList_2->addItem("NON");
-    ui->cbList_2->addItem("PEUT-ÊTRE");
+    ui->cbList_1->addItem("OUI");
+    ui->cbList_1->addItem("NON");
+    ui->cbList_1->addItem("PEUT-ÊTRE");
 
     ui->btAnnuler->setText("Annuler");
     ui->btEnregistre->setText("Enregistrer");
@@ -28,7 +20,6 @@ SetupPreferenceDialog::SetupPreferenceDialog(QDialog *parent) : QDialog(parent),
     ui->cbOption_2->setChecked(settingsPref->value("option_2").toBool());
     ui->cbOption_3->setChecked(settingsPref->value("option_3").toBool());
     ui->cbOption_4->setChecked(settingsPref->value("option_4").toBool());
-    ui->cbList_1->setCurrentIndex(settingsPref->value("optionMulti_1").toInt());
     settingsPref->endGroup();
 
     boutonManage();
@@ -44,13 +35,13 @@ void SetupPreferenceDialog::boutonManage(void)
 
     if (ui->cbOption_4->isChecked())
     {
-        ui->cbList_2->setEnabled(1);
-        ui->cbList_2->setCurrentIndex(settingsPref->value("Options/optionMulti_2").toInt());
+        ui->cbList_1->setEnabled(1);
+        ui->cbList_1->setCurrentIndex(settingsPref->value("Options/optionMulti_2").toInt());
     }
     else
     {
-        ui->cbList_2->setEnabled(0);
-        ui->cbList_2->setCurrentIndex(ui->cbList_2->findText("NON", Qt::MatchExactly));
+        ui->cbList_1->setEnabled(0);
+        ui->cbList_1->setCurrentIndex(ui->cbList_1->findText("NON", Qt::MatchExactly));
     }
 
 }
@@ -68,7 +59,6 @@ void SetupPreferenceDialog::on_btEnregistre_clicked()
         settingsPref->setValue("option_3", ui->cbOption_3->isChecked());
         settingsPref->setValue("option_4", ui->cbOption_4->isChecked());
         settingsPref->setValue("optionMulti_1", ui->cbList_1->currentIndex());
-        settingsPref->setValue("optionMulti_2", ui->cbList_2->currentIndex());
     settingsPref->endGroup();
 
     this->close();
