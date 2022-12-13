@@ -23,11 +23,14 @@ private slots:
 
     void on_btEnregistre_clicked();
 
+    void on_cbOption_4_clicked();
+
 private:
 
     /*Déclarations objets : */
-    QSettings *settings;
+    QSettings *settingsPref;
     Ui::SetupPreferenceDialog *ui;
+    void boutonManage(void);
 };
 
 #endif // SETUPPREFERENCEDIALOG_H
