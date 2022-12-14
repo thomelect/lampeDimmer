@@ -25,6 +25,8 @@ private slots:
 
     void on_cbOption_4_clicked();
 
+    void on_pbReboot_clicked();
+
 private:
 
     /*Déclarations objets : */

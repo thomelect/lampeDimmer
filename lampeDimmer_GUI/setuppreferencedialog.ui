@@ -199,6 +199,13 @@
       </property>
      </spacer>
     </item>
+    <item>
+     <widget class="QPushButton" name="pbReboot">
+      <property name="text">
+       <string>Redémarrer</string>
+      </property>
+     </widget>
+    </item>
    </layout>
   </widget>
  </widget>

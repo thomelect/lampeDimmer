@@ -213,10 +213,12 @@ private:
      */
     void parseRXData(uint8_t data);
 
-    void reboot(void);
+
 
 public:
     static int const EXIT_CODE_REBOOT;
+
+    static void reboot(void);
 
 };
 #endif // MAINWINDOW_H

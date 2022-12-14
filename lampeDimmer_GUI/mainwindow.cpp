@@ -545,20 +545,19 @@ void MainWindow::handleClick(QSystemTrayIcon::ActivationReason reason)
     case QSystemTrayIcon::Context:
         qDebug() << "Context - Right Click";
         exit(1);
-        //intensite = 0;
+        intensite = 0;
         break;
     case QSystemTrayIcon::DoubleClick:
-        qDebug() << "DoubleClick";
-        show();
+        qDebug() << "Double Click";
+        //show();
         break;
     case QSystemTrayIcon::Trigger:
         qDebug() << "Trigger - Left Click";
-
-        intensite = valueAdc;
+        show();
         break;
     case QSystemTrayIcon::MiddleClick:
         qDebug() << "MiddleClick";
-        txCommande = GET_VAL_POT;
+        //txCommande = GET_VAL_POT;
         execTxCommand();
         break;
     }

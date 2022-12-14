@@ -112,7 +112,7 @@ public:
         comboBoxSleep->setFrame(true);
         pbReboot = new QPushButton(centralwidget);
         pbReboot->setObjectName(QString::fromUtf8("pbReboot"));
-        pbReboot->setGeometry(QRect(30, 10, 80, 25));
+        pbReboot->setGeometry(QRect(30, 20, 80, 25));
         MainWindow->setCentralWidget(centralwidget);
         statusBar = new QStatusBar(MainWindow);
         statusBar->setObjectName(QString::fromUtf8("statusBar"));

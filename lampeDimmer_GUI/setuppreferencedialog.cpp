@@ -1,5 +1,6 @@
 #include "setuppreferencedialog.h"
 #include "ui_setuppreferencedialog.h"
+#include "mainwindow.h"
 #include <QDebug>
 
 SetupPreferenceDialog::SetupPreferenceDialog(QDialog *parent) : QDialog(parent), ui(new Ui::SetupPreferenceDialog)
@@ -72,5 +73,11 @@ void SetupPreferenceDialog::on_btEnregistre_clicked()
 void SetupPreferenceDialog::on_cbOption_4_clicked()
 {
     boutonManage();
+}
+
+
+void SetupPreferenceDialog::on_pbReboot_clicked()
+{
+    MainWindow::reboot();
 }
 
