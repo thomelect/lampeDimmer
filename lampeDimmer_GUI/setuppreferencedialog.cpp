@@ -10,6 +10,11 @@ SetupPreferenceDialog::SetupPreferenceDialog(QDialog *parent) : QDialog(parent),
     ui->cbList_1->addItem("NON");
     ui->cbList_1->addItem("PEUT-ÊTRE");
 
+    QFrame* line = new QFrame();
+    line->setFrameShape(QFrame::HLine);
+    line->setFrameShadow(QFrame::Sunken);
+    ui->verticalLayout_4->addWidget(line);
+
     ui->btAnnuler->setText("Annuler");
     ui->btEnregistre->setText("Enregistrer");
     /*-----------------------------------------------*/
