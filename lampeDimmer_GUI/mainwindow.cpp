@@ -14,7 +14,7 @@
 
 using namespace std;
 
-int const MainWindow::EXIT_CODE_REBOOT = 1;
+int const MainWindow::EXIT_CODE_REBOOT = -1;
 
 MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent),
                                           ui(new Ui::MainWindow)
