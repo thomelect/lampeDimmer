@@ -26,16 +26,20 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent),
     sliderModif = true;
     dialModif = true;
 
+    iconOn = new QIcon(":/images/on.png");
+    iconOff = new QIcon(":/images/off.png");
+
     ui->setupUi(this);
+
     serial = new QSerialPort(this);
     connect(serial, SIGNAL(readyRead()), this, SLOT(readSerialData()));
     createMenus();
-    ui->pushBottonOnOff->setIcon(QIcon(":/images/off.png"));
+    ui->pushBottonOnOff->setIcon(*iconOff);
     ui->pushBottonOnOff->setIconSize(QSize(65, 65));
 
     systemTray = new QSystemTrayIcon(this);
-    QIcon icon("on.png");
-    systemTray->setIcon(icon);
+
+    systemTray->setIcon(*iconOn);
     systemTray->setVisible(true);
     connect(systemTray, &QSystemTrayIcon::activated, this, &MainWindow::handleClick);
     systemTray->setToolTip("TEST");
@@ -176,13 +180,13 @@ void MainWindow::boutonManage(int value)
 
     if (value) // Si la valeur est plus grande que 0...
     {
-        ui->pushBottonOnOff->setIcon(QIcon(":/images/on.png"));
+        ui->pushBottonOnOff->setIcon(*iconOn);
         ui->pushBottonOnOff->setIconSize(QSize(65, 65));
         boutonState = 0;
     }
     else // Sinon (si la valeur est égale à 0)...
     {
-        ui->pushBottonOnOff->setIcon(QIcon(":/images/off.png"));
+        ui->pushBottonOnOff->setIcon(*iconOff);
         ui->pushBottonOnOff->setIconSize(QSize(65, 65));
         boutonState = 1;
     }

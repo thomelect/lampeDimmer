@@ -109,6 +109,8 @@ private:
     QAction *actionReboot;
     QPixmap *pixmapOff();
     QIcon *ButtonIcon();
+    QIcon *iconOn;
+    QIcon *iconOff;
     QSettings *settings;
     QSystemTrayIcon *systemTray;
     Ui::MainWindow *ui;
