@@ -27,11 +27,17 @@ private slots:
 
     void on_pbReboot_clicked();
 
+    void on_cbOption_2_clicked();
+
 private:
+    /* Déclarations variables: */
+    bool needReboot;
 
     /*Déclarations objets : */
     QSettings *settingsPref;
     Ui::SetupPreferenceDialog *ui;
+
+private:
     void boutonManage(void);
 };
 

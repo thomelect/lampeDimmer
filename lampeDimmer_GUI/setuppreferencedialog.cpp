@@ -5,17 +5,19 @@
 
 SetupPreferenceDialog::SetupPreferenceDialog(QDialog *parent) : QDialog(parent), ui(new Ui::SetupPreferenceDialog)
 {
+    needReboot = 0;
     ui->setupUi(this);
 
     ui->cbList_1->addItem("OUI");
     ui->cbList_1->addItem("NON");
     ui->cbList_1->addItem("PEUT-ÊTRE");
 
-    QFrame* line = new QFrame();
+    QFrame *line = new QFrame();
     line->setFrameShape(QFrame::HLine);
     line->setFrameShadow(QFrame::Sunken);
     ui->verticalLayout_4->addWidget(line);
 
+    ui->pbReboot->setVisible(needReboot);
     ui->btAnnuler->setText("Annuler");
     ui->btEnregistre->setText("Enregistrer");
     /*-----------------------------------------------*/
@@ -49,7 +51,6 @@ void SetupPreferenceDialog::boutonManage(void)
         ui->cbList_1->setEnabled(0);
         ui->cbList_1->setCurrentIndex(ui->cbList_1->findText("NON", Qt::MatchExactly));
     }
-
 }
 
 void SetupPreferenceDialog::on_btAnnuler_clicked()
@@ -60,14 +61,20 @@ void SetupPreferenceDialog::on_btAnnuler_clicked()
 void SetupPreferenceDialog::on_btEnregistre_clicked()
 {
     settingsPref->beginGroup("Options");
-        settingsPref->setValue("option_1", ui->cbOption_1->isChecked());
-        settingsPref->setValue("option_2", ui->cbOption_2->isChecked());
-        settingsPref->setValue("option_3", ui->cbOption_3->isChecked());
-        settingsPref->setValue("option_4", ui->cbOption_4->isChecked());
-        settingsPref->setValue("optionMulti_1", ui->cbList_1->currentIndex());
+    settingsPref->setValue("option_1", ui->cbOption_1->isChecked());
+    settingsPref->setValue("option_2", ui->cbOption_2->isChecked());
+    settingsPref->setValue("option_3", ui->cbOption_3->isChecked());
+    settingsPref->setValue("option_4", ui->cbOption_4->isChecked());
+    settingsPref->setValue("optionMulti_1", ui->cbList_1->currentIndex());
     settingsPref->endGroup();
-
-    this->close();
+    if (!needReboot)
+    {
+        this->close();
+    }
+    else
+    {
+        ui->pbReboot->setVisible(needReboot);
+    }
 }
 
 void SetupPreferenceDialog::on_cbOption_4_clicked()
@@ -75,9 +82,12 @@ void SetupPreferenceDialog::on_cbOption_4_clicked()
     boutonManage();
 }
 
-
 void SetupPreferenceDialog::on_pbReboot_clicked()
 {
     MainWindow::reboot();
 }
 
+void SetupPreferenceDialog::on_cbOption_2_clicked()
+{
+    needReboot = true;
+}
