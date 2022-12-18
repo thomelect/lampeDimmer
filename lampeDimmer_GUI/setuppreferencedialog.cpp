@@ -53,6 +53,30 @@ void SetupPreferenceDialog::boutonManage(void)
     }
 }
 
+void SetupPreferenceDialog::setAppToStartAutomatically(bool startAutomatically)
+{
+    QString key = "Lampe Dimmer";
+
+    QSettings registrySettings(
+                "HKEY_CURRENT_USER\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Run",
+                QSettings::NativeFormat);
+
+    registrySettings.remove(key);
+
+    if ( startAutomatically ) {
+        registrySettings.setValue(key, QString("\"" + windowsAppPath() + "\""));
+    }
+    else
+        registrySettings.remove(key);
+
+    registrySettings.sync();
+}
+
+QString SetupPreferenceDialog::windowsAppPath()
+{
+    return QDir::toNativeSeparators(QCoreApplication::applicationFilePath());
+}
+
 void SetupPreferenceDialog::on_btAnnuler_clicked()
 {
     this->close();
@@ -67,6 +91,7 @@ void SetupPreferenceDialog::on_btEnregistre_clicked()
     settingsPref->setValue("option_4", ui->cbOption_4->isChecked());
     settingsPref->setValue("optionMulti_1", ui->cbList_1->currentIndex());
     settingsPref->endGroup();
+
     if (!needReboot)
     {
         this->close();
@@ -75,6 +100,7 @@ void SetupPreferenceDialog::on_btEnregistre_clicked()
     {
         ui->pbReboot->setVisible(needReboot);
     }
+        setAppToStartAutomatically(ui->cbOption_3->isChecked());
 }
 
 void SetupPreferenceDialog::on_cbOption_4_clicked()
