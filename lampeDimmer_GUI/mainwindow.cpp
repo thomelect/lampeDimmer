@@ -1,41 +1,65 @@
-/*
- * Fichier: mainwindow.cpp
- * Auteur: Thomas Desrosiers
- * Date: 2021 03 23
- * Desc.: Laboratoire #5 du cours d'intégration de systèmes.
-*/
+/**
+ * @file    mainwindow.cpp
+ * @author  Thomas Desrosiers
+ * @date    2022/01/12
+ * @brief   Programme utilisé pour la communication avec le contrôleur de la lampe.
+ */
 
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
-#include "setupserialdialog.h"
-#include <QTimer>
 #include <QDebug>
 #include <QMenuBar>
 #include <QString>
+#include <QtSerialPort/QSerialPortInfo>
 
 using namespace std;
+
+int const MainWindow::EXIT_CODE_REBOOT = -1;
 
 MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent),
                                           ui(new Ui::MainWindow)
 {
-    /*
-    timer = new QTimer(this);
-    connect(timer, SIGNAL(timeout()), this, SLOT(sendGetState()));
-    timer->start(100); // vous pouvez réduire l'interval durant les tests.
-    */
-
     intensite = 0;
     serialRxIn = false;
     boutonState = true;
+    recepAvailable = false;
+    sliderModif = true;
+    dialModif = true;
+
+    iconOn = new QIcon(":/images/on.png");
+    iconOff = new QIcon(":/images/off.png");
 
     ui->setupUi(this);
+
     serial = new QSerialPort(this);
     connect(serial, SIGNAL(readyRead()), this, SLOT(readSerialData()));
     createMenus();
-    ui->pushBottonOnOff->setIcon(QIcon(":/images/off.png"));
+    ui->pushBottonOnOff->setIcon(*iconOff);
     ui->pushBottonOnOff->setIconSize(QSize(65, 65));
 
-    //Feuille de style des boutons de la de l'interface MainWindow.
+    systemTray = new QSystemTrayIcon(this);
+
+    systemTray->setIcon(*iconOn);
+    systemTray->setVisible(true);
+    connect(systemTray, &QSystemTrayIcon::activated, this, &MainWindow::handleClick);
+    systemTray->setToolTip("TEST");
+
+    settings = new QSettings("./settings.ini", QSettings::IniFormat);
+    settings->beginGroup("Info");
+    settings->setValue("Author", "Thomas Desrosiers");
+    settings->setValue("App", "LampeDimmer");
+    settings->endGroup();
+
+    timer = new QTimer();                                        // Timer utilisé pour le lecture du port série.
+    connect(timer, SIGNAL(timeout()), this, SLOT(recepTimer())); // Connexion du timer avec la fonction recepTimer.
+    timer->start(10);
+
+    statusLabel = new QLabel(this);
+    ui->statusBar->addPermanentWidget(statusLabel);
+
+    autoSetupSerial(); // Appel de la fonction de connexion automatique.
+
+    // Feuille de style des boutons de la de l'interface MainWindow.
     this->setStyleSheet("#pushBottonOnOff {"
                         "background-color: none;"
                         "border: 0px"
@@ -50,46 +74,147 @@ MainWindow::~MainWindow()
     delete ui;
 }
 
+void MainWindow::autoSetupSerial(void)
+{
+    settings->beginGroup("Serial");
+    if (settings->contains("SerialNumber")) // Si le numéro de série lu dans le fichier n'est pas null...
+    {
+        foreach (const QSerialPortInfo &info, QSerialPortInfo::availablePorts()) // Pour tout les ports disponibles...
+        {
+            if (info.serialNumber() == settings->value("SerialNumber")) // Si le numéro de série sauvegardé dans le fichier correspond à un des périphériques connectés...
+            {
+                portConfig = (info.portName() + " " + info.description()); // Information utilisées pour la connexion.
+            }
+            qDebug() << portConfig;
+        }
+        if (!portConfig.isEmpty()) // Si les information utilisées pour la connexion sont existantes...
+        {
+            foreach (const QSerialPortInfo &info, QSerialPortInfo::availablePorts()) // Pour tout les ports disponibles...
+            {
+                QString infoTag = info.portName() + " " + info.description();
+                if (infoTag == portConfig)
+                {
+                    serial->setPort(info);             // Assignation du port à connecter.
+                    qDebug() << "try  " << portConfig; // Indique à l'utilisateur qu'une tentative de connexion est en cours.
+                    if (serial->open(QIODevice::ReadWrite))
+                    {
+                        qDebug() << "open " << portConfig; // Indique à l'utilisateur qu'une tentative de connexion est en cours.
+                        if (serial->setBaudRate(settings->value("BaudRate").toInt()) && serial->setDataBits(QSerialPort::Data8) && serial->setParity(QSerialPort::NoParity) && serial->setStopBits(QSerialPort::OneStop) && serial->setFlowControl(QSerialPort::NoFlowControl))
+                        {
+                            statusLabel->setText("Connecté " + info.portName()); // Indique à l'utilisateur que la connexion est réussie ainsi que le nom du port.
+                            statusLabel->setToolTip(infoTag);                    // Indique à l'utilisateur le nom du port et sa description.
+                        }
+                    }
+                }
+            }
+        }
+        if (serial->isOpen()) // Si le port est ouvert...
+        {
+            qDebug() << "GET_VAL_INIT";
+            txCommande = GET_VAL_INIT;
+            execTxCommand();
+        }
+        boutonEnabler();
+    }
+    settings->endGroup();
+}
+
+void MainWindow::boutonEnabler()
+{
+    if (serial->isOpen()) // Si le port série est ouvert...
+    {
+        ui->comboBoxSleep->setEnabled(true); // Les éléments du GUI sont activés.
+        ui->dialIntensite->setEnabled(true);
+        ui->pushBottonOnOff->setEnabled(true);
+        ui->horizontalSliderIntensite->setEnabled(true);
+    }
+    else // Sinon (si le port série n'est pas ouvert)...
+    {
+        statusLabel->setText("Non connecté"); // Les éléments du GUI sont désactivés et le système affiche "Non connecté".
+        statusLabel->setToolTip("");
+        ui->comboBoxSleep->setDisabled(true);
+        ui->dialIntensite->setDisabled(true);
+        ui->pushBottonOnOff->setDisabled(true);
+        ui->horizontalSliderIntensite->setDisabled(true);
+    }
+    if (!valueModeSys) // Si le système est en mode veille...
+    {
+        ui->dialIntensite->setDisabled(true); // Les éléments du GUI (sauf le comboBox) sont désactivés.
+        ui->pushBottonOnOff->setDisabled(true);
+        ui->horizontalSliderIntensite->setDisabled(true);
+        ui->statusBar->showMessage("VEILLE | " + ui->comboBoxSleep->currentText()); // conversion de la valeur actuelle en pourcentage.
+    }
+    else // Sinon (si le système n'est pas en mode veille)...
+    {
+        ui->dialIntensite->setEnabled(true); // Les éléments du GUI sont activés.
+        ui->pushBottonOnOff->setEnabled(true);
+        ui->horizontalSliderIntensite->setEnabled(true);
+    }
+}
+
 void MainWindow::boutonManage(int value)
 {
+    sliderModif = false; // Indique que la position du slider est modifiée par la fonction boutonManage.
+    dialModif = false;   // Indique que la position du dial est modifiée par la fonction boutonManage.
 
-//    statusSetupInterface->getStruct(&partageSettingInterface);
-    ui->lbIntensiteValue->setText(QString::number((intensite / partageSettingInterface.displayFormatMath), 'f', 0) + partageSettingInterface.displayFormat); //La valeur du slider est affichée dans le label sous le slider.
-    ui->dialIntensite->setSliderPosition(intensite);           //Modifie la position du slider en fonction de la valeur obtenue par le slider.
-    ui->horizontalSliderIntensite->setSliderPosition(intensite);
-    ui->statusBar->showMessage(QString::number((intensite / partageSettingInterface.displayFormatMath), 'f', 0) + partageSettingInterface.displayFormat);
-    qDebug() << partageSettingInterface.displayFormat;
-    qDebug() << partageSettingInterface.displayFormatMath;
+    ui->comboBoxSleep->setCurrentIndex(veilleState);
 
-    QPixmap pixmapOff("/images/off.png");
-    QIcon ButtonIcon(pixmapOff);
-    if (value)
+    if (!valueModeSys) // Si le système est en mode veille...
     {
-        ui->pushBottonOnOff->setIcon(QIcon(":/images/on.png"));
+        ui->lbIntensiteValue->setText(QString::number(0)); // La valeur du slider est affichée dans le label sous le slider.
+        ui->dialIntensite->setSliderPosition(0);           // Modifie la position du slider en fonction de la valeur obtenue par le slider.
+        ui->horizontalSliderIntensite->setSliderPosition(0);
+        ui->statusBar->showMessage(QString::number(0)); // conversion de la valeur actuelle en pourcentage.
+        ui->comboBoxSleep->setCurrentIndex(veilleState);
+    }
+    else // Sinon (si le système n'est pas en mode veille)...
+    {
+        ui->lbIntensiteValue->setText(QString::number(value)); // La valeur du slider est affichée dans le label sous le slider.
+        ui->dialIntensite->setSliderPosition(value);           // Modifie la position du slider en fonction de la valeur obtenue par le slider.
+        ui->horizontalSliderIntensite->setSliderPosition(value);
+        ui->statusBar->showMessage(QString::number((value / 2.55), 'f', 0) + '%'); // conversion de la valeur actuelle en pourcentage.
+        ui->comboBoxSleep->setCurrentIndex(veilleState);
+    }
+
+    qDebug() << "SET_VAL : " << QString::number(value);
+
+    if (value) // Si la valeur est plus grande que 0...
+    {
+        ui->pushBottonOnOff->setIcon(*iconOn);
         ui->pushBottonOnOff->setIconSize(QSize(65, 65));
         boutonState = 0;
     }
-    else
+    else // Sinon (si la valeur est égale à 0)...
     {
-        ui->pushBottonOnOff->setIcon(QIcon(":/images/off.png"));
+        ui->pushBottonOnOff->setIcon(*iconOff);
         ui->pushBottonOnOff->setIconSize(QSize(65, 65));
         boutonState = 1;
     }
+    sliderModif = true; // Indique que la position du slider est prête à être modifiée.
+    dialModif = true;   // Indique que la position du dial est prête à être modifiée.
 }
 
 void MainWindow::createMenus(void)
 {
+    fichierMenu = menuBar()->addMenu(tr("&Fichier"));
+    setupPrefAct = new QAction(tr("&Préférences"), this);
+    quitterAct = new QAction(tr("&Quitter"), this);
+    connect(setupPrefAct, &QAction::triggered, this, &MainWindow::setupPreference);
+    connect(quitterAct, &QAction::triggered, this, &MainWindow::quitter);
+    fichierMenu->addAction(setupPrefAct);
+    fichierMenu->addAction(quitterAct);
+
+    outilsMenu = menuBar()->addMenu(tr("&Outils"));
     setupSerialAct = new QAction(tr("&Configuration du port série"), this);
     connect(setupSerialAct, &QAction::triggered, this, &MainWindow::setupSerial);
-    toolsMenu = menuBar()->addMenu(tr("&Outils"));
-    toolsMenu->addAction(setupSerialAct);
+    outilsMenu->addAction(setupSerialAct);
 
+    configMenu = menuBar()->addMenu(tr("&Configuration"));
     setupInterfaceAct = new QAction(tr("&Paramètres d'interface"), this);
     setupLumiereAct = new QAction(tr("&Paramètres Lumière"), this);
     connect(setupInterfaceAct, &QAction::triggered, this, &MainWindow::setupInterface);
-    toolsMenu = menuBar()->addMenu(tr("&Configuration"));
-    toolsMenu->addAction(setupInterfaceAct);
-    toolsMenu->addAction(setupLumiereAct);
+    configMenu->addAction(setupInterfaceAct);
+    configMenu->addAction(setupLumiereAct);
 }
 
 /**
@@ -97,19 +222,131 @@ void MainWindow::createMenus(void)
  */
 void MainWindow::execRxCommand(void)
 {
-    if (rxCommande == VAL_POT)
+    switch (rxCommande)
     {
-        valuePot = rxData[0];
-        ui->horizontalSliderIntensite->setSliderPosition(rxData[0]); //Modifie la position du slider en fonction de la valeur obtenue par le dial.
-        ui->dialIntensite->setSliderPosition(rxData[0]);             //Modifie la position du slider en fonction de la valeur obtenue par le slider.
-        ui->lbIntensiteValue->setText(QString::number(rxData[0]));
+    case VAL_ACTU:
+        /*// ACQUISITION //*/
+        valueOut = rxData[0];
+
+        /*// DEBUG //*/
+        qDebug() << "VAL_ACTU : " << QString::number(valueOut);
+        break;
+    case VAL_INIT:
+        /*// ACQUISITION //*/
+        valueOut = rxData[0];
+        valueAdc = rxData[1];
+        veilleState = VEILLE_STATE(rxData[2]);
+        valueModeSys = rxData[3];
+
+        /*// CHANGEMENTS GUI //*/
+        boutonManage(valueOut);
+        boutonEnabler();
+
+        if (veilleState == VEILLE_NONE) // Si le mode de veille actuel est "NONE"...
+        {
+            veilleState = VEILLE_STATE(settings->value("Veille/Mode").toInt()); // Récupération du mode veille sauvegardé dans le fichier .ini.
+            ui->comboBoxSleep->setCurrentIndex(veilleState);                    // Mise à jour du comboBox
+            txCommande = SET_SLEEP_MODE;                                        // Envoi du mode veille au Arduino.
+            execTxCommand();
+        }
+        else // Sinon (si le mode de veille actuel est autre que "NONE")...
+        {
+            settings->setValue("Veille/Mode", QString::number(veilleState)); // Les valeurs sauvegardés son actualisés.
+            settings->setValue("Veille/Description", ui->comboBoxSleep->currentText());
+        }
+
+        /*// DEBUG //*/
+        qDebug() << " - OUT_INI :    " << valueOut;
+        qDebug() << " - ADC_INI :    " << valueAdc;
+        qDebug() << " - VEILLE_INI : " << veilleState;
+        qDebug() << " - SYS_INI :    " << valueModeSys;
+
+        /*// FLAG DE RÉCEPTION //*/
         serialRxIn = false;
+        break;
+    case VAL_POT:
+        /*// ACQUISITION //*/
+        valueAdc = rxData[0];
+
+        /*// CHANGEMENTS GUI //*/
+        boutonManage(valueAdc);
+
+        /*// DEBUG //*/
+        qDebug() << "VAL_POT : " << QString::number(valueAdc);
+
+        /*// FLAG DE RÉCEPTION //*/
+        serialRxIn = false;
+        break;
+    case VAL_MODE:
+        /*// ACQUISITION //*/
+        valueModeSys = rxData[0];
+
+        /*// CHANGEMENTS GUI //*/
+        boutonEnabler();
+
+        /*// DEBUG //*/
+        qDebug() << "VAL_MODE : " + QString::number(valueModeSys);
+
+        /*// FLAG DE RÉCEPTION //*/
+        serialRxIn = false;
+        break;
     }
 }
 
 /**
- * @brief Sépare les données reçues sur le port série.
- * @param data la donnée à traiter
+ * @brief  Fonction de lecture du'envoie sur le port série..
+ */
+void MainWindow::execTxCommand()
+{
+    if (serial->isOpen())
+    {
+        char txData[5];
+        switch (txCommande)
+        {
+        case GET_VAL_ACTU:
+            txData[0] = '<';
+            txData[1] = 0;
+            txData[2] = GET_VAL_ACTU;
+            txData[3] = '>';
+            serial->write(txData, 4);
+            break;
+        case GET_VAL_INIT:
+            txData[0] = '<';
+            txData[1] = 0;
+            txData[2] = GET_VAL_INIT;
+            txData[3] = '>';
+            serial->write(txData, 4);
+            break;
+        case GET_VAL_POT:
+            txData[0] = '<';
+            txData[1] = 0;
+            txData[2] = GET_VAL_POT;
+            txData[3] = '>';
+            serial->write(txData, 4);
+            break;
+        case SET_SLEEP_MODE:
+            txData[0] = '<';
+            txData[1] = 1;
+            txData[2] = SET_SLEEP_MODE;
+            txData[3] = veilleState;
+            txData[4] = '>';
+            serial->write(txData, 5);
+            break;
+        case SET_VAL:
+            txData[0] = '<';
+            txData[1] = 1;
+            txData[2] = SET_VAL;
+            txData[3] = char(intensite);
+            txData[4] = '>';
+            serial->write(txData, 5);
+            break;
+        }
+    }
+}
+
+/**
+ * @brief       Sépare les données reçues sur le port série.
+ * @param data  Donnée à traiter
  */
 void MainWindow::parseRXData(uint8_t data)
 {
@@ -124,7 +361,7 @@ void MainWindow::parseRXData(uint8_t data)
         break;
     case RXSIZE:
         rxDataSize = data;
-        if (rxDataSize >= _MAX_RXDATASIZE_)
+        if (rxDataSize >= MAX_RXDATASIZE)
         {
             qDebug() << " \n\r Erreur de trame : Size trop grand. \n\r";
             rxState = WAIT;
@@ -135,10 +372,9 @@ void MainWindow::parseRXData(uint8_t data)
         }
         break;
     case RXCOMMANDE:
-        rxCommande = (RX_COMMANDES)data;
+        rxCommande = RX_COMMANDES(data);
         if (rxDataSize)
         {
-
             rxState = RXDATA;
         }
         else
@@ -146,7 +382,7 @@ void MainWindow::parseRXData(uint8_t data)
         break;
     case RXDATA:
         rxData[rxDataCnt++] = data;
-        qDebug() << data;
+        qDebug() << " ----------------- RXDATA : " << QString::number(data);
         if (rxDataCnt == rxDataSize)
             rxState = VALIDATE;
         break;
@@ -167,48 +403,41 @@ void MainWindow::parseRXData(uint8_t data)
     }
 }
 
-/**
-* @brief Fonction de lecture du port série..
-*/
+void MainWindow::quitter(void)
+{
+    exit(1);
+}
+
 void MainWindow::readSerialData(void)
 {
     QByteArray tmpRx;
-    if (serial->bytesAvailable())
+
+    if (serial->bytesAvailable()) // Si des données sont disponibles...
     {
-        tmpRx.resize(serial->bytesAvailable());
-        serial->read(tmpRx.data(), tmpRx.size());
-        for (uint16_t i = 0; i < tmpRx.size(); i++)
-            parseRXData(tmpRx[i]);
+        if (recepAvailable) // Si recepAvailable est à 1...
+        {
+            recepAvailable = false;                      // recepAvailable est remis à 0.
+            tmpRx.resize(int(serial->bytesAvailable())); // tmpRx est tronqué avec le nombre de bits qui sont actuellement disponible sur le port série.
+            serial->read(tmpRx.data(), tmpRx.size());    // Les données dans le port série sont placés dans tmpRx.
+            for (uint16_t i = 0; i < tmpRx.size(); i++)
+                parseRXData(uint8_t(tmpRx[i])); // Les bits qui se trouvent dans tmpRx sont envoyés un à uns à parseRXDate.
+        }
+        else // Sinon...
+        {
+            serial->clear(); // Le port série est vidé.
+            tmpRx.clear();   // tmpRx est vidé.
+        }
+    }
+    else // Si aucune données est disponible...
+    {
+        recepAvailable = false; // recepAvailable est remis à 0.
     }
 }
 
-/**
-* @brief Fonction de lecture du'envoie sur le port série..
-*/
-void MainWindow::sendSerialData(uint8_t cmd, uint8_t data)
+void MainWindow::reboot(void)
 {
-    if (serial->isOpen())
-    {
-        if (cmd == GET_ETAT)
-        {
-            char txData[4];
-            txData[0] = '<';
-            txData[1] = 0;
-            txData[2] = GET_ETAT;
-            txData[3] = '>';
-            serial->write(txData, 4);
-        }
-        else
-        {
-            char txData[5];
-            txData[0] = '<';
-            txData[1] = 1;
-            txData[2] = cmd;
-            txData[3] = data;
-            txData[4] = '>';
-            serial->write(txData, 5);
-        }
-    }
+    qDebug() << "Performing application reboot...";
+    qApp->exit(MainWindow::EXIT_CODE_REBOOT);
 }
 
 void MainWindow::setupSerial(void)
@@ -220,9 +449,21 @@ void MainWindow::setupSerial(void)
     setupDia.exec();
     if (serial->isOpen())
     {
-        qDebug() << "GET_ETAT initial";
-        sendSerialData(GET_ETAT);
+        statusLabel->setText("Connecté " + serial->portName()); // Indique à l'utilisateur que la connexion est réussie ainsi que le nom du port.
+        statusLabel->setToolTip(setupDia.getInfoPort());
+        txCommande = GET_VAL_INIT;
+        execTxCommand();
     }
+    boutonEnabler();
+}
+
+void MainWindow::setupPreference(void)
+{
+    SetupPreferenceDialog setupDia;
+    setupDia.setWindowTitle("Préférences");
+    setupDia.setWindowFlags(Qt::WindowSystemMenuHint); // Pour retirer le ?
+    setupDia.setModal(1);
+    setupDia.exec();
 }
 
 void MainWindow::setupInterface(void)
@@ -238,53 +479,112 @@ void MainWindow::setupInterface(void)
 
 void MainWindow::on_comboBoxSleep_activated(int index)
 {
-
-    sendSerialData(SEND_SLEEP_MODE, index);
-}
-
-void MainWindow::on_dialIntensite_valueChanged(void)
-{
-    if (!ui->pushBottonOnOff->isChecked())
-    {
-        intensite = ui->dialIntensite->value();
-        boutonManage(intensite);
-        if (!serialRxIn)
-            sendSerialData(SEND_VAL, intensite);
-        qDebug() << intensite;
-    }
-}
-
-void MainWindow::on_horizontalSliderIntensite_valueChanged(void)
-{
-    if (!ui->pushBottonOnOff->isChecked())
-    {
-        intensite = ui->horizontalSliderIntensite->value(); //On récupère la valeur du slider.
-        boutonManage(intensite);
-        if (!serialRxIn)
-            sendSerialData(SEND_VAL, intensite);
-        qDebug() << intensite;
-    }
+    veilleState = VEILLE_STATE(index);
+    settings->setValue("Veille/Mode", QString::number(index));
+    settings->setValue("Veille/Description", ui->comboBoxSleep->currentText());
+    boutonEnabler();
+    txCommande = SET_SLEEP_MODE;
+    execTxCommand();
 }
 
 void MainWindow::on_pushBottonOnOff_pressed()
 {
-    if (boutonState) //Met la lumière à "ON" et le bouton affiche maintenant "OFF".
+    if (boutonState) // Met la lumière à "ON" et le bouton affiche maintenant "OFF".
     {
-        sendSerialData(GET_ETAT);
+        txCommande = GET_VAL_POT;
+        execTxCommand();
         boutonState = !boutonState;
-        intensite = valuePot;
+        intensite = valueAdc;
     }
-    else //Met la lumière à "OFF" et le bouton affiche maintenant "ON".
+    else // Met la lumière à "OFF" et le bouton affiche maintenant "ON".
     {
         boutonState = !boutonState;
         intensite = 0;
     }
-    sendSerialData(SEND_VAL, intensite);
+    txCommande = SET_VAL;
+    execTxCommand();
 }
 
 void MainWindow::on_pushBottonOnOff_released()
 {
     boutonManage(intensite);
     if (!serialRxIn)
-        sendSerialData(SEND_VAL, intensite);
+    {
+        txCommande = SET_VAL;
+        execTxCommand();
+    }
+}
+
+void MainWindow::recepTimer(void)
+{
+    recepAvailable = true;
+}
+
+void MainWindow::on_dialIntensite_valueChanged()
+{
+    /* Cette condition permet de différencier un changement de la valeur du dial par l'utilisateur du modification en fonction des valeurs reçues par le potentiomètre */
+    if (dialModif) // Si dialModif est vrai (si la position du slider n'est pas modifier actuellement)...
+    {
+        if (!ui->pushBottonOnOff->isChecked())
+        {
+            intensite = ui->dialIntensite->value();
+            boutonManage(intensite);
+            if (!serialRxIn)
+            {
+                txCommande = SET_VAL;
+                execTxCommand();
+            }
+        }
+    }
+}
+
+void MainWindow::on_horizontalSliderIntensite_valueChanged()
+{
+    /* Cette condition permet de différencier un changement de la valeur du slider par l'utilisateur du modification en fonction des valeurs reçues par le potentiomètre */
+    if (sliderModif) // Si sliderModif est vrai (si la position du slider n'est pas modifier actuellement)...
+    {
+        if (!ui->pushBottonOnOff->isChecked())
+        {
+            intensite = ui->horizontalSliderIntensite->value(); // On récupère la valeur du slider.
+            boutonManage(intensite);
+            if (!serialRxIn)
+            {
+                txCommande = SET_VAL;
+                execTxCommand();
+            }
+        }
+    }
+}
+
+void MainWindow::handleClick(QSystemTrayIcon::ActivationReason reason)
+{
+
+    switch (reason)
+    {
+    case QSystemTrayIcon::Unknown:
+        qDebug() << "Unknown";
+        break;
+    case QSystemTrayIcon::Context:
+        qDebug() << "Context - Right Click";
+        exit(1);
+        intensite = 0;
+        break;
+    case QSystemTrayIcon::DoubleClick:
+        qDebug() << "Double Click";
+        // show();
+        break;
+    case QSystemTrayIcon::Trigger:
+        qDebug() << "Trigger - Left Click";
+        show();
+        break;
+    case QSystemTrayIcon::MiddleClick:
+        qDebug() << "MiddleClick";
+        // txCommande = GET_VAL_POT;
+        execTxCommand();
+        break;
+    }
+
+    txCommande = SET_VAL;
+    execTxCommand();
+    boutonManage(intensite);
 }

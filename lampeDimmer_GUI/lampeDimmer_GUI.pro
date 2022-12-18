@@ -20,14 +20,17 @@ DEFINES += QT_DEPRECATED_WARNINGS
 SOURCES += main.cpp \
     mainwindow.cpp \
     setupinterface.cpp \
+    setuppreferencedialog.cpp \
     setupserialdialog.cpp
 
 HEADERS += mainwindow.h \
     setupinterface.h \
+    setuppreferencedialog.h \
     setupserialdialog.h
 
 FORMS += mainwindow.ui \
     setupinterface.ui \
+    setuppreferencedialog.ui \
     setupserialdialog.ui
 
 # Default rules for deployment.

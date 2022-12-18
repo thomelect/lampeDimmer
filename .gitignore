@@ -1,38 +1,121 @@
-# Arborescence générale
+#/******
+ #* QT *
+ #******/
 
-*.one
+# C++ objects and libs
+*.slo
+*.lo
+*.o
+*.a
+*.la
+*.lai
+*.so
+*.so.*
+*.dll
+*.dylib
+
+# Qt-es
+object_script.*.Release
+object_script.*.Debug
+*_plugin_import.cpp
+/.qmake.cache
+/.qmake.stash
+*.pro.user
+*.pro.user.*
+*.qbs.user
+*.qbs.user.*
+*.moc
+moc_*.cpp
+moc_*.h
+qrc_*.cpp
+ui_*.h
+*.qmlc
+*.jsc
+Makefile*
+*build-*
+*.qm
+*.prl
+
+# Qt unit tests
+target_wrapper.*
+
+# QtCreator
 *.autosave
-/.vs
-/lampeDimmer_CODE/.vs/
-/lampeDimmer_CODE-USB/.vs/
 
-# GUI
+# QtCreator Qml
+*.qmlproject.user
+*.qmlproject.user.*
 
-lampeDimmer_GUI/debug/
-lampeDimmer_GUI/release/
-*.stash
-*.rc
-lampeDimmer_GUI/*.pro.user
-lampeDimmer_GUI/Makefile
-lampeDimmer_GUI/Makefile.Debug
-lampeDimmer_GUI/Makefile.Release
+# QtCreator CMake
+CMakeLists.txt.user*
 
-# RÉPERTOIRE !USB & USB
+# QtCreator 4.8< compilation database
+compile_commands.json
 
-*.atsln
-*.bin
-*.componentinfo.xml
+# QtCreator local machine specific files for imported projects
+*creator.user*
+
+*_qmlcache.qrc
+
+#/***************
+# * ATMELSTUDIO *
+# ***************/
+
+## Ignore Atmel Studio temporary files and build results
+# https://www.microchip.com/mplab/avr-support/atmel-studio-7
+
+# Atmel Studio is powered by an older version of Visual Studio,
+# so most of the project and solution files are the same as VS files,
+# only prefixed by an `at`.
+
+# Visual Studio 2015/2017 cache/options directory
+.vs/
+
+# Build Directories
+[Dd]ebug/
+[Rr]elease/
+
+# Build Results
+*.o
+*.d
 *.eep
 *.elf
 *.hex
-*.lss
 *.map
-*.sym
+*.srec
 
-# CODE - !USB
+# User Specific Files
+*.atsuo
 
-lampeDimmer_CODE-USB/Debug/
+#/*********
+# * KICAD *
+# *********/
 
-# CODE - USB
+# Fichiers temporaires.
+*.000
+*.bak
+*.bck
+*.kicad_pcb-bak
+*.kicad_sch-bak
+*.kicad_prl
+*.sch-bak
+*~
+_autosave-*
+*.tmp
+*-save.pro
+*-save.kicad_pcb
+fp-info-cache
 
-lampeDimmer_CODE/Debug/
+# Fichiers de netlist (exported from Eeschema).
+*.net
+
+# Fichiers d'autoroutage (exporté depuis Pcbnew).
+*.dsn
+*.ses
+
+# Fichier de BOM exportés.
+*.xml
+*.csv
+
+# Dossier de backups KiCad.
+*-backups
