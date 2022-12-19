@@ -113,6 +113,12 @@ private:
     QIcon *iconOff;
     QSettings *settings;
     QSystemTrayIcon *systemTray;
+
+    QMenu *sysTrayMenu;
+    QAction *action1;
+    QAction *action2;
+    QAction *action3;
+    QAction *action4;
     Ui::MainWindow *ui;
 
 private slots:
@@ -120,8 +126,6 @@ private slots:
      * @brief  Fonction de lecture du port série..
      */
     void readSerialData(void);
-
-    void handleClick(QSystemTrayIcon::ActivationReason reason);
 
     /**
      * @brief  Fonction appelée à caque fois que le décompte du timer arrive à 0.

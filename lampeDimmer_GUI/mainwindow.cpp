@@ -39,10 +39,21 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent),
 
     systemTray = new QSystemTrayIcon(this);
 
+    sysTrayMenu = new QMenu;
+    action1 = new QAction(tr("&Action #1"), this);
+    action2 = new QAction(tr("&Action #2"), this);
+    action3 = new QAction(tr("&Action #3"), this);
+    action4 = new QAction(tr("&Action #4"), this);
+    sysTrayMenu->addAction(action1);
+    sysTrayMenu->addAction(action2);
+    sysTrayMenu->addAction(action3);
+    sysTrayMenu->addAction(action4);
+
     systemTray->setIcon(*iconOn);
     systemTray->setVisible(true);
     connect(systemTray, &QSystemTrayIcon::activated, this, &MainWindow::handleClick);
     systemTray->setToolTip("TEST");
+    systemTray->setContextMenu(sysTrayMenu);
 
     settings = new QSettings("./settings.ini", QSettings::IniFormat);
     settings->beginGroup("Info");
@@ -552,8 +563,9 @@ void MainWindow::handleClick(QSystemTrayIcon::ActivationReason reason)
         break;
     case QSystemTrayIcon::Context:
         qDebug() << "Context - Right Click";
-        exit(1);
-        intensite = 0;
+        sysTrayMenu->setVisible(1);
+        //exit(1);
+        //intensite = 0;
         break;
     case QSystemTrayIcon::DoubleClick:
         qDebug() << "Double Click";
@@ -570,7 +582,9 @@ void MainWindow::handleClick(QSystemTrayIcon::ActivationReason reason)
         break;
     }
 
+    /*
     txCommande = SET_VAL;
     execTxCommand();
     boutonManage(intensite);
+    */
 }
