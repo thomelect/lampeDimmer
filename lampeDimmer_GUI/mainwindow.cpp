@@ -26,6 +26,13 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent),
     sliderModif = true;
     dialModif = true;
 
+
+    SetupInterface::settingInterface_s partageSettingInterface;
+    SetupInterface *settingInterface;
+
+    settingInterface = SetupInterface::getInstance();
+    settingInterface->getSettingInterface(&partageSettingInterface);
+
     iconOn = new QIcon(":/images/on.png");
     iconOff = new QIcon(":/images/off.png");
 
@@ -469,12 +476,19 @@ void MainWindow::setupPreference(void)
 void MainWindow::setupInterface(void)
 {
     SetupInterface setupDia;
+    partageSettingInterface.displayFormat = 127;
     setupDia.setWindowTitle("Configuration de l'interface");
     setupDia.setWindowFlags(Qt::WindowSystemMenuHint); // Pour retirer le ?
     setupDia.setModal(1);
     setupDia.exec();
-    statusSetupInterface->getStruct(&partageSettingInterface);
-    boutonManage(intensite);
+
+    //qDebug() << "ALLO" << settingInterface-> .displayFormat;
+    qDebug() << "ALLO" << partageSettingInterface.displayFormatMath;
+    //qDebug() << QString::number((int)(intensite / partageSettingInterface.displayFormatMath));
+    //qDebug() << (int)((double)intensite / partageSettingInterface.displayFormatMath);
+    //ui->lbIntensiteValue->setText(QString::number((int)((double)intensite / partageSettingInterface.displayFormatMath)));
+    //statusSetupInterface->getStruct(&partageSettingInterface);
+    //boutonManage(intensite);
 }
 
 void MainWindow::on_comboBoxSleep_activated(int index)

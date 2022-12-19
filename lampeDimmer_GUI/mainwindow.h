@@ -93,8 +93,6 @@ private:
     int intensite;
     bool serialRxIn;
     bool boutonState;
-    SetupInterface *statusSetupInterface;
-    SetupInterface::settingInterface_s partageSettingInterface;
     bool recepAvailable;
     bool sliderModif;
     bool dialModif;
@@ -118,6 +116,8 @@ private:
     QIcon *iconOff;
     QSettings *settings;
     QSystemTrayIcon *systemTray;
+    SetupInterface *settingInterface;
+    SetupInterface::settingInterface_s partageSettingInterface;
     Ui::MainWindow *ui;
 
 private slots:

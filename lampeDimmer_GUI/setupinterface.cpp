@@ -16,18 +16,14 @@ SetupInterface::~SetupInterface()
 
 void SetupInterface::on_btOk_clicked()
 {
+    partageSettingInterface.setting.displayFormat = ui->rbBrut->isChecked();
     if (ui->rbBrut->isChecked())
-    {
-        partageSettingInterface.setting.displayFormat = ' ';
-        partageSettingInterface.setting.displayFormat = 1.00;
-    }
+        partageSettingInterface.setting.displayFormatMath = 1.00;
     else
-    {
-        partageSettingInterface.setting.displayFormat = '%';
         partageSettingInterface.setting.displayFormatMath = 2.55;
-    }
-    qDebug() << partageSettingInterface.setting.displayFormat;
-    qDebug() << partageSettingInterface.setting.displayFormatMath;
+
+
+
     this->close();
 }
 
@@ -36,7 +32,20 @@ void SetupInterface::on_btAnnuler_clicked()
     this->close();
 }
 
-void SetupInterface::getStruct(settingInterface_s *setting)
+
+SetupInterface::partageSettingInterface_s *SetupInterface::getPartageSettingInterface()
+{
+    partageSettingInterface_s *result = NULL;
+    result = &partageSettingInterface;
+    return result;
+}
+
+void SetupInterface::setSettingInterface(settingInterface_s *setting)
+{
+    partageSettingInterface.setting = *setting;
+}
+
+void SetupInterface::getSettingInterface(settingInterface_s *setting)
 {
     *setting = partageSettingInterface.setting;
 }

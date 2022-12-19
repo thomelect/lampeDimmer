@@ -26,7 +26,8 @@ SOURCES += main.cpp \
 HEADERS += mainwindow.h \
     setupinterface.h \
     setuppreferencedialog.h \
-    setupserialdialog.h
+    setupserialdialog.h \
+    singleton.hpp
 
 FORMS += mainwindow.ui \
     setupinterface.ui \
