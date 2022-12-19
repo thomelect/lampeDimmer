@@ -52,7 +52,6 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent),
     systemTray->setIcon(*iconOn);
     systemTray->setVisible(true);
     connect(systemTray, &QSystemTrayIcon::activated, this, &MainWindow::handleClick);
-    systemTray->setToolTip("TEST");
     systemTray->setContextMenu(sysTrayMenu);
 
     settings = new QSettings("./settings.ini", QSettings::IniFormat);
@@ -154,6 +153,7 @@ void MainWindow::boutonEnabler()
         ui->pushBottonOnOff->setDisabled(true);
         ui->horizontalSliderIntensite->setDisabled(true);
         ui->statusBar->showMessage("VEILLE | " + ui->comboBoxSleep->currentText()); // conversion de la valeur actuelle en pourcentage.
+        systemTray->setToolTip(ui->comboBoxSleep->currentText());
     }
     else // Sinon (si le système n'est pas en mode veille)...
     {
@@ -185,6 +185,7 @@ void MainWindow::boutonManage(int value)
         ui->horizontalSliderIntensite->setSliderPosition(value);
         ui->statusBar->showMessage(QString::number((value / 2.55), 'f', 0) + '%'); // conversion de la valeur actuelle en pourcentage.
         ui->comboBoxSleep->setCurrentIndex(veilleState);
+        systemTray->setToolTip(QString::number((value / 2.55), 'f', 0) + '%');
     }
 
     qDebug() << "SET_VAL : " << QString::number(value);
