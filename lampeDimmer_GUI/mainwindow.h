@@ -9,14 +9,18 @@
 #define MAINWINDOW_H
 
 #include "setupserialdialog.h"
+#include "setuppreferencedialog.h"
 #include <QPixmap>
 #include <QMainWindow>
 #include <QLabel>
 #include <QtSerialPort/QSerialPort>
 #include <QSettings>
+#include <QTimer>
+#include <QDateTime>
 #include <QSystemTrayIcon>
+#include <QAction>
 
-#define _MAX_RXDATASIZE_ 16
+#define MAX_RXDATASIZE 16
 
 QT_BEGIN_NAMESPACE
 namespace Ui
@@ -48,7 +52,8 @@ private:
     {
         VAL_ACTU,
         VAL_INIT,
-        VAL_POT
+        VAL_POT,
+        VAL_MODE
     };
     /* Enums commandes transmission: */
     enum TX_COMMANDES
@@ -59,10 +64,20 @@ private:
         SET_SLEEP_MODE,
         SET_VAL
     };
+
+    enum VEILLE_STATE
+    {
+        VEILLE_NONE,
+        VEILLE_OFF,
+        VEILLE_ON,
+        VEILLE_BREATHING,
+        VEILLE_VEILLE
+    };
     /* Déclaration enums: */
     RX_STATES rxState;
     RX_COMMANDES rxCommande;
     TX_COMMANDES txCommande;
+    VEILLE_STATE veilleState;
 
     /* Déclarations variables: */
     QByteArray tmpRxData;
@@ -70,29 +85,37 @@ private:
     QString *connectInfo;
     uint8_t rxDataSize;
     uint8_t rxDataCnt;
-    uint8_t rxData[_MAX_RXDATASIZE_];
+    uint8_t rxData[MAX_RXDATASIZE];
     uint16_t rxErrorCommCnt;
     uint8_t valueAdc;
     uint8_t valueOut;
-    uint8_t valueVeilleMode;
-    uint8_t intensite;
+    bool valueModeSys;
+    int intensite;
     bool serialRxIn;
     bool boutonState;
-    int sizeTbl;
+    bool recepAvailable;
+    bool sliderModif;
+    bool dialModif;
 
     /* Déclarations classes: */
     QLabel *statusLabel;
     QSerialPort *serial;
-    QMenu *toolsMenu;
+    QMenu *outilsMenu;
+    QMenu *fichierMenu;
+    QTimer *timer;
     QAction *setupSerialAct;
+    QAction *setupPrefAct;
+    QAction *quitterAct;
+    QAction *actionReboot;
     QPixmap *pixmapOff();
     QIcon *ButtonIcon();
+    QIcon *iconOn;
+    QIcon *iconOff;
     QSettings *settings;
     QSystemTrayIcon *systemTray;
     Ui::MainWindow *ui;
 
 private slots:
-
     /**
      * @brief  Fonction de lecture du port série..
      */
@@ -101,20 +124,24 @@ private slots:
     void handleClick(QSystemTrayIcon::ActivationReason reason);
 
     /**
+     * @brief  Fonction appelée à caque fois que le décompte du timer arrive à 0.
+     *         Elle est utilisée afin de mettre à 1 la variable recepAvailable et ainsi, dans la fonction readSerialData,
+     *         si serial->bytesAvailable() est vrai, le tableau de données (le buffer) "tmpRx" est tronqué au nombre de bits disponibles
+     *         les données dans le port série sont placés dans tmpRx, et le port série est vidé.
+     *         Ainsi, on évite d'avoir une file d'attente dans le port série et deffectuer le lecture de façon excessive.
+     *
+     *         Ceci découle d'un problème ou lorsque le potentiomètre physique se situe entre 2 valeurs,
+     *         le contrôleur envoi de façon excessive des données sur le port série causant ainsi une surchage du même port et ainsi une grande consommation de mémoire de la part du programme.
+     */
+    void recepTimer(void);
+
+    void handleClick(QSystemTrayIcon::ActivationReason reason);
+
+    /**
      * @brief        Fonction appelée lorsque l'utilisateur choisi une option dans la liste.
      * @param index  Index des options de la liste.
      */
     void on_comboBoxSleep_activated(int index);
-
-    /**
-     * @brief  Fonction appelée lorsque la valeur du "potentiomètre" est changée.
-     */
-    void on_dialIntensite_valueChanged(void);
-
-    /**
-     * @brief  Fonction appelée lorsque la valeur du "slider" est changée.
-     */
-    void on_horizontalSliderIntensite_valueChanged(void);
 
     /**
      * @brief  Fonction appelée lorsque le bouton on/off est appuyé.
@@ -126,16 +153,30 @@ private slots:
      */
     void on_pushBottonOnOff_released();
 
+    /**
+     * @brief  Fonction appelée lorsque la valeur du slider est changée.
+     */
+    void on_horizontalSliderIntensite_valueChanged();
+
+    /**
+     * @brief  Fonction appelée lorsque la valeur du dial est changée.
+     */
+    void on_dialIntensite_valueChanged();
+
 private:
     /**
      * @brief  Fonction utilisée afin de créer le menu "Outils".
      */
     void createMenus(void);
 
+    void quitter(void);
+
     /**
      * @brief  Fonction utilisée afin de gérer la fenêtre de connexion.
      */
     void setupSerial(void);
+
+    void setupPreference(void);
 
 private:
     /**
@@ -173,5 +214,10 @@ private:
      * @param data  Octet reçu par la fonction usartRemRxData.
      */
     void parseRXData(uint8_t data);
+
+public:
+    static int const EXIT_CODE_REBOOT;
+
+    static void reboot(void);
 };
 #endif // MAINWINDOW_H

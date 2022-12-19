@@ -1,0 +1,57 @@
+13164594944444
+THOMAS_library
+Arduino_Micro
+
+ARDUINO, MICRO
+0
+34
+34
+THOMAS_library
+MountingHole_3.2mm
+Mounting Hole 3.2mm, M3
+mounting hole 3.2mm m3
+0
+1
+1
+THOMAS_library
+MountingHole_3.2mm_M3_Pad
+Mounting Hole 3.2mm, M3
+mounting hole 3.2mm m3
+0
+1
+1
+THOMAS_library
+NUCLEO-F446RE-CUS
+
+
+0
+108
+108
+THOMAS_library
+PicKit
+Through hole straight pin header, 1x08, 2.54mm pitch, single row
+Through hole pin header THT 1x08 2.54mm single row
+0
+8
+8
+THOMAS_library
+TestPoint_Bridge_Pitch7.08mm_Drill2.0mm
+wire loop as test point, pitch 5.08mm, hole diameter 1.3mm, wire diameter 1.0mm
+test point wire loop
+0
+2
+2
+THOMAS_library
+TestPoint_Keystone_5000-5004_Miniature-Resistor
+Keystone Miniature THM Test Point 5000-5004, http://www.keyelco.com/product-pdf.cfm?p=1309
+Through Hole Mount Test Points
+0
+1
+1
+THOMAS_library
+USART
+Through hole straight pin header, 1x04, 2.54mm pitch, single row
+Through hole pin header THT 1x04 2.54mm single row
+0
+4
+4
