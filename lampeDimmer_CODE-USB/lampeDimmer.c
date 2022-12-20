@@ -4,15 +4,15 @@
  * @author     Base : Marc Juneau
  * @author     Adaptation : Thomas Desrosiers
  * @version    2.0
- * @date       8 Janvier 2021
+ * @date       07 décembre 2022
  *
  * @mainpage	lampeDimmer
- * @author     Base : Marc Juneau
- * @author     Adaptation : Thomas Desrosiers
- *	@section	MainSection1 Description
+ * @author     	Base : Marc Juneau
+ * @author     	Adaptation : Thomas Desrosiers
+ * @section		MainSection1 Description
  *				Programme de gestion de la communication par USB.
- *	@li			Ce programme démontre le fonctionnement minimale d'un lien série USB.
- *	@li			Il utilise la bibliothèque LUFA pour un périphérique CDC
+ * @li			Ce programme démontre le fonctionnement minimale d'un lien série USB.
+ * @li			Il utilise la bibliothèque LUFA pour un périphérique CDC
  */
 
 #include <avr/io.h>
@@ -23,6 +23,7 @@
 #include <string.h>
 #include <sources/LUFA/Drivers/USB/USB.h>
 #include "adcBasic.h"
+#include "eeprom.h"
 #include "Descriptors.h"
 
 
@@ -44,6 +45,7 @@
 #define TIMER_CNT_CYCLE_FADE 50 // Nombre de cycle comptés en interruption.
 #define INCREMENT_STEP 1		// Incrément pour le fadding.
 #define _MAX_RXDATASIZE_ 16
+#define EE_ADDR_SLEEP_MODE 0x00
 
 
 /*************
@@ -81,15 +83,6 @@ enum RX_STATES
 	VALIDATE
 };
 
-/* Enum des différentes commandes utilisées en transmission: */
-enum TX_COMMANDES
-{
-	VAL_ACTU,
-	VAL_INIT,
-	VAL_POT,
-	VAL_MODE
-};
-
 /* Enum des différentes commandes utilisées en réception: */
 enum RX_COMMANDES
 {
@@ -98,6 +91,15 @@ enum RX_COMMANDES
 	GET_VAL_POT,
 	SET_SLEEP_MODE,
 	SET_VAL
+};
+
+/* Enum des différentes commandes utilisées en transmission: */
+enum TX_COMMANDES
+{
+	VAL_ACTU,
+	VAL_INIT,
+	VAL_POT,
+	VAL_MODE
 };
 
 enum VEILLE_STATE
@@ -266,7 +268,11 @@ void execRxCommand(void)
 		execTxCommand();
 		break;
 	case SET_SLEEP_MODE:
-		veilleState = rxData[0];
+		if (rxData[0] != veilleState)
+		{
+			veilleState = rxData[0];
+			eepromWriteByte(EE_ADDR_SLEEP_MODE, veilleState);
+		}
 		break;
 	case SET_VAL:	  // Réception depuis l'interface de la valeur de la sortie.
 		if (SWITCH()) // Si l'interrupteur du potentiomètre est à la position "ON"...
@@ -330,6 +336,7 @@ void hardwareInit(void)
 	DDRD |= (1 << 4);
 	clock_prescale_set(clock_div_1);
 
+	veilleState = eepromReadByte(EE_ADDR_SLEEP_MODE);
 	adcInit();	  // Appel de la fonction d'initialisation du ADC.
 	timer0Init(); // Initialisation de timer 0.
 	timer4Init(); // Initialisation de timer 4.
