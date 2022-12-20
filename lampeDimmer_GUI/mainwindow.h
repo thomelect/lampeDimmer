@@ -89,10 +89,10 @@ private:
     bool valueModeSys;
     int intensite;
     bool serialRxIn;
-    bool boutonState;
     bool recepAvailable;
     bool sliderModif;
     bool dialModif;
+    bool etatOnOff;
 
     /* Déclarations classes: */
     QLabel *statusLabel;
@@ -125,6 +125,12 @@ private slots:
     void recepTimer(void);
 
     /**
+     * @brief        Fonction utilisé pour changer l'état de la lumière de On à Off ou de Off à On.
+     * @param value  Valeur futur de la sortie lumineuse. 0 = lumière off et 1 = lumière on.
+     */
+    void toggleLamp(bool value);
+
+    /**
      * @brief        Fonction appelée lorsque l'utilisateur choisi une option dans la liste.
      * @param index  Index des options de la liste.
      */
@@ -134,11 +140,6 @@ private slots:
      * @brief  Fonction appelée lorsque le bouton on/off est appuyé.
      */
     void on_pushBottonOnOff_pressed();
-
-    /**
-     * @brief  Fonction appelée lorsque le bouton on/off est relachée.
-     */
-    void on_pushBottonOnOff_released();
 
     /**
      * @brief  Fonction appelée lorsque la valeur du slider est changée.

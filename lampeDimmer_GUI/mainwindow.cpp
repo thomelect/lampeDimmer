@@ -19,7 +19,7 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent),
 {
     intensite = 0;
     serialRxIn = false;
-    boutonState = true;
+    etatOnOff = true;
     recepAvailable = false;
     sliderModif = true;
     dialModif = true;
@@ -139,6 +139,29 @@ void MainWindow::boutonEnabler()
     }
 }
 
+void MainWindow::toggleLamp(bool value)
+{
+    qDebug() << "toggleLamp : " << QString::number(value);
+    if (value) // Met la lumière à "ON" et le bouton affiche maintenant "OFF".
+    {
+        //txCommande = GET_VAL_POT;
+        //execTxCommand();
+        intensite = valueAdc;
+    }
+    else // Met la lumière à "OFF" et le bouton affiche maintenant "ON".
+    {
+        intensite = 0;
+    }
+    txCommande = SET_VAL;
+    execTxCommand();
+    boutonManage(intensite);
+    /*if (!serialRxIn)
+    {
+        txCommande = SET_VAL;
+        execTxCommand();
+    }*/
+}
+
 void MainWindow::boutonManage(int value)
 {
     sliderModif = false; //Indique que la position du slider est modifiée par la fonction boutonManage.
@@ -171,13 +194,19 @@ void MainWindow::boutonManage(int value)
     {
         ui->pushBottonOnOff->setIcon(QIcon(":/images/on.png"));
         ui->pushBottonOnOff->setIconSize(QSize(65, 65));
-        boutonState = 0;
+        //etatOnOff = 0;
+        QIcon icon("on.png");
+        systemTray->setIcon(icon); // On assigne une image à notre icône
+        etatOnOff = 1;
     }
     else //Sinon (si la valeur est égale à 0)...
     {
         ui->pushBottonOnOff->setIcon(QIcon(":/images/off.png"));
         ui->pushBottonOnOff->setIconSize(QSize(65, 65));
-        boutonState = 1;
+        //etatOnOff = 1;
+        QIcon icon("off.png");
+        systemTray->setIcon(icon); // On assigne une image à notre icône
+        etatOnOff = 0;
     }
     sliderModif = true; //Indique que la position du slider est prête à être modifiée.
     dialModif = true;   //Indique que la position du dial est prête à être modifiée.
@@ -432,30 +461,9 @@ void MainWindow::on_comboBoxSleep_activated(int index)
 
 void MainWindow::on_pushBottonOnOff_pressed()
 {
-    if (boutonState) //Met la lumière à "ON" et le bouton affiche maintenant "OFF".
-    {
-        txCommande = GET_VAL_POT;
-        execTxCommand();
-        boutonState = !boutonState;
-        intensite = valueAdc;
-    }
-    else //Met la lumière à "OFF" et le bouton affiche maintenant "ON".
-    {
-        boutonState = !boutonState;
-        intensite = 0;
-    }
-    txCommande = SET_VAL;
-    execTxCommand();
-}
-
-void MainWindow::on_pushBottonOnOff_released()
-{
-    boutonManage(intensite);
-    if (!serialRxIn)
-    {
-        txCommande = SET_VAL;
-        execTxCommand();
-    }
+    etatOnOff = !etatOnOff;
+    qDebug() << "on_pushBottonOnOff_pressed : " << QString::number(etatOnOff);
+    toggleLamp(etatOnOff);
 }
 
 void MainWindow::recepTimer(void)
