@@ -2,6 +2,7 @@
 #define SETUPPREFERENCEDIALOG_H
 
 #include <QDialog>
+#include <QDir>
 #include <QtSerialPort/QSerialPort>
 #include <QSettings>
 
@@ -39,6 +40,10 @@ private:
 
 private:
     void boutonManage(void);
+
+    void setAppToStartAutomatically(bool startAutomatically);
+
+    QString windowsAppPath();
 };
 
 #endif // SETUPPREFERENCEDIALOG_H

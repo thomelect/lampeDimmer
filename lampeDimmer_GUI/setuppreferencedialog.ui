@@ -89,7 +89,7 @@
       <item>
        <widget class="QCheckBox" name="cbOption_3">
         <property name="text">
-         <string>Option #3</string>
+         <string>Ouvrir automatiquement</string>
         </property>
        </widget>
       </item>
@@ -187,6 +187,13 @@
      </layout>
     </item>
     <item>
+     <widget class="QPushButton" name="pbReboot">
+      <property name="text">
+       <string>Redémarrer</string>
+      </property>
+     </widget>
+    </item>
+    <item>
      <spacer name="verticalSpacer_2">
       <property name="orientation">
        <enum>Qt::Vertical</enum>
@@ -198,13 +205,6 @@
        </size>
       </property>
      </spacer>
-    </item>
-    <item>
-     <widget class="QPushButton" name="pbReboot">
-      <property name="text">
-       <string>Redémarrer</string>
-      </property>
-     </widget>
     </item>
    </layout>
   </widget>
