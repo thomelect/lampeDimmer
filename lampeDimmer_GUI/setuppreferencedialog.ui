@@ -45,7 +45,7 @@
      <x>10</x>
      <y>10</y>
      <width>317</width>
-     <height>241</height>
+     <height>256</height>
     </rect>
    </property>
    <layout class="QVBoxLayout" name="verticalLayout">
@@ -187,6 +187,13 @@
      </layout>
     </item>
     <item>
+     <widget class="QPushButton" name="pbReboot">
+      <property name="text">
+       <string>Redémarrer</string>
+      </property>
+     </widget>
+    </item>
+    <item>
      <spacer name="verticalSpacer_2">
       <property name="orientation">
        <enum>Qt::Vertical</enum>
@@ -198,13 +205,6 @@
        </size>
       </property>
      </spacer>
-    </item>
-    <item>
-     <widget class="QPushButton" name="pbReboot">
-      <property name="text">
-       <string>Redémarrer</string>
-      </property>
-     </widget>
     </item>
    </layout>
   </widget>

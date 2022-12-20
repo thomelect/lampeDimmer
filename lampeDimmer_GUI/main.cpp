@@ -58,7 +58,8 @@ int main(int argc, char *argv[])
     do
     {
         QApplication a(argc, argv);
-        QSettings settingsPref("./preferences.ini", QSettings::IniFormat);
+        //QSettings settingsPref("./preferences.ini", QSettings::IniFormat);
+        QSettings settingsPref("Thomas Desrosiers", "Lampe Dimmer");
         if (settingsPref.value("Options/option_2").toBool()) // Rester ouvert en arrière plan n'est pas coché.
             a.setQuitOnLastWindowClosed(false);              // L'application n'est pas "arrêtée" si la fenêtre est fermée.
         else

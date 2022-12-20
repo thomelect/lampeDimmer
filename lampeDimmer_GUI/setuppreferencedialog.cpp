@@ -21,7 +21,8 @@ SetupPreferenceDialog::SetupPreferenceDialog(QDialog *parent) : QDialog(parent),
     ui->btAnnuler->setText("Annuler");
     ui->btEnregistre->setText("Enregistrer");
     /*-----------------------------------------------*/
-    settingsPref = new QSettings("./preferences.ini", QSettings::IniFormat);
+    //settingsPref = new QSettings("./preferences.ini", QSettings::IniFormat);
+    settingsPref = new QSettings("Thomas Desrosiers", "Lampe Dimmer");
 
     settingsPref->beginGroup("Options");
     ui->cbOption_1->setChecked(settingsPref->value("option_1").toBool());
@@ -57,9 +58,7 @@ void SetupPreferenceDialog::setAppToStartAutomatically(bool startAutomatically)
 {
     QString key = "Lampe Dimmer";
 
-    QSettings registrySettings(
-                "HKEY_CURRENT_USER\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Run",
-                QSettings::NativeFormat);
+    QSettings registrySettings("HKEY_CURRENT_USER\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Run", QSettings::NativeFormat);
 
     registrySettings.remove(key);
 
