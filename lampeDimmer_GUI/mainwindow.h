@@ -9,6 +9,7 @@
 #define MAINWINDOW_H
 
 #include "setupserialdialog.h"
+#include "setuppreferencedialog.h"
 #include <QPixmap>
 #include <QMainWindow>
 #include <QLabel>
@@ -16,6 +17,8 @@
 #include <QSettings>
 #include <QTimer>
 #include <QDateTime>
+#include <QSystemTrayIcon>
+#include <QAction>
 
 #define MAX_RXDATASIZE 16
 
@@ -97,16 +100,28 @@ private:
     /* Déclarations classes: */
     QLabel *statusLabel;
     QSerialPort *serial;
-    QMenu *toolsMenu;
+    QMenu *outilsMenu;
+    QMenu *fichierMenu;
     QTimer *timer;
     QAction *setupSerialAct;
+    QAction *setupPrefAct;
+    QAction *quitterAct;
+    QAction *actionReboot;
     QPixmap *pixmapOff();
     QIcon *ButtonIcon();
+    QIcon *iconOn;
+    QIcon *iconOff;
     QSettings *settings;
+    QSystemTrayIcon *systemTray;
+
+    QMenu *sysTrayMenu;
+    QAction *action1;
+    QAction *action2;
+    QAction *action3;
+    QAction *action4;
     Ui::MainWindow *ui;
 
 private slots:
-
     /**
      * @brief  Fonction de lecture du port série..
      */
@@ -116,13 +131,19 @@ private slots:
      * @brief  Fonction appelée à caque fois que le décompte du timer arrive à 0.
      *         Elle est utilisée afin de mettre à 1 la variable recepAvailable et ainsi, dans la fonction readSerialData,
      *         si serial->bytesAvailable() est vrai, le tableau de données (le buffer) "tmpRx" est tronqué au nombre de bits disponibles
-     *         les données dans le port série sont placés dans tmpRx, et le port série est vidé. 
-     *         Ainsi, on évite d'avoir une file d'attente dans le port série et deffectuer le lecture de façon excessive. 
-     * 
+     *         les données dans le port série sont placés dans tmpRx, et le port série est vidé.
+     *         Ainsi, on évite d'avoir une file d'attente dans le port série et deffectuer le lecture de façon excessive.
+     *
      *         Ceci découle d'un problème ou lorsque le potentiomètre physique se situe entre 2 valeurs,
      *         le contrôleur envoi de façon excessive des données sur le port série causant ainsi une surchage du même port et ainsi une grande consommation de mémoire de la part du programme.
      */
     void recepTimer(void);
+
+    void handleClick(QSystemTrayIcon::ActivationReason reason);
+
+
+
+    void toggleLamp(bool value);
 
     /**
      * @brief        Fonction utilisé pour changer l'état de la lumière de On à Off ou de Off à On.
@@ -157,10 +178,14 @@ private:
      */
     void createMenus(void);
 
+    void quitter(void);
+
     /**
      * @brief  Fonction utilisée afin de gérer la fenêtre de connexion.
      */
     void setupSerial(void);
+
+    void setupPreference(void);
 
 private:
     /**
@@ -198,5 +223,10 @@ private:
      * @param data  Octet reçu par la fonction usartRemRxData.
      */
     void parseRXData(uint8_t data);
+
+public:
+    static int const EXIT_CODE_REBOOT;
+
+    static void reboot(void);
 };
 #endif // MAINWINDOW_H
