@@ -141,10 +141,6 @@ private slots:
 
     void handleClick(QSystemTrayIcon::ActivationReason reason);
 
-
-
-    void toggleLamp(bool value);
-
     /**
      * @brief        Fonction utilisé pour changer l'état de la lumière de On à Off ou de Off à On.
      * @param value  Valeur futur de la sortie lumineuse. 0 = lumière off et 1 = lumière on.
