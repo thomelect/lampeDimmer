@@ -168,22 +168,18 @@ void MainWindow::toggleLamp(bool value)
     qDebug() << "toggleLamp : " << QString::number(value);
     if (value) // Met la lumière à "ON" et le bouton affiche maintenant "OFF".
     {
-        //txCommande = GET_VAL_POT;
-        //execTxCommand();
         intensite = valueAdc;
     }
     else // Met la lumière à "OFF" et le bouton affiche maintenant "ON".
     {
         intensite = 0;
     }
-    txCommande = SET_VAL;
-    execTxCommand();
-    boutonManage(intensite);
-    /*if (!serialRxIn)
+    if (!serialRxIn)
     {
         txCommande = SET_VAL;
         execTxCommand();
-    }*/
+    }
+    boutonManage(intensite);
 }
 
 void MainWindow::boutonManage(int value)
@@ -217,18 +213,14 @@ void MainWindow::boutonManage(int value)
     {
         ui->pushBottonOnOff->setIcon(*iconOn);
         ui->pushBottonOnOff->setIconSize(QSize(65, 65));
-        //etatOnOff = 0;
-        QIcon icon("on.png");
-        systemTray->setIcon(icon); // On assigne une image à notre icône
+        systemTray->setIcon(*iconOn); // On assigne une image à notre icône
         etatOnOff = 1;
     }
     else // Sinon (si la valeur est égale à 0)...
     {
         ui->pushBottonOnOff->setIcon(*iconOff);
         ui->pushBottonOnOff->setIconSize(QSize(65, 65));
-        //etatOnOff = 1;
-        QIcon icon("off.png");
-        systemTray->setIcon(icon); // On assigne une image à notre icône
+        systemTray->setIcon(*iconOff); // On assigne une image à notre icône
         etatOnOff = 0;
     }
     sliderModif = true; // Indique que la position du slider est prête à être modifiée.
@@ -585,10 +577,4 @@ void MainWindow::handleClick(QSystemTrayIcon::ActivationReason reason)
         toggleLamp(etatOnOff);
         break;
     }
-
-    /*
-    txCommande = SET_VAL;
-    execTxCommand();
-    boutonManage(intensite);
-    */
 }
