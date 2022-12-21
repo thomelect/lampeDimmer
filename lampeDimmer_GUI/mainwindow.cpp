@@ -40,13 +40,19 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent),
     systemTray = new QSystemTrayIcon(this);
 
     sysTrayMenu = new QMenu;
-    action1 = new QAction(tr("&Action #1"), this);
-    action2 = new QAction(tr("&Action #2"), this);
-    action3 = new QAction(tr("&Action #3"), this);
-    action4 = new QAction(tr("&Action #4"), this);
+    action1 = new QAction(tr("&On/Off"), this);
+    action2 = new QAction(tr("&Préférences"), this);
+    action3 = new QAction(tr("&Configuration série"), this);
+    action4 = new QAction(tr("&Quitter"), this);
+
+    connect(action1, &QAction::triggered, this, &MainWindow::toggleLamp);
+    connect(action2, &QAction::triggered, this, &MainWindow::setupPreference);
+    connect(action3, &QAction::triggered, this, &MainWindow::setupSerial);
+    connect(action4, &QAction::triggered, this, &exit);
     sysTrayMenu->addAction(action1);
     sysTrayMenu->addAction(action2);
     sysTrayMenu->addAction(action3);
+    sysTrayMenu->addSeparator();
     sysTrayMenu->addAction(action4);
 
     systemTray->setIcon(*iconOn);
@@ -163,10 +169,13 @@ void MainWindow::boutonEnabler()
     }
 }
 
-void MainWindow::toggleLamp(bool value)
+void MainWindow::toggleLamp()
 {
-    qDebug() << "toggleLamp : " << QString::number(value);
-    if (value) // Met la lumière à "ON" et le bouton affiche maintenant "OFF".
+
+    etatOnOff = !etatOnOff;
+    qDebug() << "toggleLamp : " << QString::number(etatOnOff);
+
+    if (etatOnOff) // Met la lumière à "ON" et le bouton affiche maintenant "OFF".
     {
         intensite = valueAdc;
     }
@@ -212,6 +221,7 @@ void MainWindow::boutonManage(int value)
     if (value) // Si la valeur est plus grande que 0...
     {
         ui->pushBottonOnOff->setIcon(*iconOn);
+        action1->setText("&On");
         ui->pushBottonOnOff->setIconSize(QSize(65, 65));
         systemTray->setIcon(*iconOn); // On assigne une image à notre icône
         etatOnOff = 1;
@@ -219,6 +229,7 @@ void MainWindow::boutonManage(int value)
     else // Sinon (si la valeur est égale à 0)...
     {
         ui->pushBottonOnOff->setIcon(*iconOff);
+        action1->setText("&Off");
         ui->pushBottonOnOff->setIconSize(QSize(65, 65));
         systemTray->setIcon(*iconOff); // On assigne une image à notre icône
         etatOnOff = 0;
@@ -504,9 +515,9 @@ void MainWindow::on_comboBoxSleep_activated(int index)
 
 void MainWindow::on_pushBottonOnOff_pressed()
 {
-    etatOnOff = !etatOnOff;
-    qDebug() << "on_pushBottonOnOff_pressed : " << QString::number(etatOnOff);
-    toggleLamp(etatOnOff);
+    //etatOnOff = !etatOnOff;
+    //qDebug() << "on_pushBottonOnOff_pressed : " << QString::number(etatOnOff);
+    toggleLamp();
 }
 
 void MainWindow::recepTimer(void)
@@ -561,8 +572,6 @@ void MainWindow::handleClick(QSystemTrayIcon::ActivationReason reason)
     case QSystemTrayIcon::Context:
         qDebug() << "Context - Right Click";
         sysTrayMenu->setVisible(1);
-        //exit(1);
-        //intensite = 0;
         break;
     case QSystemTrayIcon::DoubleClick:
         qDebug() << "Double Click";
@@ -572,9 +581,7 @@ void MainWindow::handleClick(QSystemTrayIcon::ActivationReason reason)
         show();
         break;
     case QSystemTrayIcon::MiddleClick:
-        etatOnOff = !etatOnOff;
-        qDebug() << "MiddleClick : " << QString::number(etatOnOff);
-        toggleLamp(etatOnOff);
+        qDebug() << "MiddleClick";
         break;
     }
 }

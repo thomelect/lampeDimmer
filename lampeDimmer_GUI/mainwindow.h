@@ -145,7 +145,7 @@ private slots:
      * @brief        Fonction utilisé pour changer l'état de la lumière de On à Off ou de Off à On.
      * @param value  Valeur futur de la sortie lumineuse. 0 = lumière off et 1 = lumière on.
      */
-    void toggleLamp(bool value);
+    void toggleLamp();
 
     /**
      * @brief        Fonction appelée lorsque l'utilisateur choisi une option dans la liste.
