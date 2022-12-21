@@ -89,8 +89,8 @@ private:
     uint16_t rxErrorCommCnt;
     uint8_t valueAdc;
     uint8_t valueOut;
+    uint8_t intensite;
     bool valueModeSys;
-    int intensite;
     bool serialRxIn;
     bool recepAvailable;
     bool sliderModif;

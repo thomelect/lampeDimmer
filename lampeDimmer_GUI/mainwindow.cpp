@@ -37,38 +37,37 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent),
     ui->pushBottonOnOff->setIcon(*iconOff);
     ui->pushBottonOnOff->setIconSize(QSize(65, 65));
 
-    systemTray = new QSystemTrayIcon(this);
-
     sysTrayMenu = new QMenu;
     action1 = new QAction(tr("&On/Off"), this);
-    action2 = new QAction(tr("&Préférences"), this);
-    action3 = new QAction(tr("&Configuration série"), this);
-
     connect(action1, &QAction::triggered, this, &MainWindow::toggleLampe);
-    connect(action2, &QAction::triggered, this, &MainWindow::setupPreference);
-    connect(action3, &QAction::triggered, this, &MainWindow::setupSerial);
     sysTrayMenu->addAction(action1);
-    sysTrayMenu->addAction(action2);
-    sysTrayMenu->addAction(action3);
     ///////////////////////////////
     sysTrayMenu1 = new QMenu;
     sysTrayMenu1->setTitle("&Réglage rapides");
     sysTrayMenu->addMenu(sysTrayMenu1);
-    (full = new QAction(tr("&100%"), this))->setProperty("maValeur", 100);
-    (demi = new QAction(tr("&50%"), this))->setProperty("maValeur", 50);
-    (quart = new QAction(tr("&25%"), this))->setProperty("maValeur", 25);
-    sysTrayMenu1->addAction(full);
-    sysTrayMenu1->addAction(demi);
-    sysTrayMenu1->addAction(quart);
+    (full = new QAction(tr("&100%"), this))->setProperty("maValeur", 255);
+    (demi = new QAction(tr("&50%"), this))->setProperty("maValeur", 127);
+    (quart = new QAction(tr("&25%"), this))->setProperty("maValeur", 63);
     connect(full, &QAction::triggered, this, &MainWindow::mySlot);
     connect(demi, &QAction::triggered, this, &MainWindow::mySlot);
     connect(quart, &QAction::triggered, this, &MainWindow::mySlot);
+    sysTrayMenu1->addAction(full);
+    sysTrayMenu1->addAction(demi);
+    sysTrayMenu1->addAction(quart);
     ///////////////////////////////
+    action2 = new QAction(tr("&Préférences"), this);
+    action3 = new QAction(tr("&Configuration série"), this);
     action4 = new QAction(tr("&Quitter"), this);
+    connect(action2, &QAction::triggered, this, &MainWindow::setupPreference);
+    connect(action3, &QAction::triggered, this, &MainWindow::setupSerial);
     connect(action4, &QAction::triggered, this, &exit);
+    sysTrayMenu->addSeparator();
+    sysTrayMenu->addAction(action2);
+    sysTrayMenu->addAction(action3);
     sysTrayMenu->addSeparator();
     sysTrayMenu->addAction(action4);
 
+    systemTray = new QSystemTrayIcon(this);
     systemTray->setIcon(*iconOn);
     systemTray->setVisible(true);
     connect(systemTray, &QSystemTrayIcon::activated, this, &MainWindow::handleClick);
@@ -111,12 +110,13 @@ void MainWindow::mySlot()
          return;
       int myValue = action->property("maValeur").toInt();
       intensite = myValue;
-      qDebug() << " mySlot - VALUE" << myValue;
+      qDebug() << "mySlot - maValeur" << myValue;
       if (!serialRxIn)
       {
           txCommande = SET_VAL;
           execTxCommand();
       }
+      boutonManage(intensite);
       //emit mySignal(myValue);
 }
 
@@ -250,7 +250,7 @@ void MainWindow::boutonManage(int value)
     if (value) // Si la valeur est plus grande que 0...
     {
         ui->pushBottonOnOff->setIcon(*iconOn);
-        action1->setText("&On");
+        action1->setText("&Off");
         ui->pushBottonOnOff->setIconSize(QSize(65, 65));
         systemTray->setIcon(*iconOn); // On assigne une image à notre icône
         etatOnOff = 1;
@@ -258,7 +258,7 @@ void MainWindow::boutonManage(int value)
     else // Sinon (si la valeur est égale à 0)...
     {
         ui->pushBottonOnOff->setIcon(*iconOff);
-        action1->setText("&Off");
+        action1->setText("&On");
         ui->pushBottonOnOff->setIconSize(QSize(65, 65));
         systemTray->setIcon(*iconOff); // On assigne une image à notre icône
         etatOnOff = 0;
