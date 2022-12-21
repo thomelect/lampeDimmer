@@ -43,15 +43,29 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent),
     action1 = new QAction(tr("&On/Off"), this);
     action2 = new QAction(tr("&Préférences"), this);
     action3 = new QAction(tr("&Configuration série"), this);
-    action4 = new QAction(tr("&Quitter"), this);
 
-    connect(action1, &QAction::triggered, this, &MainWindow::toggleLamp);
+    connect(action1, &QAction::triggered, this, &MainWindow::toggleLampe);
     connect(action2, &QAction::triggered, this, &MainWindow::setupPreference);
     connect(action3, &QAction::triggered, this, &MainWindow::setupSerial);
-    connect(action4, &QAction::triggered, this, &exit);
     sysTrayMenu->addAction(action1);
     sysTrayMenu->addAction(action2);
     sysTrayMenu->addAction(action3);
+    ///////////////////////////////
+    sysTrayMenu1 = new QMenu;
+    sysTrayMenu1->setTitle("&Réglage rapides");
+    sysTrayMenu->addMenu(sysTrayMenu1);
+    (full = new QAction(tr("&100%"), this))->setProperty("maValeur", 100);
+    (demi = new QAction(tr("&50%"), this))->setProperty("maValeur", 50);
+    (quart = new QAction(tr("&25%"), this))->setProperty("maValeur", 25);
+    sysTrayMenu1->addAction(full);
+    sysTrayMenu1->addAction(demi);
+    sysTrayMenu1->addAction(quart);
+    connect(full, &QAction::triggered, this, &MainWindow::mySlot);
+    connect(demi, &QAction::triggered, this, &MainWindow::mySlot);
+    connect(quart, &QAction::triggered, this, &MainWindow::mySlot);
+    ///////////////////////////////
+    action4 = new QAction(tr("&Quitter"), this);
+    connect(action4, &QAction::triggered, this, &exit);
     sysTrayMenu->addSeparator();
     sysTrayMenu->addAction(action4);
 
@@ -88,6 +102,22 @@ MainWindow::~MainWindow()
         serial->close();
     delete serial;
     delete ui;
+}
+
+void MainWindow::mySlot()
+{
+      QAction *action = qobject_cast<QAction *>(sender());
+      if (!action)
+         return;
+      int myValue = action->property("maValeur").toInt();
+      intensite = myValue;
+      qDebug() << " mySlot - VALUE" << myValue;
+      if (!serialRxIn)
+      {
+          txCommande = SET_VAL;
+          execTxCommand();
+      }
+      //emit mySignal(myValue);
 }
 
 void MainWindow::autoSetupSerial(void)
@@ -169,11 +199,10 @@ void MainWindow::boutonEnabler()
     }
 }
 
-void MainWindow::toggleLamp()
+void MainWindow::toggleLampe()
 {
-
     etatOnOff = !etatOnOff;
-    qDebug() << "toggleLamp : " << QString::number(etatOnOff);
+    qDebug() << "toggleLampe : " << QString::number(etatOnOff);
 
     if (etatOnOff) // Met la lumière à "ON" et le bouton affiche maintenant "OFF".
     {
@@ -515,9 +544,7 @@ void MainWindow::on_comboBoxSleep_activated(int index)
 
 void MainWindow::on_pushBottonOnOff_pressed()
 {
-    //etatOnOff = !etatOnOff;
-    //qDebug() << "on_pushBottonOnOff_pressed : " << QString::number(etatOnOff);
-    toggleLamp();
+    toggleLampe();
 }
 
 void MainWindow::recepTimer(void)
