@@ -24,8 +24,6 @@ private slots:
 
     void on_btEnregistre_clicked();
 
-    void on_cbOption_4_clicked();
-
     void on_pbReboot_clicked();
 
     void on_cbOption_2_clicked();
@@ -39,9 +37,8 @@ private:
     Ui::SetupPreferenceDialog *ui;
 
 private:
-    void boutonManage(void);
 
-    void setAppToStartAutomatically(bool startAutomatically);
+    void setDemarrageAuto(bool demarrageAuto);
 
     QString windowsAppPath();
 };
