@@ -58,18 +58,16 @@ int main(int argc, char *argv[])
     do
     {
         QApplication a(argc, argv);
-        //QSettings settingsPref("./preferences.ini", QSettings::IniFormat);
-        QSettings settingsPref("Thomas Desrosiers", "Lampe Dimmer");
-        if (settingsPref.value("Options/option_2").toBool()) // Rester ouvert en arrière plan n'est pas coché.
-            a.setQuitOnLastWindowClosed(false);              // L'application n'est pas "arrêtée" si la fenêtre est fermée.
+        QSettings settingsPref("Thomas Desrosiers", "Lampe Dimmer\\Preferences\\Options");
+        if (settingsPref.value("option_2").toBool()) // Rester ouvert en arrière plan n'est pas coché.
+            a.setQuitOnLastWindowClosed(false);      // L'application n'est pas "arrêtée" si la fenêtre est fermée.
         else
             a.setQuitOnLastWindowClosed(true); // L'application n'est pas "arrêtée" si la fenêtre est fermée.
 
         MainWindow w;
-        if (!settingsPref.value("Options/option_1").toBool()) // Ouvrir en arrière plan n'est pas coché.
-            w.show();                                         // Si non utilisé, la fenêtre n'est pas affiché au démarrage de l'application
-
-#if DEBUG_LOG // Si DEBUG_LOG est égal à 0, les débug se font dans la console.
+        if (!settingsPref.value("option_1").toBool()) // Ouvrir en arrière plan n'est pas coché.
+            w.show();                                 // Si non utilisé, la fenêtre n'est pas affiché au démarrage de l'application
+#if DEBUG_LOG                                         // Si DEBUG_LOG est égal à 0, les débug se font dans la console.
         qInstallMessageHandler(myMessageOutput);
 #endif
         currentExitCode = a.exec();

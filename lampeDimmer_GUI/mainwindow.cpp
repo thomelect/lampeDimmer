@@ -73,11 +73,11 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent),
     connect(systemTray, &QSystemTrayIcon::activated, this, &MainWindow::handleClick);
     systemTray->setContextMenu(sysTrayMenu);
 
-    settings = new QSettings("./settings.ini", QSettings::IniFormat);
-    settings->beginGroup("Info");
+    settings = new QSettings("Thomas Desrosiers", "Lampe Dimmer");
     settings->setValue("Author", "Thomas Desrosiers");
-    settings->setValue("App", "LampeDimmer");
-    settings->endGroup();
+    settings->setValue("App", "Lampe Dimmer");
+
+    settings = new QSettings("Thomas Desrosiers", "Lampe Dimmer\\Settings");
 
     timer = new QTimer();                                        // Timer utilisé pour le lecture du port série.
     connect(timer, SIGNAL(timeout()), this, SLOT(recepTimer())); // Connexion du timer avec la fonction recepTimer.
@@ -105,19 +105,19 @@ MainWindow::~MainWindow()
 
 void MainWindow::mySlot()
 {
-      QAction *action = qobject_cast<QAction *>(sender());
-      if (!action)
-         return;
-      int myValue = action->property("maValeur").toInt();
-      intensite = myValue;
-      qDebug() << "mySlot - maValeur" << myValue;
-      if (!serialRxIn)
-      {
-          txCommande = SET_VAL;
-          execTxCommand();
-      }
-      boutonManage(intensite);
-      //emit mySignal(myValue);
+    QAction *action = qobject_cast<QAction *>(sender());
+    if (!action)
+        return;
+    int myValue = action->property("maValeur").toInt();
+    intensite = myValue;
+    qDebug() << "mySlot - maValeur" << myValue;
+    if (!serialRxIn)
+    {
+        txCommande = SET_VAL;
+        execTxCommand();
+    }
+    boutonManage(intensite);
+    // emit mySignal(myValue);
 }
 
 void MainWindow::autoSetupSerial(void)
@@ -317,8 +317,10 @@ void MainWindow::execRxCommand(void)
         }
         else // Sinon (si le mode de veille actuel est autre que "NONE")...
         {
-            settings->setValue("Veille/Mode", QString::number(veilleState)); // Les valeurs sauvegardés son actualisés.
-            settings->setValue("Veille/Description", ui->comboBoxSleep->currentText());
+            settings->beginGroup("Veille");
+            settings->setValue("Mode", QString::number(veilleState)); // Les valeurs sauvegardés son actualisés.
+            settings->setValue("Description", ui->comboBoxSleep->currentText());
+            settings->endGroup();
         }
 
         /*// DEBUG //*/
@@ -535,8 +537,12 @@ void MainWindow::setupPreference(void)
 void MainWindow::on_comboBoxSleep_activated(int index)
 {
     veilleState = VEILLE_STATE(index);
-    settings->setValue("Veille/Mode", QString::number(index));
-    settings->setValue("Veille/Description", ui->comboBoxSleep->currentText());
+
+    settings->beginGroup("Veille");
+    settings->setValue("Mode", QString::number(index)); // Les valeurs sauvegardés son actualisés.
+    settings->setValue("Description", ui->comboBoxSleep->currentText());
+    settings->endGroup();
+
     boutonEnabler();
     txCommande = SET_SLEEP_MODE;
     execTxCommand();
