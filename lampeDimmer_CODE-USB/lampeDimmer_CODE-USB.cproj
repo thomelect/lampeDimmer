@@ -55,7 +55,8 @@
       <ToolNumber>BUR184885453</ToolNumber>
       <ToolName>MPLAB® PICkit 4</ToolName>
     </com_atmel_avrdbg_tool_pickit4>
-    <avrtoolinterface>ISP</avrtoolinterface>
+    <avrtoolinterface>
+    </avrtoolinterface>
     <avrtoolinterfaceclock>125000</avrtoolinterfaceclock>
     <custom>
       <ToolOptions xmlns="">
@@ -163,6 +164,12 @@
       <SubType>compile</SubType>
     </Compile>
     <Compile Include="Descriptors.h">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="eeprom.c">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="eeprom.h">
       <SubType>compile</SubType>
     </Compile>
     <Compile Include="lampeDimmer.c">
