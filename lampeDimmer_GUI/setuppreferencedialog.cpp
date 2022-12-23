@@ -21,15 +21,12 @@ SetupPreferenceDialog::SetupPreferenceDialog(QDialog *parent) : QDialog(parent),
     ui->btAnnuler->setText("Annuler");
     ui->btEnregistre->setText("Enregistrer");
     /*-----------------------------------------------*/
-    //settingsPref = new QSettings("./preferences.ini", QSettings::IniFormat);
-    settingsPref = new QSettings("Thomas Desrosiers", "Lampe Dimmer");
+    settingsPref = new QSettings("Thomas Desrosiers", "Lampe Dimmer\\Preferences\\Options");
 
-    settingsPref->beginGroup("Options");
     ui->cbOption_1->setChecked(settingsPref->value("option_1").toBool());
     ui->cbOption_2->setChecked(settingsPref->value("option_2").toBool());
     ui->cbOption_3->setChecked(settingsPref->value("option_3").toBool());
     ui->cbOption_4->setChecked(settingsPref->value("option_4").toBool());
-    settingsPref->endGroup();
 
     boutonManage();
 }
@@ -45,7 +42,7 @@ void SetupPreferenceDialog::boutonManage(void)
     if (ui->cbOption_4->isChecked())
     {
         ui->cbList_1->setEnabled(1);
-        ui->cbList_1->setCurrentIndex(settingsPref->value("Options/optionMulti_2").toInt());
+        ui->cbList_1->setCurrentIndex(settingsPref->value("optionMulti_2").toInt());
     }
     else
     {
@@ -62,7 +59,8 @@ void SetupPreferenceDialog::setAppToStartAutomatically(bool startAutomatically)
 
     registrySettings.remove(key);
 
-    if ( startAutomatically ) {
+    if (startAutomatically)
+    {
         registrySettings.setValue(key, QString("\"" + windowsAppPath() + "\""));
     }
     else
@@ -83,13 +81,11 @@ void SetupPreferenceDialog::on_btAnnuler_clicked()
 
 void SetupPreferenceDialog::on_btEnregistre_clicked()
 {
-    settingsPref->beginGroup("Options");
     settingsPref->setValue("option_1", ui->cbOption_1->isChecked());
     settingsPref->setValue("option_2", ui->cbOption_2->isChecked());
     settingsPref->setValue("option_3", ui->cbOption_3->isChecked());
     settingsPref->setValue("option_4", ui->cbOption_4->isChecked());
     settingsPref->setValue("optionMulti_1", ui->cbList_1->currentIndex());
-    settingsPref->endGroup();
 
     if (!needReboot)
     {
@@ -99,7 +95,7 @@ void SetupPreferenceDialog::on_btEnregistre_clicked()
     {
         ui->pbReboot->setVisible(needReboot);
     }
-        setAppToStartAutomatically(ui->cbOption_3->isChecked());
+    setAppToStartAutomatically(ui->cbOption_3->isChecked());
 }
 
 void SetupPreferenceDialog::on_cbOption_4_clicked()
