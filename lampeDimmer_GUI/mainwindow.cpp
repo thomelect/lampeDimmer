@@ -21,7 +21,7 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent),
 {
     intensite = 0;
     serialRxIn = false;
-    boutonState = true;
+    etatOnOff = true;
     recepAvailable = false;
     sliderModif = true;
     dialModif = true;
@@ -37,18 +37,47 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent),
     ui->pushBottonOnOff->setIcon(*iconOff);
     ui->pushBottonOnOff->setIconSize(QSize(65, 65));
 
-    systemTray = new QSystemTrayIcon(this);
+    sysTrayMenu = new QMenu;
+    action1 = new QAction(tr("&On/Off"), this);
+    connect(action1, &QAction::triggered, this, &MainWindow::toggleLampe);
+    sysTrayMenu->addAction(action1);
+    ///////////////////////////////
+    sysTrayMenu1 = new QMenu;
+    sysTrayMenu1->setTitle("&Réglage rapides");
+    sysTrayMenu->addMenu(sysTrayMenu1);
+    (full = new QAction(tr("&100%"), this))->setProperty("maValeur", 255);
+    (demi = new QAction(tr("&50%"), this))->setProperty("maValeur", 127);
+    (quart = new QAction(tr("&25%"), this))->setProperty("maValeur", 63);
+    connect(full, &QAction::triggered, this, &MainWindow::mySlot);
+    connect(demi, &QAction::triggered, this, &MainWindow::mySlot);
+    connect(quart, &QAction::triggered, this, &MainWindow::mySlot);
+    sysTrayMenu1->addAction(full);
+    sysTrayMenu1->addAction(demi);
+    sysTrayMenu1->addAction(quart);
+    ///////////////////////////////
+    action2 = new QAction(tr("&Préférences"), this);
+    action3 = new QAction(tr("&Configuration série"), this);
+    action4 = new QAction(tr("&Quitter"), this);
+    connect(action2, &QAction::triggered, this, &MainWindow::setupPreference);
+    connect(action3, &QAction::triggered, this, &MainWindow::setupSerial);
+    connect(action4, &QAction::triggered, this, &exit);
+    sysTrayMenu->addSeparator();
+    sysTrayMenu->addAction(action2);
+    sysTrayMenu->addAction(action3);
+    sysTrayMenu->addSeparator();
+    sysTrayMenu->addAction(action4);
 
+    systemTray = new QSystemTrayIcon(this);
     systemTray->setIcon(*iconOn);
     systemTray->setVisible(true);
     connect(systemTray, &QSystemTrayIcon::activated, this, &MainWindow::handleClick);
-    systemTray->setToolTip("TEST");
+    systemTray->setContextMenu(sysTrayMenu);
 
-    settings = new QSettings("./settings.ini", QSettings::IniFormat);
-    settings->beginGroup("Info");
+    settings = new QSettings("Thomas Desrosiers", "Lampe Dimmer");
     settings->setValue("Author", "Thomas Desrosiers");
-    settings->setValue("App", "LampeDimmer");
-    settings->endGroup();
+    settings->setValue("App", "Lampe Dimmer");
+
+    settings = new QSettings("Thomas Desrosiers", "Lampe Dimmer\\Settings");
 
     timer = new QTimer();                                        // Timer utilisé pour le lecture du port série.
     connect(timer, SIGNAL(timeout()), this, SLOT(recepTimer())); // Connexion du timer avec la fonction recepTimer.
@@ -72,6 +101,23 @@ MainWindow::~MainWindow()
         serial->close();
     delete serial;
     delete ui;
+}
+
+void MainWindow::mySlot()
+{
+    QAction *action = qobject_cast<QAction *>(sender());
+    if (!action)
+        return;
+    int myValue = action->property("maValeur").toInt();
+    intensite = myValue;
+    qDebug() << "mySlot - maValeur" << myValue;
+    if (!serialRxIn)
+    {
+        txCommande = SET_VAL;
+        execTxCommand();
+    }
+    boutonManage(intensite);
+    // emit mySignal(myValue);
 }
 
 void MainWindow::autoSetupSerial(void)
@@ -143,6 +189,7 @@ void MainWindow::boutonEnabler()
         ui->pushBottonOnOff->setDisabled(true);
         ui->horizontalSliderIntensite->setDisabled(true);
         ui->statusBar->showMessage("VEILLE | " + ui->comboBoxSleep->currentText()); // conversion de la valeur actuelle en pourcentage.
+        systemTray->setToolTip(ui->comboBoxSleep->currentText());
     }
     else // Sinon (si le système n'est pas en mode veille)...
     {
@@ -150,6 +197,27 @@ void MainWindow::boutonEnabler()
         ui->pushBottonOnOff->setEnabled(true);
         ui->horizontalSliderIntensite->setEnabled(true);
     }
+}
+
+void MainWindow::toggleLampe()
+{
+    etatOnOff = !etatOnOff;
+    qDebug() << "toggleLampe : " << QString::number(etatOnOff);
+
+    if (etatOnOff) // Met la lumière à "ON" et le bouton affiche maintenant "OFF".
+    {
+        intensite = valueAdc;
+    }
+    else // Met la lumière à "OFF" et le bouton affiche maintenant "ON".
+    {
+        intensite = 0;
+    }
+    if (!serialRxIn)
+    {
+        txCommande = SET_VAL;
+        execTxCommand();
+    }
+    boutonManage(intensite);
 }
 
 void MainWindow::boutonManage(int value)
@@ -174,6 +242,7 @@ void MainWindow::boutonManage(int value)
         ui->horizontalSliderIntensite->setSliderPosition(value);
         ui->statusBar->showMessage(QString::number((value / 2.55), 'f', 0) + '%'); // conversion de la valeur actuelle en pourcentage.
         ui->comboBoxSleep->setCurrentIndex(veilleState);
+        systemTray->setToolTip(QString::number((value / 2.55), 'f', 0) + '%');
     }
 
     qDebug() << "SET_VAL : " << QString::number(value);
@@ -181,14 +250,18 @@ void MainWindow::boutonManage(int value)
     if (value) // Si la valeur est plus grande que 0...
     {
         ui->pushBottonOnOff->setIcon(*iconOn);
+        action1->setText("&Off");
         ui->pushBottonOnOff->setIconSize(QSize(65, 65));
-        boutonState = 0;
+        systemTray->setIcon(*iconOn); // On assigne une image à notre icône
+        etatOnOff = 1;
     }
     else // Sinon (si la valeur est égale à 0)...
     {
         ui->pushBottonOnOff->setIcon(*iconOff);
+        action1->setText("&On");
         ui->pushBottonOnOff->setIconSize(QSize(65, 65));
-        boutonState = 1;
+        systemTray->setIcon(*iconOff); // On assigne une image à notre icône
+        etatOnOff = 0;
     }
     sliderModif = true; // Indique que la position du slider est prête à être modifiée.
     dialModif = true;   // Indique que la position du dial est prête à être modifiée.
@@ -244,8 +317,10 @@ void MainWindow::execRxCommand(void)
         }
         else // Sinon (si le mode de veille actuel est autre que "NONE")...
         {
-            settings->setValue("Veille/Mode", QString::number(veilleState)); // Les valeurs sauvegardés son actualisés.
-            settings->setValue("Veille/Description", ui->comboBoxSleep->currentText());
+            settings->beginGroup("Veille");
+            settings->setValue("Mode", QString::number(veilleState)); // Les valeurs sauvegardés son actualisés.
+            settings->setValue("Description", ui->comboBoxSleep->currentText());
+            settings->endGroup();
         }
 
         /*// DEBUG //*/
@@ -462,8 +537,12 @@ void MainWindow::setupPreference(void)
 void MainWindow::on_comboBoxSleep_activated(int index)
 {
     veilleState = VEILLE_STATE(index);
-    settings->setValue("Veille/Mode", QString::number(index));
-    settings->setValue("Veille/Description", ui->comboBoxSleep->currentText());
+
+    settings->beginGroup("Veille");
+    settings->setValue("Mode", QString::number(index)); // Les valeurs sauvegardés son actualisés.
+    settings->setValue("Description", ui->comboBoxSleep->currentText());
+    settings->endGroup();
+
     boutonEnabler();
     txCommande = SET_SLEEP_MODE;
     execTxCommand();
@@ -471,30 +550,7 @@ void MainWindow::on_comboBoxSleep_activated(int index)
 
 void MainWindow::on_pushBottonOnOff_pressed()
 {
-    if (boutonState) // Met la lumière à "ON" et le bouton affiche maintenant "OFF".
-    {
-        txCommande = GET_VAL_POT;
-        execTxCommand();
-        boutonState = !boutonState;
-        intensite = valueAdc;
-    }
-    else // Met la lumière à "OFF" et le bouton affiche maintenant "ON".
-    {
-        boutonState = !boutonState;
-        intensite = 0;
-    }
-    txCommande = SET_VAL;
-    execTxCommand();
-}
-
-void MainWindow::on_pushBottonOnOff_released()
-{
-    boutonManage(intensite);
-    if (!serialRxIn)
-    {
-        txCommande = SET_VAL;
-        execTxCommand();
-    }
+    toggleLampe();
 }
 
 void MainWindow::recepTimer(void)
@@ -548,12 +604,10 @@ void MainWindow::handleClick(QSystemTrayIcon::ActivationReason reason)
         break;
     case QSystemTrayIcon::Context:
         qDebug() << "Context - Right Click";
-        exit(1);
-        intensite = 0;
+        sysTrayMenu->setVisible(1);
         break;
     case QSystemTrayIcon::DoubleClick:
         qDebug() << "Double Click";
-        // show();
         break;
     case QSystemTrayIcon::Trigger:
         qDebug() << "Trigger - Left Click";
@@ -561,12 +615,6 @@ void MainWindow::handleClick(QSystemTrayIcon::ActivationReason reason)
         break;
     case QSystemTrayIcon::MiddleClick:
         qDebug() << "MiddleClick";
-        // txCommande = GET_VAL_POT;
-        execTxCommand();
         break;
     }
-
-    txCommande = SET_VAL;
-    execTxCommand();
-    boutonManage(intensite);
 }

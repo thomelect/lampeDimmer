@@ -89,13 +89,13 @@ private:
     uint16_t rxErrorCommCnt;
     uint8_t valueAdc;
     uint8_t valueOut;
+    uint8_t intensite;
     bool valueModeSys;
-    int intensite;
     bool serialRxIn;
-    bool boutonState;
     bool recepAvailable;
     bool sliderModif;
     bool dialModif;
+    bool etatOnOff;
 
     /* Déclarations classes: */
     QLabel *statusLabel;
@@ -113,9 +113,27 @@ private:
     QIcon *iconOff;
     QSettings *settings;
     QSystemTrayIcon *systemTray;
+
+    QMenu *sysTrayMenu;
+    QMenu *sysTrayMenu1;
+    QAction *action1;
+    QAction *action2;
+    QAction *action3;
+    QAction *full;
+    QAction *demi;
+    QAction *quart;
+    QAction *action4;
+
     Ui::MainWindow *ui;
 
 private slots:
+
+    /**
+     * @brief  Fonction utilisée pour aller récupérer la valeur définie par setProperty.
+     *         Ainsi, les signaux qui veulent envoyer des attributs peuvent êtres connectés à cette fonctions.
+     */
+    void mySlot();
+
     /**
      * @brief  Fonction de lecture du port série..
      */
@@ -136,6 +154,12 @@ private slots:
     void handleClick(QSystemTrayIcon::ActivationReason reason);
 
     /**
+     * @brief        Fonction utilisé pour changer l'état de la lumière de On à Off ou de Off à On.
+     * @param value  Valeur futur de la sortie lumineuse. 0 = lumière off et 1 = lumière on.
+     */
+    void toggleLampe(void);
+
+    /**
      * @brief        Fonction appelée lorsque l'utilisateur choisi une option dans la liste.
      * @param index  Index des options de la liste.
      */
@@ -145,11 +169,6 @@ private slots:
      * @brief  Fonction appelée lorsque le bouton on/off est appuyé.
      */
     void on_pushBottonOnOff_pressed();
-
-    /**
-     * @brief  Fonction appelée lorsque le bouton on/off est relachée.
-     */
-    void on_pushBottonOnOff_released();
 
     /**
      * @brief  Fonction appelée lorsque la valeur du slider est changée.
