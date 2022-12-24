@@ -107,6 +107,7 @@ private:
     QMenu *outilsMenu;
     QMenu *fichierMenu;
     QTimer *timer;
+    QTimer *timer2;
     QAction *setupSerialAct;
     QAction *setupPrefAct;
     QAction *quitterAct;
@@ -200,6 +201,8 @@ private:
     void setupSerial(void);
 
     void setupPreference(void);
+
+    void delay(int millisecondsToWait);
 
 private:
     /**
