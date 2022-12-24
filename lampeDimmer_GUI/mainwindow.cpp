@@ -25,6 +25,8 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent),
     recepAvailable = false;
     sliderModif = true;
     dialModif = true;
+    intensiteByPass = 255;
+    bypassMode = true;
 
     iconOn = new QIcon(":/images/on.png");
     iconOff = new QIcon(":/images/off.png");
@@ -97,6 +99,10 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent),
 
 MainWindow::~MainWindow()
 {
+    //bypassMode = false;
+    txCommande = SET_BYPASS_VAL;
+    execTxCommand();
+
     if (serial->isOpen())
         serial->close();
     delete serial;
@@ -156,10 +162,20 @@ void MainWindow::autoSetupSerial(void)
         }
         if (serial->isOpen()) // Si le port est ouvert...
         {
-            qDebug() << "GET_VAL_INIT";
-            txCommande = GET_VAL_INIT;
-            execTxCommand();
+
+            if (!serialRxIn)
+            {
+                txCommande = GET_VAL_INIT;
+                execTxCommand();
+            }
+            if (!serialRxIn)
+            {
+                txCommande = SET_BYPASS_VAL;
+                execTxCommand();
+            }
         }
+
+
         boutonEnabler();
     }
     settings->endGroup();
@@ -288,6 +304,7 @@ void MainWindow::createMenus(void)
  */
 void MainWindow::execRxCommand(void)
 {
+
     switch (rxCommande)
     {
     case VAL_ACTU:
@@ -296,6 +313,9 @@ void MainWindow::execRxCommand(void)
 
         /*// DEBUG //*/
         qDebug() << "VAL_ACTU : " << QString::number(valueOut);
+
+        /*// FLAG DE RÉCEPTION //*/
+        serialRxIn = false;
         break;
     case VAL_INIT:
         /*// ACQUISITION //*/
@@ -358,6 +378,16 @@ void MainWindow::execRxCommand(void)
         /*// FLAG DE RÉCEPTION //*/
         serialRxIn = false;
         break;
+    case VAL_BYPASS_VAL:
+        /*// ACQUISITION //*/
+
+
+        /*// DEBUG //*/
+        qDebug() << "VAL_BYPASS_VALVAL_BYPASS_VAL : ";
+
+        /*// FLAG DE RÉCEPTION //*/
+        serialRxIn = false;
+        break;
     }
 }
 
@@ -366,12 +396,14 @@ void MainWindow::execRxCommand(void)
  */
 void MainWindow::execTxCommand()
 {
+    serialRxIn = true;
     if (serial->isOpen())
     {
-        char txData[5];
+        char txData[6];
         switch (txCommande)
         {
         case GET_VAL_ACTU:
+            qDebug() << "EXEC-TX | GET_VAL_ACTU";
             txData[0] = '<';
             txData[1] = 0;
             txData[2] = GET_VAL_ACTU;
@@ -379,6 +411,7 @@ void MainWindow::execTxCommand()
             serial->write(txData, 4);
             break;
         case GET_VAL_INIT:
+            qDebug() << "EXEC-TX | GET_VAL_INIT";
             txData[0] = '<';
             txData[1] = 0;
             txData[2] = GET_VAL_INIT;
@@ -386,6 +419,7 @@ void MainWindow::execTxCommand()
             serial->write(txData, 4);
             break;
         case GET_VAL_POT:
+            qDebug() << "EXEC-TX | GET_VAL_POT";
             txData[0] = '<';
             txData[1] = 0;
             txData[2] = GET_VAL_POT;
@@ -393,6 +427,7 @@ void MainWindow::execTxCommand()
             serial->write(txData, 4);
             break;
         case SET_SLEEP_MODE:
+            qDebug() << "EXEC-TX | SET_SLEEP_MODE";
             txData[0] = '<';
             txData[1] = 1;
             txData[2] = SET_SLEEP_MODE;
@@ -401,12 +436,23 @@ void MainWindow::execTxCommand()
             serial->write(txData, 5);
             break;
         case SET_VAL:
+            qDebug() << "EXEC-TX | SET_VAL";
             txData[0] = '<';
             txData[1] = 1;
             txData[2] = SET_VAL;
             txData[3] = char(intensite);
             txData[4] = '>';
             serial->write(txData, 5);
+            break;
+        case SET_BYPASS_VAL:
+            qDebug() << "EXEC-TX | SET_BYPASS_VAL";
+            txData[0] = '<';
+            txData[1] = 2;
+            txData[2] = SET_BYPASS_VAL;
+            txData[3] = char(bypassMode);
+            txData[4] = char(intensiteByPass);
+            txData[5] = '>';
+            serial->write(txData, 6);
             break;
         }
     }
@@ -423,6 +469,7 @@ void MainWindow::parseRXData(uint8_t data)
     default:
         if (data == '<')
         {
+            //serialRxIn = true;
             rxState = RXSIZE;
             rxDataCnt = 0;
         }
@@ -458,7 +505,6 @@ void MainWindow::parseRXData(uint8_t data)
         rxState = WAIT;
         if (data == '>')
         {
-            serialRxIn = true;
             execRxCommand();
         }
         else
@@ -473,6 +519,11 @@ void MainWindow::parseRXData(uint8_t data)
 
 void MainWindow::quitter(void)
 {
+    bypassMode = 1;
+        txCommande = SET_BYPASS_VAL;
+        execTxCommand();
+    while (serialRxIn)
+        ;
     exit(1);
 }
 
@@ -519,7 +570,16 @@ void MainWindow::setupSerial(void)
     {
         statusLabel->setText("Connecté " + serial->portName()); // Indique à l'utilisateur que la connexion est réussie ainsi que le nom du port.
         statusLabel->setToolTip(setupDia.getInfoPort());
-        txCommande = GET_VAL_INIT;
+        if (!serialRxIn)
+        {
+            txCommande = GET_VAL_INIT;
+            execTxCommand();
+        }
+    }
+
+    if (!serialRxIn)
+    {
+        txCommande = SET_BYPASS_VAL;
         execTxCommand();
     }
     boutonEnabler();
@@ -618,3 +678,12 @@ void MainWindow::handleClick(QSystemTrayIcon::ActivationReason reason)
         break;
     }
 }
+
+void MainWindow::on_pushButton_clicked()
+{
+    //bypassMode = !bypassMode;
+    intensiteByPass = 255;
+    txCommande = SET_BYPASS_VAL;
+    execTxCommand();
+}
+

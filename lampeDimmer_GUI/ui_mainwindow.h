@@ -35,6 +35,7 @@ public:
     QLabel *lb_255_dial;
     QLabel *lb_0_dial;
     QComboBox *comboBoxSleep;
+    QPushButton *pushButton;
     QStatusBar *statusBar;
 
     void setupUi(QMainWindow *MainWindow)
@@ -109,6 +110,9 @@ public:
         comboBoxSleep->setSizeAdjustPolicy(QComboBox::AdjustToContentsOnFirstShow);
         comboBoxSleep->setDuplicatesEnabled(false);
         comboBoxSleep->setFrame(true);
+        pushButton = new QPushButton(centralwidget);
+        pushButton->setObjectName(QString::fromUtf8("pushButton"));
+        pushButton->setGeometry(QRect(30, 20, 80, 21));
         MainWindow->setCentralWidget(centralwidget);
         statusBar = new QStatusBar(MainWindow);
         statusBar->setObjectName(QString::fromUtf8("statusBar"));
@@ -134,6 +138,7 @@ public:
         comboBoxSleep->setItemText(3, QApplication::translate("MainWindow", "BREATHING", nullptr));
         comboBoxSleep->setItemText(4, QApplication::translate("MainWindow", "VEILLEUSE", nullptr));
 
+        pushButton->setText(QApplication::translate("MainWindow", "PushButton", nullptr));
     } // retranslateUi
 
 };

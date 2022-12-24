@@ -53,7 +53,8 @@ private:
         VAL_ACTU,
         VAL_INIT,
         VAL_POT,
-        VAL_MODE
+        VAL_MODE,
+        VAL_BYPASS_VAL
     };
     /* Enums commandes transmission: */
     enum TX_COMMANDES
@@ -62,7 +63,8 @@ private:
         GET_VAL_INIT,
         GET_VAL_POT,
         SET_SLEEP_MODE,
-        SET_VAL
+        SET_VAL,
+        SET_BYPASS_VAL
     };
 
     enum VEILLE_STATE
@@ -90,7 +92,9 @@ private:
     uint8_t valueAdc;
     uint8_t valueOut;
     uint8_t intensite;
+    uint8_t intensiteByPass;
     bool valueModeSys;
+    bool bypassMode;
     bool serialRxIn;
     bool recepAvailable;
     bool sliderModif;
@@ -179,6 +183,8 @@ private slots:
      * @brief  Fonction appelée lorsque la valeur du dial est changée.
      */
     void on_dialIntensite_valueChanged();
+
+    void on_pushButton_clicked();
 
 private:
     /**
