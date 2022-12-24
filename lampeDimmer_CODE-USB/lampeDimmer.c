@@ -188,6 +188,7 @@ int main(void)
 		}
 		if (SWITCH()) // Si l'interrupteur du potentiomètre est à la position "ON"...
 		{
+			bypassMode = 0;
 			valueModeSysTbl[1] = 1;
 			if (msFlagAdc)
 			{
