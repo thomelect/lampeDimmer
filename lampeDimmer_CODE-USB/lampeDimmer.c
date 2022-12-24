@@ -211,7 +211,8 @@ int main(void)
 		}
 		else // Si l'interrupteur du potentiomètre est à la position "OFF"...
 		{
-			outputVeille();
+			if (!bypassMode)
+				outputVeille();
 			valueModeSysTbl[1] = 0;
 		}
 		if (valueModeSysTbl[1] != valueModeSysTbl[0])
