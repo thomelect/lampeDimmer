@@ -101,8 +101,8 @@ enum TX_COMMANDES
 	VAL_ACTU,
 	VAL_INIT,
 	VAL_POT,
-	VAL_MODE/*,
-	VAL_BYPASS_VAL*/
+	VAL_MODE,
+	VAL_BYPASS_VAL
 };
 
 enum VEILLE_STATE
@@ -287,8 +287,8 @@ void execRxCommand(void)
 	case SET_BYPASS_VAL:	  // Réception depuis l'interface de la valeur de la sortie.
 		bypassMode = rxData[0];
 		valueOut = rxData[1];
-		/*txCommande = VAL_BYPASS_VAL;
-		execTxCommand();*/
+		txCommande = VAL_BYPASS_VAL;
+		execTxCommand();
 		break;
 	}
 }
@@ -332,15 +332,15 @@ void execTxCommand(void)
 		txData[3] = valueModeSys;
 		txData[4] = '>';
 		serialUSBWrite((uint8_t *)txData, 5);
-		break;/*
+		break;
 	case VAL_BYPASS_VAL:
 		txData[0] = '<';
 		txData[1] = 2;
 		txData[2] = VAL_BYPASS_VAL;
-		txData[2] = bypassMode;
-		txData[3] = valueOut;
-		txData[4] = '>';
-		serialUSBWrite((uint8_t *)txData, 6);*/
+		txData[3] = bypassMode;
+		txData[4] = valueOut;
+		txData[5] = '>';
+		serialUSBWrite((uint8_t *)txData, 6);
 	}
 }
 
