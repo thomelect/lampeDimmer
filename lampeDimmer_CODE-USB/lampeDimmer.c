@@ -56,10 +56,11 @@ volatile uint8_t msFlagAdc = 0;	 // Flags qui est mis à 1 à chaques 25ms pour 
 volatile uint16_t msCntFade = 0; // Compteur utilisés pour compter 50 fois un délai de 1ms pour le fade de la sortie.
 volatile uint8_t msFlagFade = 0; // Flags qui est mis à 1 à chaques 50ms pour le fade de la sortie.
 uint16_t valueAdcTbl[2] = {0, 0};
-uint16_t valueModeSysTbl[2] = {0, 0};
+bool valueModeSysTbl[2] = {0, 0};
+bool valueModeSys = 0;
+bool bypassMode = 0;
 uint16_t valueOut = 0;
 uint16_t valueAdc = 0;
-uint16_t valueModeSys = 0;
 int increment = 5;
 
 /* Variables nécessaires à la communication avec l'interface: */
@@ -90,7 +91,8 @@ enum RX_COMMANDES
 	GET_VAL_INIT,
 	GET_VAL_POT,
 	SET_SLEEP_MODE,
-	SET_VAL
+	SET_VAL,
+	SET_BYPASS_VAL
 };
 
 /* Enum des différentes commandes utilisées en transmission: */
@@ -99,7 +101,8 @@ enum TX_COMMANDES
 	VAL_ACTU,
 	VAL_INIT,
 	VAL_POT,
-	VAL_MODE
+	VAL_MODE/*,
+	VAL_BYPASS_VAL*/
 };
 
 enum VEILLE_STATE
@@ -280,6 +283,12 @@ void execRxCommand(void)
 			valueOut = rxData[0];
 		}
 		break;
+	case SET_BYPASS_VAL:	  // Réception depuis l'interface de la valeur de la sortie.
+		bypassMode = rxData[0];
+		valueOut = rxData[1];
+		/*txCommande = VAL_BYPASS_VAL;
+		execTxCommand();*/
+		break;
 	}
 }
 
@@ -322,7 +331,15 @@ void execTxCommand(void)
 		txData[3] = valueModeSys;
 		txData[4] = '>';
 		serialUSBWrite((uint8_t *)txData, 5);
-		break;
+		break;/*
+	case VAL_BYPASS_VAL:
+		txData[0] = '<';
+		txData[1] = 2;
+		txData[2] = VAL_BYPASS_VAL;
+		txData[2] = bypassMode;
+		txData[3] = valueOut;
+		txData[4] = '>';
+		serialUSBWrite((uint8_t *)txData, 6);*/
 	}
 }
 
