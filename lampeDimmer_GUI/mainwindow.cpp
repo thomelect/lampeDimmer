@@ -15,6 +15,7 @@
 using namespace std;
 
 int const MainWindow::EXIT_CODE_REBOOT = -1;
+#define DARK_MODE 1
 
 MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent),
                                           ui(new Ui::MainWindow)
@@ -87,6 +88,20 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent),
     ui->statusBar->addPermanentWidget(statusLabel);
 
     autoSetupSerial(); // Appel de la fonction de connexion automatique.
+
+#if DARK_MODE
+    QFile f(":qdarkstyle/dark/style.qss");
+
+    if (!f.exists())   {
+        printf("Unable to set stylesheet, file not found\n");
+    }
+    else   {
+        printf("Able to set stylesheet\n");
+        f.open(QFile::ReadOnly | QFile::Text);
+        QTextStream ts(&f);
+        qApp->setStyleSheet(ts.readAll());
+    }
+# endif
 
     // Feuille de style des boutons de la de l'interface MainWindow.
     this->setStyleSheet("#pushBottonOnOff {"
