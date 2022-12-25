@@ -48,6 +48,10 @@
 #define EE_ADDR_SLEEP_MODE 0x00
 
 
+#define FILTRE_SIZE			100
+#define FILTRE_ECART_MAX	1
+
+
 /*************
  * VARIABLES *
  *************/
@@ -129,6 +133,10 @@ uint8_t serialUSBAvailable(void);
 uint8_t serialUSBRead(uint8_t *dest, uint8_t size);
 uint8_t serialUSBRxData[CDC_TXRX_EPSIZE];
 
+uint8_t _tblFlag = 0;
+float _tblData[FILTRE_SIZE];
+uint8_t _tblIndex = 0;
+
 /**
  * @brief  Fonction de traitement des données et commandes reçues.
  */
@@ -138,6 +146,8 @@ void execRxCommand(void);
  * @brief  Fonction de traitement pour l'envoie des donnés.
  */
 void execTxCommand(void);
+
+uint8_t filtreFenetre(uint8_t tempRaw);
 
 /**
  *@brief		Fonction qui traite la valeur de sortie en fonction du mode veille actuel.
@@ -188,19 +198,23 @@ int main(void)
 			valueModeSysTbl[1] = 1;
 			if (msFlagAdc)
 			{
-				msFlagAdc = 0;
-				for (uint8_t i = 0; i < 100; i++) // Une valeur moyenne sur un echantillon de 100 mesures est calculé afin d'éviter d'être entre deux valeurs.
+// 				msFlagAdc = 0;
+// 				for (uint8_t i = 0; i < 100; i++) // Une valeur moyenne sur un echantillon de 100 mesures est calculé afin d'éviter d'être entre deux valeurs.
+// 				{
+// 					valueAdcTbl[1] += adcRead8();
+// 				}
+				
+				
+				valueAdcTbl[0] = filtreFenetre(adcRead8());
+				
+				/*valueAdcTbl[1] /= 100;*/
+				if (valueAdcTbl[0] >= 255) // Si valueOut dépasse 255..
+					valueAdcTbl[0] = 255;  // valueOut est limité à 255.
+				if (valueAdcTbl[0] != valueAdcTbl[1])
 				{
-					valueAdcTbl[1] += adcRead8();
-				}
-				valueAdcTbl[1] /= 100;
-				if (valueAdcTbl[1] >= 255) // Si valueOut dépasse 255..
-					valueAdcTbl[1] = 255;  // valueOut est limité à 255.
-				if (valueAdcTbl[1] != valueAdcTbl[0])
-				{
-					valueAdcTbl[0] = valueAdcTbl[1]; // La nouvelle valeur remplace l'ancienne.
-					valueOut = valueAdcTbl[1];
-					valueAdc = valueAdcTbl[1];
+					valueAdcTbl[1] = valueAdcTbl[0]; // La nouvelle valeur remplace l'ancienne.
+					valueOut = valueAdcTbl[0];
+					valueAdc = valueAdcTbl[0];
 					txCommande = VAL_POT;
 					execTxCommand();
 				}
@@ -324,6 +338,38 @@ void execTxCommand(void)
 		serialUSBWrite((uint8_t *)txData, 5);
 		break;
 	}
+}
+
+uint8_t filtreFenetre(uint8_t tempRaw)
+{
+	uint16_t valFiltre = 0;
+	if (_tblIndex >= FILTRE_SIZE)
+	{
+		_tblFlag = 1;
+		_tblIndex = 0;
+	}
+	if (!_tblFlag)
+	{
+		_tblData[_tblIndex++] = tempRaw;
+	}
+	if (_tblFlag)
+	{
+
+		for (uint8_t i = 0; i < FILTRE_SIZE; i++)
+		{
+			valFiltre += _tblData[i];
+		}
+		valFiltre /= FILTRE_SIZE;
+		if (((tempRaw - valFiltre) > FILTRE_ECART_MAX) && ((valFiltre - tempRaw) > FILTRE_ECART_MAX))
+		{
+			_tblData[_tblIndex++] = tempRaw;
+		}
+	}
+	else
+	{
+		valFiltre = 0;
+	}
+	return valFiltre;
 }
 
 /**
