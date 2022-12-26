@@ -33,8 +33,8 @@ public:
     QHBoxLayout *horizontalLayout_2;
     QDial *dialIntensite;
     QPushButton *pushBottonOnOff;
-    QLabel *lbIntensiteValue;
     QSlider *horizontalSliderIntensite;
+    QLabel *lbIntensiteValue;
     QComboBox *comboBoxSleep;
     QStatusBar *statusBar;
 
@@ -75,6 +75,16 @@ public:
 
         verticalLayout_2->addLayout(horizontalLayout_2);
 
+        horizontalSliderIntensite = new QSlider(verticalLayoutWidget);
+        horizontalSliderIntensite->setObjectName(QString::fromUtf8("horizontalSliderIntensite"));
+        horizontalSliderIntensite->setMaximum(255);
+        horizontalSliderIntensite->setOrientation(Qt::Horizontal);
+        horizontalSliderIntensite->setInvertedAppearance(false);
+        horizontalSliderIntensite->setTickPosition(QSlider::TicksAbove);
+        horizontalSliderIntensite->setTickInterval(64);
+
+        verticalLayout_2->addWidget(horizontalSliderIntensite);
+
         lbIntensiteValue = new QLabel(verticalLayoutWidget);
         lbIntensiteValue->setObjectName(QString::fromUtf8("lbIntensiteValue"));
         lbIntensiteValue->setEnabled(true);
@@ -88,16 +98,6 @@ public:
         lbIntensiteValue->setAlignment(Qt::AlignCenter);
 
         verticalLayout_2->addWidget(lbIntensiteValue);
-
-        horizontalSliderIntensite = new QSlider(verticalLayoutWidget);
-        horizontalSliderIntensite->setObjectName(QString::fromUtf8("horizontalSliderIntensite"));
-        horizontalSliderIntensite->setMaximum(255);
-        horizontalSliderIntensite->setOrientation(Qt::Horizontal);
-        horizontalSliderIntensite->setInvertedAppearance(false);
-        horizontalSliderIntensite->setTickPosition(QSlider::TicksAbove);
-        horizontalSliderIntensite->setTickInterval(64);
-
-        verticalLayout_2->addWidget(horizontalSliderIntensite);
 
         comboBoxSleep = new QComboBox(verticalLayoutWidget);
         comboBoxSleep->addItem(QString());
